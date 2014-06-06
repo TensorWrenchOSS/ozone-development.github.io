@@ -215,7 +215,11 @@ ozpIwc.Client=function(config) {
 	this.peerUrl=config.peerUrl;
 	var a=document.createElement("a");
 	a.href = this.peerUrl;
-	this.peerOrigin=a.protocol + "//" + a.hostname + ":" + a.port;
+	this.peerOrigin=a.protocol + "//" + a.hostname;
+	if((a.protocol==="http:" && a.port != 80) || (a.protocol==="https:" && a.port != 443))
+		this.peerOrigin+= ":" + a.port;
+	
+	
 	this.autoPeer=("autoPeer" in config) ? config.autoPeer : true;
 	this.msgIdSequence=0;
 	this.events=new ozpIwc.Event();
