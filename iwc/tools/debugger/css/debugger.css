@@ -1,0 +1,45 @@
+table {
+  border-collapse: collapse;
+  border: 1px solid black;
+	width: 100%;
+}
+table td{
+  border: 1px solid black;
+}
+
+table#messages tr:nth-child(4n+1),table#messages tr:nth-child(4n+2) {
+	background-color: #F3F5F7;
+}
+
+table#keyValueTable tr:nth-child(2n+1) {
+	background-color: #F3F5F7;
+}
+
+.scrollable {
+	height: 50%;
+	width: 100%;
+	overflow: scroll;
+}
+
+.expander {
+	font-weight: bold;
+	font-size: large;
+	border: 1px solid blue;
+}
+
+tr.packet {
+	display:none;
+}
+
+.hidden {
+	display: none;
+}
+
+span.address {
+	text-decoration: underline;
+	color: blue;
+}
+
+.participantTable td {
+	width: 33%;
+}

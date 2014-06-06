@@ -1,0 +1,11 @@
+{
+  "author": "Ozone Developers",
+  "name": "ozone-development.github.io",
+  "version": "0.0.1",
+	"repository": "https://github.com/ozone-development/ozone-development.github.io",
+  "devDependencies": {
+  	"grunt" : "0.4.x",
+		"grunt-contrib-watch": "*",
+		"grunt-contrib-connect": "*"
+  }
+}
