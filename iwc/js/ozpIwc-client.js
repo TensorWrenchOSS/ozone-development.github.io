@@ -216,7 +216,7 @@ ozpIwc.Client=function(config) {
 	var a=document.createElement("a");
 	a.href = this.peerUrl;
 	this.peerOrigin=a.protocol + "//" + a.hostname;
-	if((a.protocol==="http:" && a.port != 80) || (a.protocol==="https:" && a.port != 443))
+	if(a.port)
 		this.peerOrigin+= ":" + a.port;
 	
 	
