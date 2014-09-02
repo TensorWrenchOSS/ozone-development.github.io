@@ -1,0 +1,25 @@
+{
+    "_links": {
+        "self" : { "href": "/api/intents/v1/text/plain" },
+        "curies": [{
+            "name": "ozp",
+            "href": "/api/intents/v1/rels/{rel}",
+            "templated": true
+        }],
+        "item" : [
+            { "href": "/api/intents/v1/text/plain/view"},
+            { "href": "/api/intents/v1/text/plain/edit"}
+        ]
+    },
+    "_embedded": {
+        "item": [{
+            "type": "text/plain",
+            "action": "share",
+            "icon": "http://example.com/view-text-plain.png",
+            "label": "Share plain text",
+            "_links": {
+                "self" : {"href": "/api/intents/v1/text/plain/share"}
+            }
+        }]
+    }
+}
