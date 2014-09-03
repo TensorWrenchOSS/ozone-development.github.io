@@ -206,61 +206,68 @@ client.on("connected",function() {
 		}
 		lastUpdate=now;
 	};
-	
+
 	window.setInterval(animate,50);
 
-	
+
 	//=================================================================
 	// listen for balls changing
 	var watchRequest={
-		dst: "keyValue.api",
+		dst: "data.api",
 		action: "watch",
 		resource: "/balls"
 	};
 	var onBallsChanged=function(reply) {
 		if(reply.action!=="changed") {
-			return;
+			return true;//maintain persistent callback
 		}
-		if(reply.entity.addChild) {
-			balls[reply.entity.addChild]=new Ball(reply.entity.addChild,viewPort);
+		if(reply.entity.addedChildren) {
+			reply.entity.addedChildren.forEach(function(b) {
+    			balls[b]=new Ball(b,viewPort);
+            });
 		}
-		if(reply.entity.removeChild) {
-			balls[reply.entity.removeChild].cleanup();
+		if(reply.entity.removedChildren) {
+			reply.entity.removeChildren.forEach(function(b) {
+                balls[b].cleanup();
+            });
 		}
+		return true;//maintain persistent callback
 	};
 	client.send(watchRequest,onBallsChanged);
 
 	//=================================================================
 	// get the existing balls
 	var listExistingBalls={
-		dst: "keyValue.api",
+		dst: "data.api",
 		action: "list",
 		resource: "/balls"
 	};
-	
+
 	client.send(listExistingBalls,function(reply) {
 		for(var i=0; i<reply.entity.length;++i) {
 			balls[reply.entity[i]]=new Ball(reply.entity[i],viewPort);
 		}
+		return null;//de-register callback
 	});
 
 	//=================================================================
 	// add our ball
 	var pushRequest={
-		dst: "keyValue.api",
-		action: "push",
+		dst: "data.api",
+		action: "addChild",
 		resource: "/balls",
-		entity: {} 
+		entity: {}
 	};
-	
+
 	client.send(pushRequest,function(packet){
-		if(packet.action==="success") {
+		if(packet.action==="ok") {
 			ourBalls.push(new AnimatedBall({
-				resource:packet.entity.resource,
+				resource:packet.entity.resource
 			}));
 
 		} else {
 			console.log("Failed to push our ball: " + JSON.stringify(packet,null,2));
-		}	
+		}
+		return null;//de-register callback
 	});
 });

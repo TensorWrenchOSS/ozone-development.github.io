@@ -6,7 +6,8 @@ module.exports = function(grunt) {
 		connect: {
 			app: {        
 				options:{ 
-					port: 8080,base: ".", 
+					port: 8080,
+                    base: ".", 
 					keepalive: true,
 					debug: true
 				}

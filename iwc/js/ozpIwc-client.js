@@ -11,14 +11,12 @@ ozpIwc.AsyncAction=function() {
 };
 
 ozpIwc.AsyncAction.prototype.when=function(state,callback,self) {
-	if(self) {
-		callback=function() { return callback.apply(self,arguments); };
-	}
+    self=self || this;
 	
 	if(this.resolution === state) {
-		callback.apply(this,this.value);
+		callback.apply(self,this.value);
 	} else {
-		this.callbacks[state]=callback;
+		this.callbacks[state]=function() { return callback.apply(self,arguments); };
 	}
 	return this;
 };
@@ -53,7 +51,7 @@ var ozpIwc=ozpIwc || {};
 	*/
 ozpIwc.Event=function() {
 	this.events={};
-};	
+};
 
 /**
  * Registers a handler for the the event.
@@ -65,7 +63,7 @@ ozpIwc.Event=function() {
 ozpIwc.Event.prototype.on=function(event,callback,self) {
 	var wrapped=callback;
 	if(self) {
-		wrapped=function() { 
+		wrapped=function() {
 			callback.apply(self,arguments);
 		};
 		wrapped.ozpIwcDelegateFor=callback;
@@ -79,7 +77,7 @@ ozpIwc.Event.prototype.on=function(event,callback,self) {
  * Unregisters an event handler previously registered.
  * @param {type} event
  * @param {type} callback
- */	
+ */
 ozpIwc.Event.prototype.off=function(event,callback) {
 	this.events[event]=(this.events[event]||[]).filter( function(h) {
 		return h!==callback && h.ozpIwcDelegateFor !== callback;
@@ -104,7 +102,7 @@ ozpIwc.Event.prototype.trigger=function(eventName,event) {
 
 
 /**
- * Adds an on() and off() function to the target that delegate to this object 
+ * Adds an on() and off() function to the target that delegate to this object
  * @param {object} target Target to receive the on/off functions
  */
 ozpIwc.Event.prototype.mixinOnOff=function(target) {
@@ -122,7 +120,7 @@ ozpIwc.Event.prototype.mixinOnOff=function(target) {
  */
 ozpIwc.CancelableEvent=function(data) {
 	data = data || {};
-	for(k in data) {
+	for(var k in data) {
 		this[k]=data[k];
 	}
 	this.canceled=false;
@@ -144,7 +142,7 @@ ozpIwc.CancelableEvent.prototype.cancel=function(reason) {
 /** @namespace */
 var ozpIwc=ozpIwc || {};
 
-/** 
+/**
  * @type {object}
  * @property {function} log - Normal log output.
  * @property {function} error - Error output.
@@ -156,7 +154,7 @@ ozpIwc.log=ozpIwc.log || {
 		}
 	},
 	error: function() {
-		if(window.console && typeof(window.console.error)==="error") {
+		if(window.console && typeof(window.console.error)==="function") {
 			window.console.error.apply(window.console,arguments);
 		}
 	}
@@ -173,7 +171,7 @@ ozpIwc.util=ozpIwc.util || {};
  * @returns {String}
  */
 ozpIwc.util.generateId=function() {
-		return Math.floor(Math.random() * 0xffffffff).toString(16);
+    return Math.floor(Math.random() * 0xffffffff).toString(16);
 };
 
 /**
@@ -182,7 +180,7 @@ ozpIwc.util.generateId=function() {
  * @returns {Number}
  */
 ozpIwc.util.now=function() {
-		return new Date().getTime();
+    return new Date().getTime();
 };
 
 /**
@@ -192,9 +190,89 @@ ozpIwc.util.now=function() {
  * @returns {Function} newConstructor with an augmented prototype
  */
 ozpIwc.util.extend=function(baseClass,newConstructor) {
-	newConstructor.prototype = Object.create(baseClass.prototype); 
-	newConstructor.prototype.constructor = newConstructor;
-	return newConstructor;
+    newConstructor.prototype = Object.create(baseClass.prototype);
+    newConstructor.prototype.constructor = newConstructor;
+    return newConstructor;
+};
+
+/**
+ * Detect browser support for structured clones.
+ * @returns {boolean} - true if structured clones are supported,
+ * false otherwise
+ */
+ozpIwc.util.structuredCloneSupport=function() {
+    if (ozpIwc.util.structuredCloneSupport.cache !== undefined) {
+        return ozpIwc.util.structuredCloneSupport.cache;
+    }
+    var onlyStrings = false;
+    //If the browser doesn't support structured clones, it will call toString() on the object passed to postMessage.
+    //A bug in FF will cause File clone to fail (see https://bugzilla.mozilla.org/show_bug.cgi?id=722126)
+    //We detect this using a test Blob
+    try {
+        window.postMessage({
+            toString: function () {
+                onlyStrings = true;
+            },
+            blob: new Blob()
+        }, "*");
+    } catch (e) {
+        onlyStrings=true;
+    }
+    ozpIwc.util.structuredCloneSupport.cache=!onlyStrings;
+    return ozpIwc.util.structuredCloneSupport.cache;
+};
+
+ozpIwc.util.structuredCloneSupport.cache=undefined;
+
+/**
+ * Does a deep clone of a serializable object.  Note that this will not
+ * clone unserializable objects like DOM elements, Date, RegExp, etc.
+ * @param {type} value - value to be cloned.
+ * @returns {object} - a deep copy of the object
+ */
+ozpIwc.util.clone=function(value) {
+	if(Array.isArray(value) || typeof(value) === 'object') {
+		return JSON.parse(JSON.stringify(value));
+	} else {
+		return value;
+	}
+};
+
+
+/**
+ * Returns true if every needle is found in the haystack.
+ * @param {array} haystack - The array to search.
+ * @param {array} needles - All of the values to search.
+ * @param {function} [equal] - What constitutes equality.  Defaults to a===b.
+ * @returns {boolean}
+ */
+ozpIwc.util.arrayContainsAll=function(haystack,needles,equal) {
+    equal=equal || function(a,b) { return a===b;};
+    return needles.every(function(needle) { 
+        return haystack.some(function(hay) { 
+            return equal(hay,needle);
+        });
+    });
+};
+
+
+/**
+ * Returns true if the value every attribute in needs is equal to 
+ * value of the same attribute in haystack.
+ * @param {array} haystack - The object that must contain all attributes and values.
+ * @param {array} needles - The reference object for the attributes and values.
+ * @param {function} [equal] - What constitutes equality.  Defaults to a===b.
+ * @returns {boolean}
+ */
+ozpIwc.util.objectContainsAll=function(haystack,needles,equal) {
+    equal=equal || function(a,b) { return a===b;};
+    
+    for(var attribute in needles) {
+        if(!equal(haystack[attribute],needles[attribute])) {
+            return false;
+        }
+    }
+    return true;
 };
 
 var ozpIwc=ozpIwc || {};
@@ -202,7 +280,7 @@ var ozpIwc=ozpIwc || {};
 /**
  * @class
  * This class will be heavily modified in the future.
- * 
+ *
  * @todo accept a list of peer URLs that are searched in order of preference
  * @param {object} config
  * @param {string} config.peerUrl - Base URL of the peer server
@@ -210,7 +288,7 @@ var ozpIwc=ozpIwc || {};
  */
 ozpIwc.Client=function(config) {
 	config=config || {};
-	this.participantId="$nobody";
+	this.address="$nobody";
 	this.replyCallbacks={};
 	this.peerUrl=config.peerUrl;
 	var a=document.createElement("a");
@@ -229,25 +307,31 @@ ozpIwc.Client=function(config) {
 	this.sentPackets=0;
 	this.sentBytes=0;
 	this.startTime=ozpIwc.util.now();
+    this.window = window;
 	var self=this;
 
 	if(this.autoPeer) {
 		this.findPeer();
 	}
-	
+
+    this.postMessageHandler = function(event) {
+        if(event.origin !== self.peerOrigin){
+            return;
+        }
+        try {
+            var message=event.data;
+            if (typeof(message) === 'string') {
+                message=JSON.parse(event.data);
+            }
+            self.receive(message);
+            self.receivedBytes+=(event.data.length * 2);
+            self.receivedPackets++;
+        } catch(e) {
+            // ignore!
+        }
+    };
 	// receive postmessage events
-	this.messageEventListener=window.addEventListener("message", function(event) {
-		if(event.origin !== self.peerOrigin){
-			return;
-		}
-		try {
-			self.receive(JSON.parse(event.data));
-			self.receivedBytes+=(event.data.length * 2);
-			self.receivedPackets++;		
-		} catch(e) {
-			// ignore!
-		}
-	}, false);
+	this.messageEventListener=window.addEventListener("message", this.postMessageHandler, false);
 };
 
 /**
@@ -259,17 +343,21 @@ ozpIwc.Client=function(config) {
  * @returns {undefined}
  */
 ozpIwc.Client.prototype.receive=function(packet) {
-	if(packet.replyTo && this.replyCallbacks[packet.replyTo]) {
-		this.replyCallbacks[packet.replyTo](packet);
-	} else {
-		this.events.trigger("receive",packet);
-	}	
+    if(packet.replyTo && this.replyCallbacks[packet.replyTo]) {
+        if (!this.replyCallbacks[packet.replyTo](packet)) {
+            this.cancelCallback(packet.replyTo);
+        }
+    } else {
+        this.events.trigger("receive",packet);
+    }
 };
 /**
  * Used to send a packet
  * @param {string} dst - where to send the packet
  * @param {object} entity - payload of the packet
- * @param {function} callback - callback for any replies
+ * @param {function} callback - callback for any replies. The callback will be
+ * persisted if it returns a truth-like value, canceled if it returns a
+ * false-like value.
  */
 ozpIwc.Client.prototype.send=function(fields,callback) {
 	var now=new Date().getTime();
@@ -277,7 +365,7 @@ ozpIwc.Client.prototype.send=function(fields,callback) {
 
 	var packet={
 		ver: 1,
-		src: this.participantId,
+		src: this.address,
 		msgId: id,
 		time: now
 	};
@@ -289,60 +377,77 @@ ozpIwc.Client.prototype.send=function(fields,callback) {
 	if(callback) {
 		this.replyCallbacks[id]=callback;
 	}
-	var data=JSON.stringify(packet);
+	var data=packet;
+    if (!ozpIwc.util.structuredCloneSupport()) {
+        data=JSON.stringify(packet);
+    }
 	this.peer.postMessage(data,'*');
 	this.sentBytes+=data.length;
 	this.sentPackets++;
 	return packet;
 };
 
+/**
+ * Cancel a callback registration
+ * @param (string} msgId - The packet replyTo ID for which the callback was registered
+ */
+ozpIwc.Client.prototype.cancelCallback=function(msgId) {
+    var success=false;
+    if (msgId) {
+        delete this.replyCallbacks[msgId];
+        success=true;
+    }
+    return success;
+};
+
+
 ozpIwc.Client.prototype.on=function(event,callback) {
-	if(event==="connected" && this.participantId !=="$nobody") {
+	if(event==="connected" && this.address !=="$nobody") {
 		callback(this);
 		return;
 	}
 	return this.events.on.apply(this.events,arguments);
 };
 
-ozpIwc.Client.prototype.off=function(event,callback) { 
-	return this.events.off.apply(this.events,arguments);
+ozpIwc.Client.prototype.off=function(event,callback) {
+    return this.events.off.apply(this.events,arguments);
 };
 
 ozpIwc.Client.prototype.disconnect=function() {
-	window.removeEventListener("message",this.messageEventListener,false);
-	if(this.iframe) {
-		document.body.removeChild(this.iframe);
-	}
+    window.removeEventListener("message",this.messageEventListener,false);
+    if(this.iframe) {
+        document.body.removeChild(this.iframe);
+    }
 };
 
 ozpIwc.Client.prototype.createIframePeer=function(peerUrl) {
-	var self=this;
-	var createIframeShim=function() {
-		self.iframe=document.createElement("iframe");
-		self.iframe.src=peerUrl+"/iframe_peer.html";
-		self.iframe.height=1;
-		self.iframe.width=1;
-		self.iframe.style="display:none !important;";
-		self.iframe.addEventListener("load",function() { self.requestAddress(); },false);	
-		document.body.appendChild(self.iframe);
-		self.peer=self.iframe.contentWindow;
+    var self=this;
+    var createIframeShim=function() {
+        self.iframe=document.createElement("iframe");
+        self.iframe.src=peerUrl+"/iframe_peer.html";
+        self.iframe.height=1;
+        self.iframe.width=1;
+        self.iframe.style="display:none !important;";
+        self.iframe.addEventListener("load",function() { self.requestAddress(); },false);
+        document.body.appendChild(self.iframe);
+        self.peer=self.iframe.contentWindow;
 
-	};
-	// need at least the body tag to be loaded, so wait until it's loaded
-	if(document.readyState === 'complete' ) {
-		createIframeShim();
-	} else {
-		window.addEventListener("load",createIframeShim,false);
-}
+    };
+    // need at least the body tag to be loaded, so wait until it's loaded
+    if(document.readyState === 'complete' ) {
+        createIframeShim();
+    } else {
+        window.addEventListener("load",createIframeShim,false);
+    }
 };
 
 ozpIwc.Client.prototype.findPeer=function() {
-	// check if we have a parent, get address there if so
+    // check if we have a parent, get address there if so
 //	if(window.parent!==window) {
 //		this.peer=window.parent;
 //		this.requestAddress();
 //	} else {
-		this.createIframePeer(this.peerUrl);
+    this.createIframePeer(this.peerUrl);
 //	}
 };
 
@@ -350,7 +455,8 @@ ozpIwc.Client.prototype.requestAddress=function(){
 	// send connect to get our address
 	var self=this;
 	this.send({dst:"$transport"},function(message) {
-		self.participantId=message.dst;
+		self.address=message.dst;
 		self.events.trigger("connected",self);
+        return null;//de-register callback
 	});
 };

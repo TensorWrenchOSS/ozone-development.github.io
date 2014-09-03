@@ -9,7 +9,7 @@ ozpIwc.util=ozpIwc.util || {};
  * @returns {String}
  */
 ozpIwc.util.generateId=function() {
-		return Math.floor(Math.random() * 0xffffffff).toString(16);
+    return Math.floor(Math.random() * 0xffffffff).toString(16);
 };
 
 /**
@@ -18,7 +18,7 @@ ozpIwc.util.generateId=function() {
  * @returns {Number}
  */
 ozpIwc.util.now=function() {
-		return new Date().getTime();
+    return new Date().getTime();
 };
 
 /**
@@ -28,9 +28,89 @@ ozpIwc.util.now=function() {
  * @returns {Function} newConstructor with an augmented prototype
  */
 ozpIwc.util.extend=function(baseClass,newConstructor) {
-	newConstructor.prototype = Object.create(baseClass.prototype); 
-	newConstructor.prototype.constructor = newConstructor;
-	return newConstructor;
+    newConstructor.prototype = Object.create(baseClass.prototype);
+    newConstructor.prototype.constructor = newConstructor;
+    return newConstructor;
+};
+
+/**
+ * Detect browser support for structured clones.
+ * @returns {boolean} - true if structured clones are supported,
+ * false otherwise
+ */
+ozpIwc.util.structuredCloneSupport=function() {
+    if (ozpIwc.util.structuredCloneSupport.cache !== undefined) {
+        return ozpIwc.util.structuredCloneSupport.cache;
+    }
+    var onlyStrings = false;
+    //If the browser doesn't support structured clones, it will call toString() on the object passed to postMessage.
+    //A bug in FF will cause File clone to fail (see https://bugzilla.mozilla.org/show_bug.cgi?id=722126)
+    //We detect this using a test Blob
+    try {
+        window.postMessage({
+            toString: function () {
+                onlyStrings = true;
+            },
+            blob: new Blob()
+        }, "*");
+    } catch (e) {
+        onlyStrings=true;
+    }
+    ozpIwc.util.structuredCloneSupport.cache=!onlyStrings;
+    return ozpIwc.util.structuredCloneSupport.cache;
+};
+
+ozpIwc.util.structuredCloneSupport.cache=undefined;
+
+/**
+ * Does a deep clone of a serializable object.  Note that this will not
+ * clone unserializable objects like DOM elements, Date, RegExp, etc.
+ * @param {type} value - value to be cloned.
+ * @returns {object} - a deep copy of the object
+ */
+ozpIwc.util.clone=function(value) {
+	if(Array.isArray(value) || typeof(value) === 'object') {
+		return JSON.parse(JSON.stringify(value));
+	} else {
+		return value;
+	}
+};
+
+
+/**
+ * Returns true if every needle is found in the haystack.
+ * @param {array} haystack - The array to search.
+ * @param {array} needles - All of the values to search.
+ * @param {function} [equal] - What constitutes equality.  Defaults to a===b.
+ * @returns {boolean}
+ */
+ozpIwc.util.arrayContainsAll=function(haystack,needles,equal) {
+    equal=equal || function(a,b) { return a===b;};
+    return needles.every(function(needle) { 
+        return haystack.some(function(hay) { 
+            return equal(hay,needle);
+        });
+    });
+};
+
+
+/**
+ * Returns true if the value every attribute in needs is equal to 
+ * value of the same attribute in haystack.
+ * @param {array} haystack - The object that must contain all attributes and values.
+ * @param {array} needles - The reference object for the attributes and values.
+ * @param {function} [equal] - What constitutes equality.  Defaults to a===b.
+ * @returns {boolean}
+ */
+ozpIwc.util.objectContainsAll=function(haystack,needles,equal) {
+    equal=equal || function(a,b) { return a===b;};
+    
+    for(var attribute in needles) {
+        if(!equal(haystack[attribute],needles[attribute])) {
+            return false;
+        }
+    }
+    return true;
 };
 
 /*
