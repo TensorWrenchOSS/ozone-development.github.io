@@ -1,0 +1,12 @@
+{
+  "name": "ozone-development-github-io",
+  "description": "github.io page for ozone-development",
+  "version": "0.1.0",
+  "homepage": "https://github.com/ozone-development/ozone-development.github.io",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "ozp-iwc": "ozone-development/ozp-iwc",
+    "ozp-data-schemas": "ozone-development/ozp-data-schemas"
+  }
+}
