@@ -18,7 +18,7 @@ module.exports = function(grunt) {
         files: [
           {
             src: ['api/**'],
-            dest: 'api/',
+            dest: './',
             cwd: 'bower_components/ozp-data-schemas/mock',
             expand: true,
             rename: function(dest, src) {
