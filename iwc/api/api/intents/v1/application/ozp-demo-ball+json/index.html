@@ -1,0 +1,24 @@
+{
+    "_links": {
+        "self": { "href": "/api/intents/v1/application/ozp-demo-ball+json"},
+        "curies": [{
+            "name": "ozp",
+            "href": "/api/intents/v1/rels/{rel}",
+            "templated": true
+        }],
+        "ozp:intentActions": [
+            { "href": "/api/intents/v1/application/ozp-demo-ball+json/view"}
+        ]
+    },
+    "_embedded": {
+        "item": [{
+            "type": "application/ozp-demo-ball+json",
+            "action": "edit",
+            "icon": "http://example.com/view-text-plain.png",
+            "label": "Edit a bouncing ball",
+            "_links": {
+                "self" : { "href" : "/api/intents/v1/application/ozp-demo-ball+json/edit"}
+            }
+        }]
+    }
+}

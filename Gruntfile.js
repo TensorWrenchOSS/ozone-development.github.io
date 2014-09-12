@@ -36,6 +36,16 @@ module.exports = function(grunt) {
             cwd: 'bower_components/ozp-iwc/dist'
           }
         ]
+      },
+      duplicate_api: {
+        files: [
+          {
+            src: ['**'],
+            dest: 'iwc/api',
+            expand: true,
+            cwd: 'api'
+          }
+        ]
       }
   },
   clean: {
@@ -51,6 +61,6 @@ module.exports = function(grunt) {
   // Default task(s).
   grunt.registerTask('default', ['connect']);
 
-  grunt.registerTask('build', ['clean:dist', 'copy:iwc', 'copy:mockapi']);
+  grunt.registerTask('build', ['clean:dist', 'copy:iwc', 'copy:mockapi', 'copy:duplicate_api']);
 
 };
