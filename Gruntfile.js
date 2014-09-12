@@ -18,7 +18,7 @@ module.exports = function(grunt) {
         files: [
           {
             src: ['api/**'],
-            dest: './',
+            dest: 'iwc/',
             cwd: 'bower_components/ozp-data-schemas/mock',
             expand: true,
             rename: function(dest, src) {
@@ -31,7 +31,7 @@ module.exports = function(grunt) {
         files: [
           {
             src: ['**'],
-            dest: './iwc',
+            dest: 'iwc',
             expand: true,
             cwd: 'bower_components/ozp-iwc/dist'
           }
@@ -51,6 +51,6 @@ module.exports = function(grunt) {
   // Default task(s).
   grunt.registerTask('default', ['connect']);
 
-  grunt.registerTask('build', ['clean:dist', 'copy:mockapi', 'copy:iwc']);
+  grunt.registerTask('build', ['clean:dist', 'copy:iwc', 'copy:mockapi']);
 
 };
