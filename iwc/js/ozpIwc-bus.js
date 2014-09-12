@@ -1,16 +1,2008 @@
 /** @namespace */
 var ozpIwc=ozpIwc || {};
 
-/** @namespace */
-ozpIwc.util=ozpIwc.util || {};
+/**
+	* @class
+	*/
+ozpIwc.Event=function() {
+	this.events={};
+};
 
 /**
- * Generates a large hexidecimal string to serve as a unique ID.  Not a guid.
- * @returns {String}
+ * Registers a handler for the the event.
+ * @param {string} event The name of the event to trigger on
+ * @param {function} callback Function to be invoked
+ * @param {object} [self] Used as the this pointer when callback is invoked.
+ * @returns {object} A handle that can be used to unregister the callback via [off()]{@link ozpIwc.Event#off}
  */
-ozpIwc.util.generateId=function() {
-    return Math.floor(Math.random() * 0xffffffff).toString(16);
+ozpIwc.Event.prototype.on=function(event,callback,self) {
+	var wrapped=callback;
+	if(self) {
+		wrapped=function() {
+			callback.apply(self,arguments);
+		};
+		wrapped.ozpIwcDelegateFor=callback;
+	}
+	this.events[event]=this.events[event]||[];
+	this.events[event].push(wrapped);
+	return wrapped;
 };
+
+/**
+ * Unregisters an event handler previously registered.
+ * @param {type} event
+ * @param {type} callback
+ */
+ozpIwc.Event.prototype.off=function(event,callback) {
+	this.events[event]=(this.events[event]||[]).filter( function(h) {
+		return h!==callback && h.ozpIwcDelegateFor !== callback;
+	});
+};
+
+/**
+ * Fires an event that will be received by all handlers.
+ * @param {string} eventName  - Name of the event
+ * @param {object} event - Event object to pass to the handers.
+ * @returns {object} The event after all handlers have processed it
+ */
+ozpIwc.Event.prototype.trigger=function(eventName,event) {
+	event = event || new ozpIwc.CancelableEvent();
+	var handlers=this.events[eventName] || [];
+
+	handlers.forEach(function(h) {
+		h(event);
+	});
+	return event;
+};
+
+
+/**
+ * Adds an on() and off() function to the target that delegate to this object
+ * @param {object} target Target to receive the on/off functions
+ */
+ozpIwc.Event.prototype.mixinOnOff=function(target) {
+	var self=this;
+	target.on=function() { return self.on.apply(self,arguments);};
+	target.off=function() { return self.off.apply(self,arguments);};
+};
+
+/**
+ * Convenient base for events that can be canceled.  Provides and manages
+ * the properties canceled and cancelReason, as well as the member function
+ * cancel().
+ * @class
+ * @param {object} data - Data that will be copied into the event
+ */
+ozpIwc.CancelableEvent=function(data) {
+	data = data || {};
+	for(var k in data) {
+		this[k]=data[k];
+	}
+	this.canceled=false;
+	this.cancelReason=null;
+};
+
+/**
+ * Marks the event as canceled.
+ * @param {type} reason - A text description of why the event was canceled.
+ * @returns {ozpIwc.CancelableEvent} Reference to self
+ */
+ozpIwc.CancelableEvent.prototype.cancel=function(reason) {
+	reason= reason || "Unknown";
+	this.canceled=true;
+	this.cancelReason=reason;
+	return this;
+};
+
+/*!
+ * https://github.com/es-shims/es5-shim
+ * @license es5-shim Copyright 2009-2014 by contributors, MIT License
+ * see https://github.com/es-shims/es5-shim/blob/master/LICENSE
+ */
+
+// vim: ts=4 sts=4 sw=4 expandtab
+
+//Add semicolon to prevent IIFE from being passed as argument to concated code.
+;
+
+// UMD (Universal Module Definition)
+// see https://github.com/umdjs/umd/blob/master/returnExports.js
+(function (root, factory) {
+    if (typeof define === 'function' && define.amd) {
+        // AMD. Register as an anonymous module.
+        define(factory);
+    } else if (typeof exports === 'object') {
+        // Node. Does not work with strict CommonJS, but
+        // only CommonJS-like enviroments that support module.exports,
+        // like Node.
+        module.exports = factory();
+    } else {
+        // Browser globals (root is window)
+        root.returnExports = factory();
+  }
+}(this, function () {
+
+var call = Function.prototype.call;
+var prototypeOfObject = Object.prototype;
+var owns = call.bind(prototypeOfObject.hasOwnProperty);
+
+// If JS engine supports accessors creating shortcuts.
+var defineGetter;
+var defineSetter;
+var lookupGetter;
+var lookupSetter;
+var supportsAccessors = owns(prototypeOfObject, "__defineGetter__");
+if (supportsAccessors) {
+    defineGetter = call.bind(prototypeOfObject.__defineGetter__);
+    defineSetter = call.bind(prototypeOfObject.__defineSetter__);
+    lookupGetter = call.bind(prototypeOfObject.__lookupGetter__);
+    lookupSetter = call.bind(prototypeOfObject.__lookupSetter__);
+}
+
+// ES5 15.2.3.2
+// http://es5.github.com/#x15.2.3.2
+if (!Object.getPrototypeOf) {
+    // https://github.com/es-shims/es5-shim/issues#issue/2
+    // http://ejohn.org/blog/objectgetprototypeof/
+    // recommended by fschaefer on github
+    //
+    // sure, and webreflection says ^_^
+    // ... this will nerever possibly return null
+    // ... Opera Mini breaks here with infinite loops
+    Object.getPrototypeOf = function getPrototypeOf(object) {
+        var proto = object.__proto__;
+        if (proto || proto === null) {
+            return proto;
+        } else if (object.constructor) {
+            return object.constructor.prototype;
+        } else {
+            return prototypeOfObject;
+        }
+    };
+}
+
+//ES5 15.2.3.3
+//http://es5.github.com/#x15.2.3.3
+
+function doesGetOwnPropertyDescriptorWork(object) {
+    try {
+        object.sentinel = 0;
+        return Object.getOwnPropertyDescriptor(
+                object,
+                "sentinel"
+        ).value === 0;
+    } catch (exception) {
+        // returns falsy
+    }
+}
+
+//check whether getOwnPropertyDescriptor works if it's given. Otherwise,
+//shim partially.
+if (Object.defineProperty) {
+    var getOwnPropertyDescriptorWorksOnObject = doesGetOwnPropertyDescriptorWork({});
+    var getOwnPropertyDescriptorWorksOnDom = typeof document === "undefined" ||
+    doesGetOwnPropertyDescriptorWork(document.createElement("div"));
+    if (!getOwnPropertyDescriptorWorksOnDom || !getOwnPropertyDescriptorWorksOnObject) {
+        var getOwnPropertyDescriptorFallback = Object.getOwnPropertyDescriptor;
+    }
+}
+
+if (!Object.getOwnPropertyDescriptor || getOwnPropertyDescriptorFallback) {
+    var ERR_NON_OBJECT = "Object.getOwnPropertyDescriptor called on a non-object: ";
+
+    Object.getOwnPropertyDescriptor = function getOwnPropertyDescriptor(object, property) {
+        if ((typeof object !== "object" && typeof object !== "function") || object === null) {
+            throw new TypeError(ERR_NON_OBJECT + object);
+        }
+
+        // make a valiant attempt to use the real getOwnPropertyDescriptor
+        // for I8's DOM elements.
+        if (getOwnPropertyDescriptorFallback) {
+            try {
+                return getOwnPropertyDescriptorFallback.call(Object, object, property);
+            } catch (exception) {
+                // try the shim if the real one doesn't work
+            }
+        }
+
+        // If object does not owns property return undefined immediately.
+        if (!owns(object, property)) {
+            return;
+        }
+
+        // If object has a property then it's for sure both `enumerable` and
+        // `configurable`.
+        var descriptor =  { enumerable: true, configurable: true };
+
+        // If JS engine supports accessor properties then property may be a
+        // getter or setter.
+        if (supportsAccessors) {
+            // Unfortunately `__lookupGetter__` will return a getter even
+            // if object has own non getter property along with a same named
+            // inherited getter. To avoid misbehavior we temporary remove
+            // `__proto__` so that `__lookupGetter__` will return getter only
+            // if it's owned by an object.
+            var prototype = object.__proto__;
+            var notPrototypeOfObject = object !== prototypeOfObject;
+            // avoid recursion problem, breaking in Opera Mini when
+            // Object.getOwnPropertyDescriptor(Object.prototype, 'toString')
+            // or any other Object.prototype accessor
+            if (notPrototypeOfObject) {
+                object.__proto__ = prototypeOfObject;
+            }
+
+            var getter = lookupGetter(object, property);
+            var setter = lookupSetter(object, property);
+
+            if (notPrototypeOfObject) {
+                // Once we have getter and setter we can put values back.
+                object.__proto__ = prototype;
+            }
+
+            if (getter || setter) {
+                if (getter) {
+                    descriptor.get = getter;
+                }
+                if (setter) {
+                    descriptor.set = setter;
+                }
+                // If it was accessor property we're done and return here
+                // in order to avoid adding `value` to the descriptor.
+                return descriptor;
+            }
+        }
+
+        // If we got this far we know that object has an own property that is
+        // not an accessor so we set it as a value and return descriptor.
+        descriptor.value = object[property];
+        descriptor.writable = true;
+        return descriptor;
+    };
+}
+
+// ES5 15.2.3.4
+// http://es5.github.com/#x15.2.3.4
+if (!Object.getOwnPropertyNames) {
+    Object.getOwnPropertyNames = function getOwnPropertyNames(object) {
+        return Object.keys(object);
+    };
+}
+
+// ES5 15.2.3.5
+// http://es5.github.com/#x15.2.3.5
+if (!Object.create) {
+
+    // Contributed by Brandon Benvie, October, 2012
+    var createEmpty;
+    var supportsProto = !({__proto__:null} instanceof Object);
+                        // the following produces false positives
+                        // in Opera Mini => not a reliable check
+                        // Object.prototype.__proto__ === null
+    if (supportsProto || typeof document === 'undefined') {
+        createEmpty = function () {
+            return { "__proto__": null };
+        };
+    } else {
+        // In old IE __proto__ can't be used to manually set `null`, nor does
+        // any other method exist to make an object that inherits from nothing,
+        // aside from Object.prototype itself. Instead, create a new global
+        // object and *steal* its Object.prototype and strip it bare. This is
+        // used as the prototype to create nullary objects.
+        createEmpty = function () {
+            var iframe = document.createElement('iframe');
+            var parent = document.body || document.documentElement;
+            iframe.style.display = 'none';
+            parent.appendChild(iframe);
+            iframe.src = 'javascript:';
+            var empty = iframe.contentWindow.Object.prototype;
+            parent.removeChild(iframe);
+            iframe = null;
+            delete empty.constructor;
+            delete empty.hasOwnProperty;
+            delete empty.propertyIsEnumerable;
+            delete empty.isPrototypeOf;
+            delete empty.toLocaleString;
+            delete empty.toString;
+            delete empty.valueOf;
+            empty.__proto__ = null;
+
+            function Empty() {}
+            Empty.prototype = empty;
+            // short-circuit future calls
+            createEmpty = function () {
+                return new Empty();
+            };
+            return new Empty();
+        };
+    }
+
+    Object.create = function create(prototype, properties) {
+
+        var object;
+        function Type() {}  // An empty constructor.
+
+        if (prototype === null) {
+            object = createEmpty();
+        } else {
+            if (typeof prototype !== "object" && typeof prototype !== "function") {
+                // In the native implementation `parent` can be `null`
+                // OR *any* `instanceof Object`  (Object|Function|Array|RegExp|etc)
+                // Use `typeof` tho, b/c in old IE, DOM elements are not `instanceof Object`
+                // like they are in modern browsers. Using `Object.create` on DOM elements
+                // is...err...probably inappropriate, but the native version allows for it.
+                throw new TypeError("Object prototype may only be an Object or null"); // same msg as Chrome
+            }
+            Type.prototype = prototype;
+            object = new Type();
+            // IE has no built-in implementation of `Object.getPrototypeOf`
+            // neither `__proto__`, but this manually setting `__proto__` will
+            // guarantee that `Object.getPrototypeOf` will work as expected with
+            // objects created using `Object.create`
+            object.__proto__ = prototype;
+        }
+
+        if (properties !== void 0) {
+            Object.defineProperties(object, properties);
+        }
+
+        return object;
+    };
+}
+
+// ES5 15.2.3.6
+// http://es5.github.com/#x15.2.3.6
+
+// Patch for WebKit and IE8 standard mode
+// Designed by hax <hax.github.com>
+// related issue: https://github.com/es-shims/es5-shim/issues#issue/5
+// IE8 Reference:
+//     http://msdn.microsoft.com/en-us/library/dd282900.aspx
+//     http://msdn.microsoft.com/en-us/library/dd229916.aspx
+// WebKit Bugs:
+//     https://bugs.webkit.org/show_bug.cgi?id=36423
+
+function doesDefinePropertyWork(object) {
+    try {
+        Object.defineProperty(object, "sentinel", {});
+        return "sentinel" in object;
+    } catch (exception) {
+        // returns falsy
+    }
+}
+
+// check whether defineProperty works if it's given. Otherwise,
+// shim partially.
+if (Object.defineProperty) {
+    var definePropertyWorksOnObject = doesDefinePropertyWork({});
+    var definePropertyWorksOnDom = typeof document === "undefined" ||
+        doesDefinePropertyWork(document.createElement("div"));
+    if (!definePropertyWorksOnObject || !definePropertyWorksOnDom) {
+        var definePropertyFallback = Object.defineProperty,
+            definePropertiesFallback = Object.defineProperties;
+    }
+}
+
+if (!Object.defineProperty || definePropertyFallback) {
+    var ERR_NON_OBJECT_DESCRIPTOR = "Property description must be an object: ";
+    var ERR_NON_OBJECT_TARGET = "Object.defineProperty called on non-object: "
+    var ERR_ACCESSORS_NOT_SUPPORTED = "getters & setters can not be defined " +
+                                      "on this javascript engine";
+
+    Object.defineProperty = function defineProperty(object, property, descriptor) {
+        if ((typeof object !== "object" && typeof object !== "function") || object === null) {
+            throw new TypeError(ERR_NON_OBJECT_TARGET + object);
+        }
+        if ((typeof descriptor !== "object" && typeof descriptor !== "function") || descriptor === null) {
+            throw new TypeError(ERR_NON_OBJECT_DESCRIPTOR + descriptor);
+        }
+        // make a valiant attempt to use the real defineProperty
+        // for I8's DOM elements.
+        if (definePropertyFallback) {
+            try {
+                return definePropertyFallback.call(Object, object, property, descriptor);
+            } catch (exception) {
+                // try the shim if the real one doesn't work
+            }
+        }
+
+        // If it's a data property.
+        if (owns(descriptor, "value")) {
+            // fail silently if "writable", "enumerable", or "configurable"
+            // are requested but not supported
+            /*
+            // alternate approach:
+            if ( // can't implement these features; allow false but not true
+                !(owns(descriptor, "writable") ? descriptor.writable : true) ||
+                !(owns(descriptor, "enumerable") ? descriptor.enumerable : true) ||
+                !(owns(descriptor, "configurable") ? descriptor.configurable : true)
+            )
+                throw new RangeError(
+                    "This implementation of Object.defineProperty does not " +
+                    "support configurable, enumerable, or writable."
+                );
+            */
+
+            if (supportsAccessors && (lookupGetter(object, property) ||
+                                      lookupSetter(object, property)))
+            {
+                // As accessors are supported only on engines implementing
+                // `__proto__` we can safely override `__proto__` while defining
+                // a property to make sure that we don't hit an inherited
+                // accessor.
+                var prototype = object.__proto__;
+                object.__proto__ = prototypeOfObject;
+                // Deleting a property anyway since getter / setter may be
+                // defined on object itself.
+                delete object[property];
+                object[property] = descriptor.value;
+                // Setting original `__proto__` back now.
+                object.__proto__ = prototype;
+            } else {
+                object[property] = descriptor.value;
+            }
+        } else {
+            if (!supportsAccessors) {
+                throw new TypeError(ERR_ACCESSORS_NOT_SUPPORTED);
+            }
+            // If we got that far then getters and setters can be defined !!
+            if (owns(descriptor, "get")) {
+                defineGetter(object, property, descriptor.get);
+            }
+            if (owns(descriptor, "set")) {
+                defineSetter(object, property, descriptor.set);
+            }
+        }
+        return object;
+    };
+}
+
+// ES5 15.2.3.7
+// http://es5.github.com/#x15.2.3.7
+if (!Object.defineProperties || definePropertiesFallback) {
+    Object.defineProperties = function defineProperties(object, properties) {
+        // make a valiant attempt to use the real defineProperties
+        if (definePropertiesFallback) {
+            try {
+                return definePropertiesFallback.call(Object, object, properties);
+            } catch (exception) {
+                // try the shim if the real one doesn't work
+            }
+        }
+
+        for (var property in properties) {
+            if (owns(properties, property) && property !== "__proto__") {
+                Object.defineProperty(object, property, properties[property]);
+            }
+        }
+        return object;
+    };
+}
+
+// ES5 15.2.3.8
+// http://es5.github.com/#x15.2.3.8
+if (!Object.seal) {
+    Object.seal = function seal(object) {
+        // this is misleading and breaks feature-detection, but
+        // allows "securable" code to "gracefully" degrade to working
+        // but insecure code.
+        return object;
+    };
+}
+
+// ES5 15.2.3.9
+// http://es5.github.com/#x15.2.3.9
+if (!Object.freeze) {
+    Object.freeze = function freeze(object) {
+        // this is misleading and breaks feature-detection, but
+        // allows "securable" code to "gracefully" degrade to working
+        // but insecure code.
+        return object;
+    };
+}
+
+// detect a Rhino bug and patch it
+try {
+    Object.freeze(function () {});
+} catch (exception) {
+    Object.freeze = (function freeze(freezeObject) {
+        return function freeze(object) {
+            if (typeof object === "function") {
+                return object;
+            } else {
+                return freezeObject(object);
+            }
+        };
+    })(Object.freeze);
+}
+
+// ES5 15.2.3.10
+// http://es5.github.com/#x15.2.3.10
+if (!Object.preventExtensions) {
+    Object.preventExtensions = function preventExtensions(object) {
+        // this is misleading and breaks feature-detection, but
+        // allows "securable" code to "gracefully" degrade to working
+        // but insecure code.
+        return object;
+    };
+}
+
+// ES5 15.2.3.11
+// http://es5.github.com/#x15.2.3.11
+if (!Object.isSealed) {
+    Object.isSealed = function isSealed(object) {
+        return false;
+    };
+}
+
+// ES5 15.2.3.12
+// http://es5.github.com/#x15.2.3.12
+if (!Object.isFrozen) {
+    Object.isFrozen = function isFrozen(object) {
+        return false;
+    };
+}
+
+// ES5 15.2.3.13
+// http://es5.github.com/#x15.2.3.13
+if (!Object.isExtensible) {
+    Object.isExtensible = function isExtensible(object) {
+        // 1. If Type(O) is not Object throw a TypeError exception.
+        if (Object(object) !== object) {
+            throw new TypeError(); // TODO message
+        }
+        // 2. Return the Boolean value of the [[Extensible]] internal property of O.
+        var name = '';
+        while (owns(object, name)) {
+            name += '?';
+        }
+        object[name] = true;
+        var returnValue = owns(object, name);
+        delete object[name];
+        return returnValue;
+    };
+}
+
+}));
+
+
+/*!
+ * https://github.com/es-shims/es5-shim
+ * @license es5-shim Copyright 2009-2014 by contributors, MIT License
+ * see https://github.com/es-shims/es5-shim/blob/master/LICENSE
+ */
+
+// vim: ts=4 sts=4 sw=4 expandtab
+
+//Add semicolon to prevent IIFE from being passed as argument to concated code.
+;
+
+// UMD (Universal Module Definition)
+// see https://github.com/umdjs/umd/blob/master/returnExports.js
+(function (root, factory) {
+    if (typeof define === 'function' && define.amd) {
+        // AMD. Register as an anonymous module.
+        define(factory);
+    } else if (typeof exports === 'object') {
+        // Node. Does not work with strict CommonJS, but
+        // only CommonJS-like enviroments that support module.exports,
+        // like Node.
+        module.exports = factory();
+    } else {
+        // Browser globals (root is window)
+        root.returnExports = factory();
+    }
+}(this, function () {
+
+/**
+ * Brings an environment as close to ECMAScript 5 compliance
+ * as is possible with the facilities of erstwhile engines.
+ *
+ * Annotated ES5: http://es5.github.com/ (specific links below)
+ * ES5 Spec: http://www.ecma-international.org/publications/files/ECMA-ST/Ecma-262.pdf
+ * Required reading: http://javascriptweblog.wordpress.com/2011/12/05/extending-javascript-natives/
+ */
+
+// Shortcut to an often accessed properties, in order to avoid multiple
+// dereference that costs universally.
+var ArrayPrototype = Array.prototype;
+var ObjectPrototype = Object.prototype;
+var FunctionPrototype = Function.prototype;
+var StringPrototype = String.prototype;
+var NumberPrototype = Number.prototype;
+var array_slice = ArrayPrototype.slice;
+var array_splice = ArrayPrototype.splice;
+var array_push = ArrayPrototype.push;
+var array_unshift = ArrayPrototype.unshift;
+var call = FunctionPrototype.call;
+
+// Having a toString local variable name breaks in Opera so use _toString.
+var _toString = ObjectPrototype.toString;
+
+var isFunction = function (val) {
+    return ObjectPrototype.toString.call(val) === '[object Function]';
+};
+var isRegex = function (val) {
+    return ObjectPrototype.toString.call(val) === '[object RegExp]';
+};
+var isArray = function isArray(obj) {
+    return _toString.call(obj) === "[object Array]";
+};
+var isString = function isString(obj) {
+    return _toString.call(obj) === "[object String]";
+};
+var isArguments = function isArguments(value) {
+    var str = _toString.call(value);
+    var isArgs = str === '[object Arguments]';
+    if (!isArgs) {
+        isArgs = !isArray(value)
+            && value !== null
+            && typeof value === 'object'
+            && typeof value.length === 'number'
+            && value.length >= 0
+            && isFunction(value.callee);
+    }
+    return isArgs;
+};
+
+var supportsDescriptors = Object.defineProperty && (function () {
+    try {
+        Object.defineProperty({}, 'x', {});
+        return true;
+    } catch (e) { /* this is ES3 */
+        return false;
+    }
+}());
+
+// Define configurable, writable and non-enumerable props
+// if they don't exist.
+var defineProperty;
+if (supportsDescriptors) {
+    defineProperty = function (object, name, method, forceAssign) {
+        if (!forceAssign && (name in object)) { return; }
+        Object.defineProperty(object, name, {
+            configurable: true,
+            enumerable: false,
+            writable: true,
+            value: method
+        });
+    };
+} else {
+    defineProperty = function (object, name, method, forceAssign) {
+        if (!forceAssign && (name in object)) { return; }
+        object[name] = method;
+    };
+}
+var defineProperties = function (object, map, forceAssign) {
+    for (var name in map) {
+        if (ObjectPrototype.hasOwnProperty.call(map, name)) {
+          defineProperty(object, name, map[name], forceAssign);
+        }
+    }
+};
+
+//
+// Util
+// ======
+//
+
+// ES5 9.4
+// http://es5.github.com/#x9.4
+// http://jsperf.com/to-integer
+
+function toInteger(n) {
+    n = +n;
+    if (n !== n) { // isNaN
+        n = 0;
+    } else if (n !== 0 && n !== (1 / 0) && n !== -(1 / 0)) {
+        n = (n > 0 || -1) * Math.floor(Math.abs(n));
+    }
+    return n;
+}
+
+function isPrimitive(input) {
+    var type = typeof input;
+    return (
+        input === null ||
+        type === "undefined" ||
+        type === "boolean" ||
+        type === "number" ||
+        type === "string"
+    );
+}
+
+function toPrimitive(input) {
+    var val, valueOf, toStr;
+    if (isPrimitive(input)) {
+        return input;
+    }
+    valueOf = input.valueOf;
+    if (isFunction(valueOf)) {
+        val = valueOf.call(input);
+        if (isPrimitive(val)) {
+            return val;
+        }
+    }
+    toStr = input.toString;
+    if (isFunction(toStr)) {
+        val = toStr.call(input);
+        if (isPrimitive(val)) {
+            return val;
+        }
+    }
+    throw new TypeError();
+}
+
+// ES5 9.9
+// http://es5.github.com/#x9.9
+var toObject = function (o) {
+    if (o == null) { // this matches both null and undefined
+        throw new TypeError("can't convert " + o + " to object");
+    }
+    return Object(o);
+};
+
+var ToUint32 = function ToUint32(x) {
+    return x >>> 0;
+};
+
+//
+// Function
+// ========
+//
+
+// ES-5 15.3.4.5
+// http://es5.github.com/#x15.3.4.5
+
+function Empty() {}
+
+defineProperties(FunctionPrototype, {
+    bind: function bind(that) { // .length is 1
+        // 1. Let Target be the this value.
+        var target = this;
+        // 2. If IsCallable(Target) is false, throw a TypeError exception.
+        if (!isFunction(target)) {
+            throw new TypeError("Function.prototype.bind called on incompatible " + target);
+        }
+        // 3. Let A be a new (possibly empty) internal list of all of the
+        //   argument values provided after thisArg (arg1, arg2 etc), in order.
+        // XXX slicedArgs will stand in for "A" if used
+        var args = array_slice.call(arguments, 1); // for normal call
+        // 4. Let F be a new native ECMAScript object.
+        // 11. Set the [[Prototype]] internal property of F to the standard
+        //   built-in Function prototype object as specified in 15.3.3.1.
+        // 12. Set the [[Call]] internal property of F as described in
+        //   15.3.4.5.1.
+        // 13. Set the [[Construct]] internal property of F as described in
+        //   15.3.4.5.2.
+        // 14. Set the [[HasInstance]] internal property of F as described in
+        //   15.3.4.5.3.
+        var binder = function () {
+
+            if (this instanceof bound) {
+                // 15.3.4.5.2 [[Construct]]
+                // When the [[Construct]] internal method of a function object,
+                // F that was created using the bind function is called with a
+                // list of arguments ExtraArgs, the following steps are taken:
+                // 1. Let target be the value of F's [[TargetFunction]]
+                //   internal property.
+                // 2. If target has no [[Construct]] internal method, a
+                //   TypeError exception is thrown.
+                // 3. Let boundArgs be the value of F's [[BoundArgs]] internal
+                //   property.
+                // 4. Let args be a new list containing the same values as the
+                //   list boundArgs in the same order followed by the same
+                //   values as the list ExtraArgs in the same order.
+                // 5. Return the result of calling the [[Construct]] internal
+                //   method of target providing args as the arguments.
+
+                var result = target.apply(
+                    this,
+                    args.concat(array_slice.call(arguments))
+                );
+                if (Object(result) === result) {
+                    return result;
+                }
+                return this;
+
+            } else {
+                // 15.3.4.5.1 [[Call]]
+                // When the [[Call]] internal method of a function object, F,
+                // which was created using the bind function is called with a
+                // this value and a list of arguments ExtraArgs, the following
+                // steps are taken:
+                // 1. Let boundArgs be the value of F's [[BoundArgs]] internal
+                //   property.
+                // 2. Let boundThis be the value of F's [[BoundThis]] internal
+                //   property.
+                // 3. Let target be the value of F's [[TargetFunction]] internal
+                //   property.
+                // 4. Let args be a new list containing the same values as the
+                //   list boundArgs in the same order followed by the same
+                //   values as the list ExtraArgs in the same order.
+                // 5. Return the result of calling the [[Call]] internal method
+                //   of target providing boundThis as the this value and
+                //   providing args as the arguments.
+
+                // equiv: target.call(this, ...boundArgs, ...args)
+                return target.apply(
+                    that,
+                    args.concat(array_slice.call(arguments))
+                );
+
+            }
+
+        };
+
+        // 15. If the [[Class]] internal property of Target is "Function", then
+        //     a. Let L be the length property of Target minus the length of A.
+        //     b. Set the length own property of F to either 0 or L, whichever is
+        //       larger.
+        // 16. Else set the length own property of F to 0.
+
+        var boundLength = Math.max(0, target.length - args.length);
+
+        // 17. Set the attributes of the length own property of F to the values
+        //   specified in 15.3.5.1.
+        var boundArgs = [];
+        for (var i = 0; i < boundLength; i++) {
+            boundArgs.push("$" + i);
+        }
+
+        // XXX Build a dynamic function with desired amount of arguments is the only
+        // way to set the length property of a function.
+        // In environments where Content Security Policies enabled (Chrome extensions,
+        // for ex.) all use of eval or Function costructor throws an exception.
+        // However in all of these environments Function.prototype.bind exists
+        // and so this code will never be executed.
+        var bound = Function("binder", "return function (" + boundArgs.join(",") + "){return binder.apply(this,arguments)}")(binder);
+
+        if (target.prototype) {
+            Empty.prototype = target.prototype;
+            bound.prototype = new Empty();
+            // Clean up dangling references.
+            Empty.prototype = null;
+        }
+
+        // TODO
+        // 18. Set the [[Extensible]] internal property of F to true.
+
+        // TODO
+        // 19. Let thrower be the [[ThrowTypeError]] function Object (13.2.3).
+        // 20. Call the [[DefineOwnProperty]] internal method of F with
+        //   arguments "caller", PropertyDescriptor {[[Get]]: thrower, [[Set]]:
+        //   thrower, [[Enumerable]]: false, [[Configurable]]: false}, and
+        //   false.
+        // 21. Call the [[DefineOwnProperty]] internal method of F with
+        //   arguments "arguments", PropertyDescriptor {[[Get]]: thrower,
+        //   [[Set]]: thrower, [[Enumerable]]: false, [[Configurable]]: false},
+        //   and false.
+
+        // TODO
+        // NOTE Function objects created using Function.prototype.bind do not
+        // have a prototype property or the [[Code]], [[FormalParameters]], and
+        // [[Scope]] internal properties.
+        // XXX can't delete prototype in pure-js.
+
+        // 22. Return F.
+        return bound;
+    }
+});
+
+// _Please note: Shortcuts are defined after `Function.prototype.bind` as we
+// us it in defining shortcuts.
+var owns = call.bind(ObjectPrototype.hasOwnProperty);
+
+// If JS engine supports accessors creating shortcuts.
+var defineGetter;
+var defineSetter;
+var lookupGetter;
+var lookupSetter;
+var supportsAccessors;
+if ((supportsAccessors = owns(ObjectPrototype, "__defineGetter__"))) {
+    defineGetter = call.bind(ObjectPrototype.__defineGetter__);
+    defineSetter = call.bind(ObjectPrototype.__defineSetter__);
+    lookupGetter = call.bind(ObjectPrototype.__lookupGetter__);
+    lookupSetter = call.bind(ObjectPrototype.__lookupSetter__);
+}
+
+//
+// Array
+// =====
+//
+
+// ES5 15.4.4.12
+// http://es5.github.com/#x15.4.4.12
+var spliceNoopReturnsEmptyArray = (function () {
+    var a = [1, 2];
+    var result = a.splice();
+    return a.length === 2 && isArray(result) && result.length === 0;
+}());
+defineProperties(ArrayPrototype, {
+    // Safari 5.0 bug where .splice() returns undefined
+    splice: function splice(start, deleteCount) {
+        if (arguments.length === 0) {
+            return [];
+        } else {
+            return array_splice.apply(this, arguments);
+        }
+    }
+}, spliceNoopReturnsEmptyArray);
+
+var spliceWorksWithEmptyObject = (function () {
+    var obj = {};
+    ArrayPrototype.splice.call(obj, 0, 0, 1);
+    return obj.length === 1;
+}());
+defineProperties(ArrayPrototype, {
+    splice: function splice(start, deleteCount) {
+        if (arguments.length === 0) { return []; }
+        var args = arguments;
+        this.length = Math.max(toInteger(this.length), 0);
+        if (arguments.length > 0 && typeof deleteCount !== 'number') {
+            args = array_slice.call(arguments);
+            if (args.length < 2) {
+                args.push(this.length - start);
+            } else {
+                args[1] = toInteger(deleteCount);
+            }
+        }
+        return array_splice.apply(this, args);
+    }
+}, !spliceWorksWithEmptyObject);
+
+// ES5 15.4.4.12
+// http://es5.github.com/#x15.4.4.13
+// Return len+argCount.
+// [bugfix, ielt8]
+// IE < 8 bug: [].unshift(0) === undefined but should be "1"
+var hasUnshiftReturnValueBug = [].unshift(0) !== 1;
+defineProperties(ArrayPrototype, {
+    unshift: function () {
+        array_unshift.apply(this, arguments);
+        return this.length;
+    }
+}, hasUnshiftReturnValueBug);
+
+// ES5 15.4.3.2
+// http://es5.github.com/#x15.4.3.2
+// https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/isArray
+defineProperties(Array, { isArray: isArray });
+
+// The IsCallable() check in the Array functions
+// has been replaced with a strict check on the
+// internal class of the object to trap cases where
+// the provided function was actually a regular
+// expression literal, which in V8 and
+// JavaScriptCore is a typeof "function".  Only in
+// V8 are regular expression literals permitted as
+// reduce parameters, so it is desirable in the
+// general case for the shim to match the more
+// strict and common behavior of rejecting regular
+// expressions.
+
+// ES5 15.4.4.18
+// http://es5.github.com/#x15.4.4.18
+// https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/array/forEach
+
+// Check failure of by-index access of string characters (IE < 9)
+// and failure of `0 in boxedString` (Rhino)
+var boxedString = Object("a");
+var splitString = boxedString[0] !== "a" || !(0 in boxedString);
+
+var properlyBoxesContext = function properlyBoxed(method) {
+    // Check node 0.6.21 bug where third parameter is not boxed
+    var properlyBoxesNonStrict = true;
+    var properlyBoxesStrict = true;
+    if (method) {
+        method.call('foo', function (_, __, context) {
+            if (typeof context !== 'object') { properlyBoxesNonStrict = false; }
+        });
+
+        method.call([1], function () {
+            'use strict';
+            properlyBoxesStrict = typeof this === 'string';
+        }, 'x');
+    }
+    return !!method && properlyBoxesNonStrict && properlyBoxesStrict;
+};
+
+defineProperties(ArrayPrototype, {
+    forEach: function forEach(fun /*, thisp*/) {
+        var object = toObject(this),
+            self = splitString && isString(this) ? this.split('') : object,
+            thisp = arguments[1],
+            i = -1,
+            length = self.length >>> 0;
+
+        // If no callback function or if callback is not a callable function
+        if (!isFunction(fun)) {
+            throw new TypeError(); // TODO message
+        }
+
+        while (++i < length) {
+            if (i in self) {
+                // Invoke the callback function with call, passing arguments:
+                // context, property value, property key, thisArg object
+                // context
+                fun.call(thisp, self[i], i, object);
+            }
+        }
+    }
+}, !properlyBoxesContext(ArrayPrototype.forEach));
+
+// ES5 15.4.4.19
+// http://es5.github.com/#x15.4.4.19
+// https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Objects/Array/map
+defineProperties(ArrayPrototype, {
+    map: function map(fun /*, thisp*/) {
+        var object = toObject(this),
+            self = splitString && isString(this) ? this.split('') : object,
+            length = self.length >>> 0,
+            result = Array(length),
+            thisp = arguments[1];
+
+        // If no callback function or if callback is not a callable function
+        if (!isFunction(fun)) {
+            throw new TypeError(fun + " is not a function");
+        }
+
+        for (var i = 0; i < length; i++) {
+            if (i in self) {
+                result[i] = fun.call(thisp, self[i], i, object);
+            }
+        }
+        return result;
+    }
+}, !properlyBoxesContext(ArrayPrototype.map));
+
+// ES5 15.4.4.20
+// http://es5.github.com/#x15.4.4.20
+// https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Objects/Array/filter
+defineProperties(ArrayPrototype, {
+    filter: function filter(fun /*, thisp */) {
+        var object = toObject(this),
+            self = splitString && isString(this) ? this.split('') : object,
+            length = self.length >>> 0,
+            result = [],
+            value,
+            thisp = arguments[1];
+
+        // If no callback function or if callback is not a callable function
+        if (!isFunction(fun)) {
+            throw new TypeError(fun + " is not a function");
+        }
+
+        for (var i = 0; i < length; i++) {
+            if (i in self) {
+                value = self[i];
+                if (fun.call(thisp, value, i, object)) {
+                    result.push(value);
+                }
+            }
+        }
+        return result;
+    }
+}, !properlyBoxesContext(ArrayPrototype.filter));
+
+// ES5 15.4.4.16
+// http://es5.github.com/#x15.4.4.16
+// https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/every
+defineProperties(ArrayPrototype, {
+    every: function every(fun /*, thisp */) {
+        var object = toObject(this),
+            self = splitString && isString(this) ? this.split('') : object,
+            length = self.length >>> 0,
+            thisp = arguments[1];
+
+        // If no callback function or if callback is not a callable function
+        if (!isFunction(fun)) {
+            throw new TypeError(fun + " is not a function");
+        }
+
+        for (var i = 0; i < length; i++) {
+            if (i in self && !fun.call(thisp, self[i], i, object)) {
+                return false;
+            }
+        }
+        return true;
+    }
+}, !properlyBoxesContext(ArrayPrototype.every));
+
+// ES5 15.4.4.17
+// http://es5.github.com/#x15.4.4.17
+// https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/some
+defineProperties(ArrayPrototype, {
+    some: function some(fun /*, thisp */) {
+        var object = toObject(this),
+            self = splitString && isString(this) ? this.split('') : object,
+            length = self.length >>> 0,
+            thisp = arguments[1];
+
+        // If no callback function or if callback is not a callable function
+        if (!isFunction(fun)) {
+            throw new TypeError(fun + " is not a function");
+        }
+
+        for (var i = 0; i < length; i++) {
+            if (i in self && fun.call(thisp, self[i], i, object)) {
+                return true;
+            }
+        }
+        return false;
+    }
+}, !properlyBoxesContext(ArrayPrototype.some));
+
+// ES5 15.4.4.21
+// http://es5.github.com/#x15.4.4.21
+// https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Objects/Array/reduce
+var reduceCoercesToObject = false;
+if (ArrayPrototype.reduce) {
+    reduceCoercesToObject = typeof ArrayPrototype.reduce.call('es5', function (_, __, ___, list) { return list; }) === 'object';
+}
+defineProperties(ArrayPrototype, {
+    reduce: function reduce(fun /*, initial*/) {
+        var object = toObject(this),
+            self = splitString && isString(this) ? this.split('') : object,
+            length = self.length >>> 0;
+
+        // If no callback function or if callback is not a callable function
+        if (!isFunction(fun)) {
+            throw new TypeError(fun + " is not a function");
+        }
+
+        // no value to return if no initial value and an empty array
+        if (!length && arguments.length === 1) {
+            throw new TypeError("reduce of empty array with no initial value");
+        }
+
+        var i = 0;
+        var result;
+        if (arguments.length >= 2) {
+            result = arguments[1];
+        } else {
+            do {
+                if (i in self) {
+                    result = self[i++];
+                    break;
+                }
+
+                // if array contains no values, no initial value to return
+                if (++i >= length) {
+                    throw new TypeError("reduce of empty array with no initial value");
+                }
+            } while (true);
+        }
+
+        for (; i < length; i++) {
+            if (i in self) {
+                result = fun.call(void 0, result, self[i], i, object);
+            }
+        }
+
+        return result;
+    }
+}, !reduceCoercesToObject);
+
+// ES5 15.4.4.22
+// http://es5.github.com/#x15.4.4.22
+// https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Objects/Array/reduceRight
+var reduceRightCoercesToObject = false;
+if (ArrayPrototype.reduceRight) {
+    reduceRightCoercesToObject = typeof ArrayPrototype.reduceRight.call('es5', function (_, __, ___, list) { return list; }) === 'object';
+}
+defineProperties(ArrayPrototype, {
+    reduceRight: function reduceRight(fun /*, initial*/) {
+        var object = toObject(this),
+            self = splitString && isString(this) ? this.split('') : object,
+            length = self.length >>> 0;
+
+        // If no callback function or if callback is not a callable function
+        if (!isFunction(fun)) {
+            throw new TypeError(fun + " is not a function");
+        }
+
+        // no value to return if no initial value, empty array
+        if (!length && arguments.length === 1) {
+            throw new TypeError("reduceRight of empty array with no initial value");
+        }
+
+        var result, i = length - 1;
+        if (arguments.length >= 2) {
+            result = arguments[1];
+        } else {
+            do {
+                if (i in self) {
+                    result = self[i--];
+                    break;
+                }
+
+                // if array contains no values, no initial value to return
+                if (--i < 0) {
+                    throw new TypeError("reduceRight of empty array with no initial value");
+                }
+            } while (true);
+        }
+
+        if (i < 0) {
+            return result;
+        }
+
+        do {
+            if (i in self) {
+                result = fun.call(void 0, result, self[i], i, object);
+            }
+        } while (i--);
+
+        return result;
+    }
+}, !reduceRightCoercesToObject);
+
+// ES5 15.4.4.14
+// http://es5.github.com/#x15.4.4.14
+// https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/indexOf
+var hasFirefox2IndexOfBug = Array.prototype.indexOf && [0, 1].indexOf(1, 2) !== -1;
+defineProperties(ArrayPrototype, {
+    indexOf: function indexOf(sought /*, fromIndex */ ) {
+        var self = splitString && isString(this) ? this.split('') : toObject(this),
+            length = self.length >>> 0;
+
+        if (!length) {
+            return -1;
+        }
+
+        var i = 0;
+        if (arguments.length > 1) {
+            i = toInteger(arguments[1]);
+        }
+
+        // handle negative indices
+        i = i >= 0 ? i : Math.max(0, length + i);
+        for (; i < length; i++) {
+            if (i in self && self[i] === sought) {
+                return i;
+            }
+        }
+        return -1;
+    }
+}, hasFirefox2IndexOfBug);
+
+// ES5 15.4.4.15
+// http://es5.github.com/#x15.4.4.15
+// https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/lastIndexOf
+var hasFirefox2LastIndexOfBug = Array.prototype.lastIndexOf && [0, 1].lastIndexOf(0, -3) !== -1;
+defineProperties(ArrayPrototype, {
+    lastIndexOf: function lastIndexOf(sought /*, fromIndex */) {
+        var self = splitString && isString(this) ? this.split('') : toObject(this),
+            length = self.length >>> 0;
+
+        if (!length) {
+            return -1;
+        }
+        var i = length - 1;
+        if (arguments.length > 1) {
+            i = Math.min(i, toInteger(arguments[1]));
+        }
+        // handle negative indices
+        i = i >= 0 ? i : length - Math.abs(i);
+        for (; i >= 0; i--) {
+            if (i in self && sought === self[i]) {
+                return i;
+            }
+        }
+        return -1;
+    }
+}, hasFirefox2LastIndexOfBug);
+
+//
+// Object
+// ======
+//
+
+// ES5 15.2.3.14
+// http://es5.github.com/#x15.2.3.14
+
+// http://whattheheadsaid.com/2010/10/a-safer-object-keys-compatibility-implementation
+var hasDontEnumBug = !({'toString': null}).propertyIsEnumerable('toString'),
+    hasProtoEnumBug = (function () {}).propertyIsEnumerable('prototype'),
+    dontEnums = [
+        "toString",
+        "toLocaleString",
+        "valueOf",
+        "hasOwnProperty",
+        "isPrototypeOf",
+        "propertyIsEnumerable",
+        "constructor"
+    ],
+    dontEnumsLength = dontEnums.length;
+
+defineProperties(Object, {
+    keys: function keys(object) {
+        var isFn = isFunction(object),
+            isArgs = isArguments(object),
+            isObject = object !== null && typeof object === 'object',
+            isStr = isObject && isString(object);
+
+        if (!isObject && !isFn && !isArgs) {
+            throw new TypeError("Object.keys called on a non-object");
+        }
+
+        var theKeys = [];
+        var skipProto = hasProtoEnumBug && isFn;
+        if (isStr || isArgs) {
+            for (var i = 0; i < object.length; ++i) {
+                theKeys.push(String(i));
+            }
+        } else {
+            for (var name in object) {
+                if (!(skipProto && name === 'prototype') && owns(object, name)) {
+                    theKeys.push(String(name));
+                }
+            }
+        }
+
+        if (hasDontEnumBug) {
+            var ctor = object.constructor,
+                skipConstructor = ctor && ctor.prototype === object;
+            for (var j = 0; j < dontEnumsLength; j++) {
+                var dontEnum = dontEnums[j];
+                if (!(skipConstructor && dontEnum === 'constructor') && owns(object, dontEnum)) {
+                    theKeys.push(dontEnum);
+                }
+            }
+        }
+        return theKeys;
+    }
+});
+
+var keysWorksWithArguments = Object.keys && (function () {
+    // Safari 5.0 bug
+    return Object.keys(arguments).length === 2;
+}(1, 2));
+var originalKeys = Object.keys;
+defineProperties(Object, {
+    keys: function keys(object) {
+        if (isArguments(object)) {
+            return originalKeys(ArrayPrototype.slice.call(object));
+        } else {
+            return originalKeys(object);
+        }
+    }
+}, !keysWorksWithArguments);
+
+//
+// Date
+// ====
+//
+
+// ES5 15.9.5.43
+// http://es5.github.com/#x15.9.5.43
+// This function returns a String value represent the instance in time
+// represented by this Date object. The format of the String is the Date Time
+// string format defined in 15.9.1.15. All fields are present in the String.
+// The time zone is always UTC, denoted by the suffix Z. If the time value of
+// this object is not a finite Number a RangeError exception is thrown.
+var negativeDate = -62198755200000;
+var negativeYearString = "-000001";
+var hasNegativeDateBug = Date.prototype.toISOString && new Date(negativeDate).toISOString().indexOf(negativeYearString) === -1;
+
+defineProperties(Date.prototype, {
+    toISOString: function toISOString() {
+        var result, length, value, year, month;
+        if (!isFinite(this)) {
+            throw new RangeError("Date.prototype.toISOString called on non-finite value.");
+        }
+
+        year = this.getUTCFullYear();
+
+        month = this.getUTCMonth();
+        // see https://github.com/es-shims/es5-shim/issues/111
+        year += Math.floor(month / 12);
+        month = (month % 12 + 12) % 12;
+
+        // the date time string format is specified in 15.9.1.15.
+        result = [month + 1, this.getUTCDate(), this.getUTCHours(), this.getUTCMinutes(), this.getUTCSeconds()];
+        year = (
+            (year < 0 ? "-" : (year > 9999 ? "+" : "")) +
+            ("00000" + Math.abs(year)).slice(0 <= year && year <= 9999 ? -4 : -6)
+        );
+
+        length = result.length;
+        while (length--) {
+            value = result[length];
+            // pad months, days, hours, minutes, and seconds to have two
+            // digits.
+            if (value < 10) {
+                result[length] = "0" + value;
+            }
+        }
+        // pad milliseconds to have three digits.
+        return (
+            year + "-" + result.slice(0, 2).join("-") +
+            "T" + result.slice(2).join(":") + "." +
+            ("000" + this.getUTCMilliseconds()).slice(-3) + "Z"
+        );
+    }
+}, hasNegativeDateBug);
+
+
+// ES5 15.9.5.44
+// http://es5.github.com/#x15.9.5.44
+// This function provides a String representation of a Date object for use by
+// JSON.stringify (15.12.3).
+var dateToJSONIsSupported = false;
+try {
+    dateToJSONIsSupported = (
+        Date.prototype.toJSON &&
+        new Date(NaN).toJSON() === null &&
+        new Date(negativeDate).toJSON().indexOf(negativeYearString) !== -1 &&
+        Date.prototype.toJSON.call({ // generic
+            toISOString: function () {
+                return true;
+            }
+        })
+    );
+} catch (e) {
+}
+if (!dateToJSONIsSupported) {
+    Date.prototype.toJSON = function toJSON(key) {
+        // When the toJSON method is called with argument key, the following
+        // steps are taken:
+
+        // 1.  Let O be the result of calling ToObject, giving it the this
+        // value as its argument.
+        // 2. Let tv be toPrimitive(O, hint Number).
+        var o = Object(this),
+            tv = toPrimitive(o),
+            toISO;
+        // 3. If tv is a Number and is not finite, return null.
+        if (typeof tv === "number" && !isFinite(tv)) {
+            return null;
+        }
+        // 4. Let toISO be the result of calling the [[Get]] internal method of
+        // O with argument "toISOString".
+        toISO = o.toISOString;
+        // 5. If IsCallable(toISO) is false, throw a TypeError exception.
+        if (typeof toISO !== "function") {
+            throw new TypeError("toISOString property is not callable");
+        }
+        // 6. Return the result of calling the [[Call]] internal method of
+        //  toISO with O as the this value and an empty argument list.
+        return toISO.call(o);
+
+        // NOTE 1 The argument is ignored.
+
+        // NOTE 2 The toJSON function is intentionally generic; it does not
+        // require that its this value be a Date object. Therefore, it can be
+        // transferred to other kinds of objects for use as a method. However,
+        // it does require that any such object have a toISOString method. An
+        // object is free to use the argument key to filter its
+        // stringification.
+    };
+}
+
+// ES5 15.9.4.2
+// http://es5.github.com/#x15.9.4.2
+// based on work shared by Daniel Friesen (dantman)
+// http://gist.github.com/303249
+var supportsExtendedYears = Date.parse('+033658-09-27T01:46:40.000Z') === 1e15;
+var acceptsInvalidDates = !isNaN(Date.parse('2012-04-04T24:00:00.500Z')) || !isNaN(Date.parse('2012-11-31T23:59:59.000Z'));
+var doesNotParseY2KNewYear = isNaN(Date.parse("2000-01-01T00:00:00.000Z"));
+if (!Date.parse || doesNotParseY2KNewYear || acceptsInvalidDates || !supportsExtendedYears) {
+    // XXX global assignment won't work in embeddings that use
+    // an alternate object for the context.
+    Date = (function (NativeDate) {
+
+        // Date.length === 7
+        function Date(Y, M, D, h, m, s, ms) {
+            var length = arguments.length;
+            if (this instanceof NativeDate) {
+                var date = length === 1 && String(Y) === Y ? // isString(Y)
+                    // We explicitly pass it through parse:
+                    new NativeDate(Date.parse(Y)) :
+                    // We have to manually make calls depending on argument
+                    // length here
+                    length >= 7 ? new NativeDate(Y, M, D, h, m, s, ms) :
+                    length >= 6 ? new NativeDate(Y, M, D, h, m, s) :
+                    length >= 5 ? new NativeDate(Y, M, D, h, m) :
+                    length >= 4 ? new NativeDate(Y, M, D, h) :
+                    length >= 3 ? new NativeDate(Y, M, D) :
+                    length >= 2 ? new NativeDate(Y, M) :
+                    length >= 1 ? new NativeDate(Y) :
+                                  new NativeDate();
+                // Prevent mixups with unfixed Date object
+                date.constructor = Date;
+                return date;
+            }
+            return NativeDate.apply(this, arguments);
+        }
+
+        // 15.9.1.15 Date Time String Format.
+        var isoDateExpression = new RegExp("^" +
+            "(\\d{4}|[\+\-]\\d{6})" + // four-digit year capture or sign +
+                                      // 6-digit extended year
+            "(?:-(\\d{2})" + // optional month capture
+            "(?:-(\\d{2})" + // optional day capture
+            "(?:" + // capture hours:minutes:seconds.milliseconds
+                "T(\\d{2})" + // hours capture
+                ":(\\d{2})" + // minutes capture
+                "(?:" + // optional :seconds.milliseconds
+                    ":(\\d{2})" + // seconds capture
+                    "(?:(\\.\\d{1,}))?" + // milliseconds capture
+                ")?" +
+            "(" + // capture UTC offset component
+                "Z|" + // UTC capture
+                "(?:" + // offset specifier +/-hours:minutes
+                    "([-+])" + // sign capture
+                    "(\\d{2})" + // hours offset capture
+                    ":(\\d{2})" + // minutes offset capture
+                ")" +
+            ")?)?)?)?" +
+        "$");
+
+        var months = [
+            0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365
+        ];
+
+        function dayFromMonth(year, month) {
+            var t = month > 1 ? 1 : 0;
+            return (
+                months[month] +
+                Math.floor((year - 1969 + t) / 4) -
+                Math.floor((year - 1901 + t) / 100) +
+                Math.floor((year - 1601 + t) / 400) +
+                365 * (year - 1970)
+            );
+        }
+
+        function toUTC(t) {
+            return Number(new NativeDate(1970, 0, 1, 0, 0, 0, t));
+        }
+
+        // Copy any custom methods a 3rd party library may have added
+        for (var key in NativeDate) {
+            Date[key] = NativeDate[key];
+        }
+
+        // Copy "native" methods explicitly; they may be non-enumerable
+        Date.now = NativeDate.now;
+        Date.UTC = NativeDate.UTC;
+        Date.prototype = NativeDate.prototype;
+        Date.prototype.constructor = Date;
+
+        // Upgrade Date.parse to handle simplified ISO 8601 strings
+        Date.parse = function parse(string) {
+            var match = isoDateExpression.exec(string);
+            if (match) {
+                // parse months, days, hours, minutes, seconds, and milliseconds
+                // provide default values if necessary
+                // parse the UTC offset component
+                var year = Number(match[1]),
+                    month = Number(match[2] || 1) - 1,
+                    day = Number(match[3] || 1) - 1,
+                    hour = Number(match[4] || 0),
+                    minute = Number(match[5] || 0),
+                    second = Number(match[6] || 0),
+                    millisecond = Math.floor(Number(match[7] || 0) * 1000),
+                    // When time zone is missed, local offset should be used
+                    // (ES 5.1 bug)
+                    // see https://bugs.ecmascript.org/show_bug.cgi?id=112
+                    isLocalTime = Boolean(match[4] && !match[8]),
+                    signOffset = match[9] === "-" ? 1 : -1,
+                    hourOffset = Number(match[10] || 0),
+                    minuteOffset = Number(match[11] || 0),
+                    result;
+                if (
+                    hour < (
+                        minute > 0 || second > 0 || millisecond > 0 ?
+                        24 : 25
+                    ) &&
+                    minute < 60 && second < 60 && millisecond < 1000 &&
+                    month > -1 && month < 12 && hourOffset < 24 &&
+                    minuteOffset < 60 && // detect invalid offsets
+                    day > -1 &&
+                    day < (
+                        dayFromMonth(year, month + 1) -
+                        dayFromMonth(year, month)
+                    )
+                ) {
+                    result = (
+                        (dayFromMonth(year, month) + day) * 24 +
+                        hour +
+                        hourOffset * signOffset
+                    ) * 60;
+                    result = (
+                        (result + minute + minuteOffset * signOffset) * 60 +
+                        second
+                    ) * 1000 + millisecond;
+                    if (isLocalTime) {
+                        result = toUTC(result);
+                    }
+                    if (-8.64e15 <= result && result <= 8.64e15) {
+                        return result;
+                    }
+                }
+                return NaN;
+            }
+            return NativeDate.parse.apply(this, arguments);
+        };
+
+        return Date;
+    })(Date);
+}
+
+// ES5 15.9.4.4
+// http://es5.github.com/#x15.9.4.4
+if (!Date.now) {
+    Date.now = function now() {
+        return new Date().getTime();
+    };
+}
+
+
+//
+// Number
+// ======
+//
+
+// ES5.1 15.7.4.5
+// http://es5.github.com/#x15.7.4.5
+var hasToFixedBugs = NumberPrototype.toFixed && (
+  (0.00008).toFixed(3) !== '0.000'
+  || (0.9).toFixed(0) !== '1'
+  || (1.255).toFixed(2) !== '1.25'
+  || (1000000000000000128).toFixed(0) !== "1000000000000000128"
+);
+
+var toFixedHelpers = {
+  base: 1e7,
+  size: 6,
+  data: [0, 0, 0, 0, 0, 0],
+  multiply: function multiply(n, c) {
+      var i = -1;
+      while (++i < toFixedHelpers.size) {
+          c += n * toFixedHelpers.data[i];
+          toFixedHelpers.data[i] = c % toFixedHelpers.base;
+          c = Math.floor(c / toFixedHelpers.base);
+      }
+  },
+  divide: function divide(n) {
+      var i = toFixedHelpers.size, c = 0;
+      while (--i >= 0) {
+          c += toFixedHelpers.data[i];
+          toFixedHelpers.data[i] = Math.floor(c / n);
+          c = (c % n) * toFixedHelpers.base;
+      }
+  },
+  numToString: function numToString() {
+      var i = toFixedHelpers.size;
+      var s = '';
+      while (--i >= 0) {
+          if (s !== '' || i === 0 || toFixedHelpers.data[i] !== 0) {
+              var t = String(toFixedHelpers.data[i]);
+              if (s === '') {
+                  s = t;
+              } else {
+                  s += '0000000'.slice(0, 7 - t.length) + t;
+              }
+          }
+      }
+      return s;
+  },
+  pow: function pow(x, n, acc) {
+      return (n === 0 ? acc : (n % 2 === 1 ? pow(x, n - 1, acc * x) : pow(x * x, n / 2, acc)));
+  },
+  log: function log(x) {
+      var n = 0;
+      while (x >= 4096) {
+          n += 12;
+          x /= 4096;
+      }
+      while (x >= 2) {
+          n += 1;
+          x /= 2;
+      }
+      return n;
+  }
+};
+
+defineProperties(NumberPrototype, {
+    toFixed: function toFixed(fractionDigits) {
+        var f, x, s, m, e, z, j, k;
+
+        // Test for NaN and round fractionDigits down
+        f = Number(fractionDigits);
+        f = f !== f ? 0 : Math.floor(f);
+
+        if (f < 0 || f > 20) {
+            throw new RangeError("Number.toFixed called with invalid number of decimals");
+        }
+
+        x = Number(this);
+
+        // Test for NaN
+        if (x !== x) {
+            return "NaN";
+        }
+
+        // If it is too big or small, return the string value of the number
+        if (x <= -1e21 || x >= 1e21) {
+            return String(x);
+        }
+
+        s = "";
+
+        if (x < 0) {
+            s = "-";
+            x = -x;
+        }
+
+        m = "0";
+
+        if (x > 1e-21) {
+            // 1e-21 < x < 1e21
+            // -70 < log2(x) < 70
+            e = toFixedHelpers.log(x * toFixedHelpers.pow(2, 69, 1)) - 69;
+            z = (e < 0 ? x * toFixedHelpers.pow(2, -e, 1) : x / toFixedHelpers.pow(2, e, 1));
+            z *= 0x10000000000000; // Math.pow(2, 52);
+            e = 52 - e;
+
+            // -18 < e < 122
+            // x = z / 2 ^ e
+            if (e > 0) {
+                toFixedHelpers.multiply(0, z);
+                j = f;
+
+                while (j >= 7) {
+                    toFixedHelpers.multiply(1e7, 0);
+                    j -= 7;
+                }
+
+                toFixedHelpers.multiply(toFixedHelpers.pow(10, j, 1), 0);
+                j = e - 1;
+
+                while (j >= 23) {
+                    toFixedHelpers.divide(1 << 23);
+                    j -= 23;
+                }
+
+                toFixedHelpers.divide(1 << j);
+                toFixedHelpers.multiply(1, 1);
+                toFixedHelpers.divide(2);
+                m = toFixedHelpers.numToString();
+            } else {
+                toFixedHelpers.multiply(0, z);
+                toFixedHelpers.multiply(1 << (-e), 0);
+                m = toFixedHelpers.numToString() + '0.00000000000000000000'.slice(2, 2 + f);
+            }
+        }
+
+        if (f > 0) {
+            k = m.length;
+
+            if (k <= f) {
+                m = s + '0.0000000000000000000'.slice(0, f - k + 2) + m;
+            } else {
+                m = s + m.slice(0, k - f) + '.' + m.slice(k - f);
+            }
+        } else {
+            m = s + m;
+        }
+
+        return m;
+    }
+}, hasToFixedBugs);
+
+
+//
+// String
+// ======
+//
+
+// ES5 15.5.4.14
+// http://es5.github.com/#x15.5.4.14
+
+// [bugfix, IE lt 9, firefox 4, Konqueror, Opera, obscure browsers]
+// Many browsers do not split properly with regular expressions or they
+// do not perform the split correctly under obscure conditions.
+// See http://blog.stevenlevithan.com/archives/cross-browser-split
+// I've tested in many browsers and this seems to cover the deviant ones:
+//    'ab'.split(/(?:ab)*/) should be ["", ""], not [""]
+//    '.'.split(/(.?)(.?)/) should be ["", ".", "", ""], not ["", ""]
+//    'tesst'.split(/(s)*/) should be ["t", undefined, "e", "s", "t"], not
+//       [undefined, "t", undefined, "e", ...]
+//    ''.split(/.?/) should be [], not [""]
+//    '.'.split(/()()/) should be ["."], not ["", "", "."]
+
+var string_split = StringPrototype.split;
+if (
+    'ab'.split(/(?:ab)*/).length !== 2 ||
+    '.'.split(/(.?)(.?)/).length !== 4 ||
+    'tesst'.split(/(s)*/)[1] === "t" ||
+    'test'.split(/(?:)/, -1).length !== 4 ||
+    ''.split(/.?/).length ||
+    '.'.split(/()()/).length > 1
+) {
+    (function () {
+        var compliantExecNpcg = /()??/.exec("")[1] === void 0; // NPCG: nonparticipating capturing group
+
+        StringPrototype.split = function (separator, limit) {
+            var string = this;
+            if (separator === void 0 && limit === 0) {
+                return [];
+            }
+
+            // If `separator` is not a regex, use native split
+            if (_toString.call(separator) !== "[object RegExp]") {
+                return string_split.call(this, separator, limit);
+            }
+
+            var output = [],
+                flags = (separator.ignoreCase ? "i" : "") +
+                        (separator.multiline  ? "m" : "") +
+                        (separator.extended   ? "x" : "") + // Proposed for ES6
+                        (separator.sticky     ? "y" : ""), // Firefox 3+
+                lastLastIndex = 0,
+                // Make `global` and avoid `lastIndex` issues by working with a copy
+                separator2, match, lastIndex, lastLength;
+            separator = new RegExp(separator.source, flags + "g");
+            string += ""; // Type-convert
+            if (!compliantExecNpcg) {
+                // Doesn't need flags gy, but they don't hurt
+                separator2 = new RegExp("^" + separator.source + "$(?!\\s)", flags);
+            }
+            /* Values for `limit`, per the spec:
+             * If undefined: 4294967295 // Math.pow(2, 32) - 1
+             * If 0, Infinity, or NaN: 0
+             * If positive number: limit = Math.floor(limit); if (limit > 4294967295) limit -= 4294967296;
+             * If negative number: 4294967296 - Math.floor(Math.abs(limit))
+             * If other: Type-convert, then use the above rules
+             */
+            limit = limit === void 0 ?
+                -1 >>> 0 : // Math.pow(2, 32) - 1
+                ToUint32(limit);
+            while (match = separator.exec(string)) {
+                // `separator.lastIndex` is not reliable cross-browser
+                lastIndex = match.index + match[0].length;
+                if (lastIndex > lastLastIndex) {
+                    output.push(string.slice(lastLastIndex, match.index));
+                    // Fix browsers whose `exec` methods don't consistently return `undefined` for
+                    // nonparticipating capturing groups
+                    if (!compliantExecNpcg && match.length > 1) {
+                        match[0].replace(separator2, function () {
+                            for (var i = 1; i < arguments.length - 2; i++) {
+                                if (arguments[i] === void 0) {
+                                    match[i] = void 0;
+                                }
+                            }
+                        });
+                    }
+                    if (match.length > 1 && match.index < string.length) {
+                        ArrayPrototype.push.apply(output, match.slice(1));
+                    }
+                    lastLength = match[0].length;
+                    lastLastIndex = lastIndex;
+                    if (output.length >= limit) {
+                        break;
+                    }
+                }
+                if (separator.lastIndex === match.index) {
+                    separator.lastIndex++; // Avoid an infinite loop
+                }
+            }
+            if (lastLastIndex === string.length) {
+                if (lastLength || !separator.test("")) {
+                    output.push("");
+                }
+            } else {
+                output.push(string.slice(lastLastIndex));
+            }
+            return output.length > limit ? output.slice(0, limit) : output;
+        };
+    }());
+
+// [bugfix, chrome]
+// If separator is undefined, then the result array contains just one String,
+// which is the this value (converted to a String). If limit is not undefined,
+// then the output array is truncated so that it contains no more than limit
+// elements.
+// "0".split(undefined, 0) -> []
+} else if ("0".split(void 0, 0).length) {
+    StringPrototype.split = function split(separator, limit) {
+        if (separator === void 0 && limit === 0) { return []; }
+        return string_split.call(this, separator, limit);
+    };
+}
+
+var str_replace = StringPrototype.replace;
+var replaceReportsGroupsCorrectly = (function () {
+    var groups = [];
+    'x'.replace(/x(.)?/g, function (match, group) {
+        groups.push(group);
+    });
+    return groups.length === 1 && typeof groups[0] === 'undefined';
+}());
+
+if (!replaceReportsGroupsCorrectly) {
+    StringPrototype.replace = function replace(searchValue, replaceValue) {
+        var isFn = isFunction(replaceValue);
+        var hasCapturingGroups = isRegex(searchValue) && (/\)[*?]/).test(searchValue.source);
+        if (!isFn || !hasCapturingGroups) {
+            return str_replace.call(this, searchValue, replaceValue);
+        } else {
+            var wrappedReplaceValue = function (match) {
+                var length = arguments.length;
+                var originalLastIndex = searchValue.lastIndex;
+                searchValue.lastIndex = 0;
+                var args = searchValue.exec(match);
+                searchValue.lastIndex = originalLastIndex;
+                args.push(arguments[length - 2], arguments[length - 1]);
+                return replaceValue.apply(this, args);
+            };
+            return str_replace.call(this, searchValue, wrappedReplaceValue);
+        }
+    };
+}
+
+// ECMA-262, 3rd B.2.3
+// Not an ECMAScript standard, although ECMAScript 3rd Edition has a
+// non-normative section suggesting uniform semantics and it should be
+// normalized across all browsers
+// [bugfix, IE lt 9] IE < 9 substr() with negative value not working in IE
+var string_substr = StringPrototype.substr;
+var hasNegativeSubstrBug = "".substr && "0b".substr(-1) !== "b";
+defineProperties(StringPrototype, {
+    substr: function substr(start, length) {
+        return string_substr.call(
+            this,
+            start < 0 ? ((start = this.length + start) < 0 ? 0 : start) : start,
+            length
+        );
+    }
+}, hasNegativeSubstrBug);
+
+// ES5 15.5.4.20
+// whitespace from: http://es5.github.io/#x15.5.4.20
+var ws = "\x09\x0A\x0B\x0C\x0D\x20\xA0\u1680\u180E\u2000\u2001\u2002\u2003" +
+    "\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u202F\u205F\u3000\u2028" +
+    "\u2029\uFEFF";
+var zeroWidth = '\u200b';
+var wsRegexChars = "[" + ws + "]";
+var trimBeginRegexp = new RegExp("^" + wsRegexChars + wsRegexChars + "*");
+var trimEndRegexp = new RegExp(wsRegexChars + wsRegexChars + "*$");
+var hasTrimWhitespaceBug = StringPrototype.trim && (ws.trim() || !zeroWidth.trim());
+defineProperties(StringPrototype, {
+    // http://blog.stevenlevithan.com/archives/faster-trim-javascript
+    // http://perfectionkills.com/whitespace-deviations/
+    trim: function trim() {
+        if (this === void 0 || this === null) {
+            throw new TypeError("can't convert " + this + " to object");
+        }
+        return String(this).replace(trimBeginRegexp, "").replace(trimEndRegexp, "");
+    }
+}, hasTrimWhitespaceBug);
+
+// ES-5 15.1.2.2
+if (parseInt(ws + '08') !== 8 || parseInt(ws + '0x16') !== 22) {
+    parseInt = (function (origParseInt) {
+        var hexRegex = /^0[xX]/;
+        return function parseIntES5(str, radix) {
+            str = String(str).trim();
+            if (!Number(radix)) {
+                radix = hexRegex.test(str) ? 16 : 10;
+            }
+            return origParseInt(str, radix);
+        };
+    }(parseInt));
+}
+
+}));
+
+!function(){var a,b,c,d;!function(){var e={},f={};a=function(a,b,c){e[a]={deps:b,callback:c}},d=c=b=function(a){function c(b){if("."!==b.charAt(0))return b;for(var c=b.split("/"),d=a.split("/").slice(0,-1),e=0,f=c.length;f>e;e++){var g=c[e];if(".."===g)d.pop();else{if("."===g)continue;d.push(g)}}return d.join("/")}if(d._eak_seen=e,f[a])return f[a];if(f[a]={},!e[a])throw new Error("Could not find module "+a);for(var g,h=e[a],i=h.deps,j=h.callback,k=[],l=0,m=i.length;m>l;l++)"exports"===i[l]?k.push(g={}):k.push(b(c(i[l])));var n=j.apply(this,k);return f[a]=g||n}}(),a("promise/all",["./utils","exports"],function(a,b){"use strict";function c(a){var b=this;if(!d(a))throw new TypeError("You must pass an array to all.");return new b(function(b,c){function d(a){return function(b){f(a,b)}}function f(a,c){h[a]=c,0===--i&&b(h)}var g,h=[],i=a.length;0===i&&b([]);for(var j=0;j<a.length;j++)g=a[j],g&&e(g.then)?g.then(d(j),c):f(j,g)})}var d=a.isArray,e=a.isFunction;b.all=c}),a("promise/asap",["exports"],function(a){"use strict";function b(){return function(){process.nextTick(e)}}function c(){var a=0,b=new i(e),c=document.createTextNode("");return b.observe(c,{characterData:!0}),function(){c.data=a=++a%2}}function d(){return function(){j.setTimeout(e,1)}}function e(){for(var a=0;a<k.length;a++){var b=k[a],c=b[0],d=b[1];c(d)}k=[]}function f(a,b){var c=k.push([a,b]);1===c&&g()}var g,h="undefined"!=typeof window?window:{},i=h.MutationObserver||h.WebKitMutationObserver,j="undefined"!=typeof global?global:void 0===this?window:this,k=[];g="undefined"!=typeof process&&"[object process]"==={}.toString.call(process)?b():i?c():d(),a.asap=f}),a("promise/config",["exports"],function(a){"use strict";function b(a,b){return 2!==arguments.length?c[a]:(c[a]=b,void 0)}var c={instrument:!1};a.config=c,a.configure=b}),a("promise/polyfill",["./promise","./utils","exports"],function(a,b,c){"use strict";function d(){var a;a="undefined"!=typeof global?global:"undefined"!=typeof window&&window.document?window:self;var b="Promise"in a&&"resolve"in a.Promise&&"reject"in a.Promise&&"all"in a.Promise&&"race"in a.Promise&&function(){var b;return new a.Promise(function(a){b=a}),f(b)}();b||(a.Promise=e)}var e=a.Promise,f=b.isFunction;c.polyfill=d}),a("promise/promise",["./config","./utils","./all","./race","./resolve","./reject","./asap","exports"],function(a,b,c,d,e,f,g,h){"use strict";function i(a){if(!v(a))throw new TypeError("You must pass a resolver function as the first argument to the promise constructor");if(!(this instanceof i))throw new TypeError("Failed to construct 'Promise': Please use the 'new' operator, this object constructor cannot be called as a function.");this._subscribers=[],j(a,this)}function j(a,b){function c(a){o(b,a)}function d(a){q(b,a)}try{a(c,d)}catch(e){d(e)}}function k(a,b,c,d){var e,f,g,h,i=v(c);if(i)try{e=c(d),g=!0}catch(j){h=!0,f=j}else e=d,g=!0;n(b,e)||(i&&g?o(b,e):h?q(b,f):a===D?o(b,e):a===E&&q(b,e))}function l(a,b,c,d){var e=a._subscribers,f=e.length;e[f]=b,e[f+D]=c,e[f+E]=d}function m(a,b){for(var c,d,e=a._subscribers,f=a._detail,g=0;g<e.length;g+=3)c=e[g],d=e[g+b],k(b,c,d,f);a._subscribers=null}function n(a,b){var c,d=null;try{if(a===b)throw new TypeError("A promises callback cannot return that same promise.");if(u(b)&&(d=b.then,v(d)))return d.call(b,function(d){return c?!0:(c=!0,b!==d?o(a,d):p(a,d),void 0)},function(b){return c?!0:(c=!0,q(a,b),void 0)}),!0}catch(e){return c?!0:(q(a,e),!0)}return!1}function o(a,b){a===b?p(a,b):n(a,b)||p(a,b)}function p(a,b){a._state===B&&(a._state=C,a._detail=b,t.async(r,a))}function q(a,b){a._state===B&&(a._state=C,a._detail=b,t.async(s,a))}function r(a){m(a,a._state=D)}function s(a){m(a,a._state=E)}var t=a.config,u=(a.configure,b.objectOrFunction),v=b.isFunction,w=(b.now,c.all),x=d.race,y=e.resolve,z=f.reject,A=g.asap;t.async=A;var B=void 0,C=0,D=1,E=2;i.prototype={constructor:i,_state:void 0,_detail:void 0,_subscribers:void 0,then:function(a,b){var c=this,d=new this.constructor(function(){});if(this._state){var e=arguments;t.async(function(){k(c._state,d,e[c._state-1],c._detail)})}else l(this,d,a,b);return d},"catch":function(a){return this.then(null,a)}},i.all=w,i.race=x,i.resolve=y,i.reject=z,h.Promise=i}),a("promise/race",["./utils","exports"],function(a,b){"use strict";function c(a){var b=this;if(!d(a))throw new TypeError("You must pass an array to race.");return new b(function(b,c){for(var d,e=0;e<a.length;e++)d=a[e],d&&"function"==typeof d.then?d.then(b,c):b(d)})}var d=a.isArray;b.race=c}),a("promise/reject",["exports"],function(a){"use strict";function b(a){var b=this;return new b(function(b,c){c(a)})}a.reject=b}),a("promise/resolve",["exports"],function(a){"use strict";function b(a){if(a&&"object"==typeof a&&a.constructor===this)return a;var b=this;return new b(function(b){b(a)})}a.resolve=b}),a("promise/utils",["exports"],function(a){"use strict";function b(a){return c(a)||"object"==typeof a&&null!==a}function c(a){return"function"==typeof a}function d(a){return"[object Array]"===Object.prototype.toString.call(a)}var e=Date.now||function(){return(new Date).getTime()};a.objectOrFunction=b,a.isFunction=c,a.isArray=d,a.now=e}),b("promise/polyfill").polyfill()}();
+/** @namespace */
+var ozpIwc=ozpIwc || {};
+
+/** @namespace */
+ozpIwc.util=ozpIwc.util || {};
 
 /**
  * Used to get the current epoch time.  Tests overrides this
@@ -28,6 +2020,10 @@ ozpIwc.util.now=function() {
  * @returns {Function} newConstructor with an augmented prototype
  */
 ozpIwc.util.extend=function(baseClass,newConstructor) {
+    if(!baseClass || !baseClass.prototype) {
+        console.error("Cannot create a new class for ",newConstructor," due to invalid baseclass:",baseClass);
+        throw new Error("Cannot create a new class due to invalid baseClass.  Dependency not loaded first?");
+    };
     newConstructor.prototype = Object.create(baseClass.prototype);
     newConstructor.prototype.constructor = newConstructor;
     return newConstructor;
@@ -70,49 +2066,725 @@ ozpIwc.util.structuredCloneSupport.cache=undefined;
  */
 ozpIwc.util.clone=function(value) {
 	if(Array.isArray(value) || typeof(value) === 'object') {
-		return JSON.parse(JSON.stringify(value));
+        try {
+            return JSON.parse(JSON.stringify(value));
+        } catch (e) {
+            console.log(e);
+        }
 	} else {
 		return value;
 	}
 };
 
 
-/**
- * Returns true if every needle is found in the haystack.
- * @param {array} haystack - The array to search.
- * @param {array} needles - All of the values to search.
- * @param {function} [equal] - What constitutes equality.  Defaults to a===b.
- * @returns {boolean}
- */
-ozpIwc.util.arrayContainsAll=function(haystack,needles,equal) {
-    equal=equal || function(a,b) { return a===b;};
-    return needles.every(function(needle) { 
-        return haystack.some(function(hay) { 
-            return equal(hay,needle);
-        });
-    });
+
+ozpIwc.util.parseQueryParams=function(query) {
+    query = query || window.location.search;
+    var params={};
+	var regex=/\??([^&=]+)=?([^&]*)/g;
+	var match;
+	while(match=regex.exec(query)) {
+		params[match[1]]=decodeURIComponent(match[2]);
+	}
+    return params;
 };
 
+ozpIwc.util.determineOrigin=function(url) {
+    var a=document.createElement("a");
+    a.href = url;
+    var origin=a.protocol + "//" + a.hostname;
+    if(a.port)
+        origin+= ":" + a.port;
+    return origin;
+};
 
-/**
- * Returns true if the value every attribute in needs is equal to 
- * value of the same attribute in haystack.
- * @param {array} haystack - The object that must contain all attributes and values.
- * @param {array} needles - The reference object for the attributes and values.
- * @param {function} [equal] - What constitutes equality.  Defaults to a===b.
- * @returns {boolean}
- */
-ozpIwc.util.objectContainsAll=function(haystack,needles,equal) {
-    equal=equal || function(a,b) { return a===b;};
-    
-    for(var attribute in needles) {
-        if(!equal(haystack[attribute],needles[attribute])) {
-            return false;
-        }
+ozpIwc.util.escapeRegex=function(str) {
+    return str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+};
+(function() {
+var define, requireModule, require, requirejs;
+
+(function() {
+  var registry = {}, seen = {};
+
+  define = function(name, deps, callback) {
+    registry[name] = { deps: deps, callback: callback };
+  };
+
+  requirejs = require = requireModule = function(name) {
+  requirejs._eak_seen = registry;
+
+    if (seen[name]) { return seen[name]; }
+    seen[name] = {};
+
+    if (!registry[name]) {
+      throw new Error("Could not find module " + name);
     }
-    return true;
-};
 
+    var mod = registry[name],
+        deps = mod.deps,
+        callback = mod.callback,
+        reified = [],
+        exports;
+
+    for (var i=0, l=deps.length; i<l; i++) {
+      if (deps[i] === 'exports') {
+        reified.push(exports = {});
+      } else {
+        reified.push(requireModule(resolve(deps[i])));
+      }
+    }
+
+    var value = callback.apply(this, reified);
+    return seen[name] = exports || value;
+
+    function resolve(child) {
+      if (child.charAt(0) !== '.') { return child; }
+      var parts = child.split("/");
+      var parentBase = name.split("/").slice(0, -1);
+
+      for (var i=0, l=parts.length; i<l; i++) {
+        var part = parts[i];
+
+        if (part === '..') { parentBase.pop(); }
+        else if (part === '.') { continue; }
+        else { parentBase.push(part); }
+      }
+
+      return parentBase.join("/");
+    }
+  };
+})();
+
+define("promise/all", 
+  ["./utils","exports"],
+  function(__dependency1__, __exports__) {
+    "use strict";
+    /* global toString */
+
+    var isArray = __dependency1__.isArray;
+    var isFunction = __dependency1__.isFunction;
+
+    /**
+      Returns a promise that is fulfilled when all the given promises have been
+      fulfilled, or rejected if any of them become rejected. The return promise
+      is fulfilled with an array that gives all the values in the order they were
+      passed in the `promises` array argument.
+
+      Example:
+
+      ```javascript
+      var promise1 = RSVP.resolve(1);
+      var promise2 = RSVP.resolve(2);
+      var promise3 = RSVP.resolve(3);
+      var promises = [ promise1, promise2, promise3 ];
+
+      RSVP.all(promises).then(function(array){
+        // The array here would be [ 1, 2, 3 ];
+      });
+      ```
+
+      If any of the `promises` given to `RSVP.all` are rejected, the first promise
+      that is rejected will be given as an argument to the returned promises's
+      rejection handler. For example:
+
+      Example:
+
+      ```javascript
+      var promise1 = RSVP.resolve(1);
+      var promise2 = RSVP.reject(new Error("2"));
+      var promise3 = RSVP.reject(new Error("3"));
+      var promises = [ promise1, promise2, promise3 ];
+
+      RSVP.all(promises).then(function(array){
+        // Code here never runs because there are rejected promises!
+      }, function(error) {
+        // error.message === "2"
+      });
+      ```
+
+      @method all
+      @for RSVP
+      @param {Array} promises
+      @param {String} label
+      @return {Promise} promise that is fulfilled when all `promises` have been
+      fulfilled, or rejected if any of them become rejected.
+    */
+    function all(promises) {
+      /*jshint validthis:true */
+      var Promise = this;
+
+      if (!isArray(promises)) {
+        throw new TypeError('You must pass an array to all.');
+      }
+
+      return new Promise(function(resolve, reject) {
+        var results = [], remaining = promises.length,
+        promise;
+
+        if (remaining === 0) {
+          resolve([]);
+        }
+
+        function resolver(index) {
+          return function(value) {
+            resolveAll(index, value);
+          };
+        }
+
+        function resolveAll(index, value) {
+          results[index] = value;
+          if (--remaining === 0) {
+            resolve(results);
+          }
+        }
+
+        for (var i = 0; i < promises.length; i++) {
+          promise = promises[i];
+
+          if (promise && isFunction(promise.then)) {
+            promise.then(resolver(i), reject);
+          } else {
+            resolveAll(i, promise);
+          }
+        }
+      });
+    }
+
+    __exports__.all = all;
+  });
+define("promise/asap", 
+  ["exports"],
+  function(__exports__) {
+    "use strict";
+    var browserGlobal = (typeof window !== 'undefined') ? window : {};
+    var BrowserMutationObserver = browserGlobal.MutationObserver || browserGlobal.WebKitMutationObserver;
+    var local = (typeof global !== 'undefined') ? global : (this === undefined? window:this);
+
+    // node
+    function useNextTick() {
+      return function() {
+        process.nextTick(flush);
+      };
+    }
+
+    function useMutationObserver() {
+      var iterations = 0;
+      var observer = new BrowserMutationObserver(flush);
+      var node = document.createTextNode('');
+      observer.observe(node, { characterData: true });
+
+      return function() {
+        node.data = (iterations = ++iterations % 2);
+      };
+    }
+
+    function useSetTimeout() {
+      return function() {
+        local.setTimeout(flush, 1);
+      };
+    }
+
+    var queue = [];
+    function flush() {
+      for (var i = 0; i < queue.length; i++) {
+        var tuple = queue[i];
+        var callback = tuple[0], arg = tuple[1];
+        callback(arg);
+      }
+      queue = [];
+    }
+
+    var scheduleFlush;
+
+    // Decide what async method to use to triggering processing of queued callbacks:
+    if (typeof process !== 'undefined' && {}.toString.call(process) === '[object process]') {
+      scheduleFlush = useNextTick();
+    } else if (BrowserMutationObserver) {
+      scheduleFlush = useMutationObserver();
+    } else {
+      scheduleFlush = useSetTimeout();
+    }
+
+    function asap(callback, arg) {
+      var length = queue.push([callback, arg]);
+      if (length === 1) {
+        // If length is 1, that means that we need to schedule an async flush.
+        // If additional callbacks are queued before the queue is flushed, they
+        // will be processed by this flush that we are scheduling.
+        scheduleFlush();
+      }
+    }
+
+    __exports__.asap = asap;
+  });
+define("promise/config", 
+  ["exports"],
+  function(__exports__) {
+    "use strict";
+    var config = {
+      instrument: false
+    };
+
+    function configure(name, value) {
+      if (arguments.length === 2) {
+        config[name] = value;
+      } else {
+        return config[name];
+      }
+    }
+
+    __exports__.config = config;
+    __exports__.configure = configure;
+  });
+define("promise/polyfill", 
+  ["./promise","./utils","exports"],
+  function(__dependency1__, __dependency2__, __exports__) {
+    "use strict";
+    /*global self*/
+    var RSVPPromise = __dependency1__.Promise;
+    var isFunction = __dependency2__.isFunction;
+
+    function polyfill() {
+      var local;
+
+      if (typeof global !== 'undefined') {
+        local = global;
+      } else if (typeof window !== 'undefined' && window.document) {
+        local = window;
+      } else {
+        local = self;
+      }
+
+      var es6PromiseSupport = 
+        "Promise" in local &&
+        // Some of these methods are missing from
+        // Firefox/Chrome experimental implementations
+        "resolve" in local.Promise &&
+        "reject" in local.Promise &&
+        "all" in local.Promise &&
+        "race" in local.Promise &&
+        // Older version of the spec had a resolver object
+        // as the arg rather than a function
+        (function() {
+          var resolve;
+          new local.Promise(function(r) { resolve = r; });
+          return isFunction(resolve);
+        }());
+
+      if (!es6PromiseSupport) {
+        local.Promise = RSVPPromise;
+      }
+    }
+
+    __exports__.polyfill = polyfill;
+  });
+define("promise/promise", 
+  ["./config","./utils","./all","./race","./resolve","./reject","./asap","exports"],
+  function(__dependency1__, __dependency2__, __dependency3__, __dependency4__, __dependency5__, __dependency6__, __dependency7__, __exports__) {
+    "use strict";
+    var config = __dependency1__.config;
+    var configure = __dependency1__.configure;
+    var objectOrFunction = __dependency2__.objectOrFunction;
+    var isFunction = __dependency2__.isFunction;
+    var now = __dependency2__.now;
+    var all = __dependency3__.all;
+    var race = __dependency4__.race;
+    var staticResolve = __dependency5__.resolve;
+    var staticReject = __dependency6__.reject;
+    var asap = __dependency7__.asap;
+
+    var counter = 0;
+
+    config.async = asap; // default async is asap;
+
+    function Promise(resolver) {
+      if (!isFunction(resolver)) {
+        throw new TypeError('You must pass a resolver function as the first argument to the promise constructor');
+      }
+
+      if (!(this instanceof Promise)) {
+        throw new TypeError("Failed to construct 'Promise': Please use the 'new' operator, this object constructor cannot be called as a function.");
+      }
+
+      this._subscribers = [];
+
+      invokeResolver(resolver, this);
+    }
+
+    function invokeResolver(resolver, promise) {
+      function resolvePromise(value) {
+        resolve(promise, value);
+      }
+
+      function rejectPromise(reason) {
+        reject(promise, reason);
+      }
+
+      try {
+        resolver(resolvePromise, rejectPromise);
+      } catch(e) {
+        rejectPromise(e);
+      }
+    }
+
+    function invokeCallback(settled, promise, callback, detail) {
+      var hasCallback = isFunction(callback),
+          value, error, succeeded, failed;
+
+      if (hasCallback) {
+        try {
+          value = callback(detail);
+          succeeded = true;
+        } catch(e) {
+          failed = true;
+          error = e;
+        }
+      } else {
+        value = detail;
+        succeeded = true;
+      }
+
+      if (handleThenable(promise, value)) {
+        return;
+      } else if (hasCallback && succeeded) {
+        resolve(promise, value);
+      } else if (failed) {
+        reject(promise, error);
+      } else if (settled === FULFILLED) {
+        resolve(promise, value);
+      } else if (settled === REJECTED) {
+        reject(promise, value);
+      }
+    }
+
+    var PENDING   = void 0;
+    var SEALED    = 0;
+    var FULFILLED = 1;
+    var REJECTED  = 2;
+
+    function subscribe(parent, child, onFulfillment, onRejection) {
+      var subscribers = parent._subscribers;
+      var length = subscribers.length;
+
+      subscribers[length] = child;
+      subscribers[length + FULFILLED] = onFulfillment;
+      subscribers[length + REJECTED]  = onRejection;
+    }
+
+    function publish(promise, settled) {
+      var child, callback, subscribers = promise._subscribers, detail = promise._detail;
+
+      for (var i = 0; i < subscribers.length; i += 3) {
+        child = subscribers[i];
+        callback = subscribers[i + settled];
+
+        invokeCallback(settled, child, callback, detail);
+      }
+
+      promise._subscribers = null;
+    }
+
+    Promise.prototype = {
+      constructor: Promise,
+
+      _state: undefined,
+      _detail: undefined,
+      _subscribers: undefined,
+
+      then: function(onFulfillment, onRejection) {
+        var promise = this;
+
+        var thenPromise = new this.constructor(function() {});
+
+        if (this._state) {
+          var callbacks = arguments;
+          config.async(function invokePromiseCallback() {
+            invokeCallback(promise._state, thenPromise, callbacks[promise._state - 1], promise._detail);
+          });
+        } else {
+          subscribe(this, thenPromise, onFulfillment, onRejection);
+        }
+
+        return thenPromise;
+      },
+
+      'catch': function(onRejection) {
+        return this.then(null, onRejection);
+      }
+    };
+
+    Promise.all = all;
+    Promise.race = race;
+    Promise.resolve = staticResolve;
+    Promise.reject = staticReject;
+
+    function handleThenable(promise, value) {
+      var then = null,
+      resolved;
+
+      try {
+        if (promise === value) {
+          throw new TypeError("A promises callback cannot return that same promise.");
+        }
+
+        if (objectOrFunction(value)) {
+          then = value.then;
+
+          if (isFunction(then)) {
+            then.call(value, function(val) {
+              if (resolved) { return true; }
+              resolved = true;
+
+              if (value !== val) {
+                resolve(promise, val);
+              } else {
+                fulfill(promise, val);
+              }
+            }, function(val) {
+              if (resolved) { return true; }
+              resolved = true;
+
+              reject(promise, val);
+            });
+
+            return true;
+          }
+        }
+      } catch (error) {
+        if (resolved) { return true; }
+        reject(promise, error);
+        return true;
+      }
+
+      return false;
+    }
+
+    function resolve(promise, value) {
+      if (promise === value) {
+        fulfill(promise, value);
+      } else if (!handleThenable(promise, value)) {
+        fulfill(promise, value);
+      }
+    }
+
+    function fulfill(promise, value) {
+      if (promise._state !== PENDING) { return; }
+      promise._state = SEALED;
+      promise._detail = value;
+
+      config.async(publishFulfillment, promise);
+    }
+
+    function reject(promise, reason) {
+      if (promise._state !== PENDING) { return; }
+      promise._state = SEALED;
+      promise._detail = reason;
+
+      config.async(publishRejection, promise);
+    }
+
+    function publishFulfillment(promise) {
+      publish(promise, promise._state = FULFILLED);
+    }
+
+    function publishRejection(promise) {
+      publish(promise, promise._state = REJECTED);
+    }
+
+    __exports__.Promise = Promise;
+  });
+define("promise/race", 
+  ["./utils","exports"],
+  function(__dependency1__, __exports__) {
+    "use strict";
+    /* global toString */
+    var isArray = __dependency1__.isArray;
+
+    /**
+      `RSVP.race` allows you to watch a series of promises and act as soon as the
+      first promise given to the `promises` argument fulfills or rejects.
+
+      Example:
+
+      ```javascript
+      var promise1 = new RSVP.Promise(function(resolve, reject){
+        setTimeout(function(){
+          resolve("promise 1");
+        }, 200);
+      });
+
+      var promise2 = new RSVP.Promise(function(resolve, reject){
+        setTimeout(function(){
+          resolve("promise 2");
+        }, 100);
+      });
+
+      RSVP.race([promise1, promise2]).then(function(result){
+        // result === "promise 2" because it was resolved before promise1
+        // was resolved.
+      });
+      ```
+
+      `RSVP.race` is deterministic in that only the state of the first completed
+      promise matters. For example, even if other promises given to the `promises`
+      array argument are resolved, but the first completed promise has become
+      rejected before the other promises became fulfilled, the returned promise
+      will become rejected:
+
+      ```javascript
+      var promise1 = new RSVP.Promise(function(resolve, reject){
+        setTimeout(function(){
+          resolve("promise 1");
+        }, 200);
+      });
+
+      var promise2 = new RSVP.Promise(function(resolve, reject){
+        setTimeout(function(){
+          reject(new Error("promise 2"));
+        }, 100);
+      });
+
+      RSVP.race([promise1, promise2]).then(function(result){
+        // Code here never runs because there are rejected promises!
+      }, function(reason){
+        // reason.message === "promise2" because promise 2 became rejected before
+        // promise 1 became fulfilled
+      });
+      ```
+
+      @method race
+      @for RSVP
+      @param {Array} promises array of promises to observe
+      @param {String} label optional string for describing the promise returned.
+      Useful for tooling.
+      @return {Promise} a promise that becomes fulfilled with the value the first
+      completed promises is resolved with if the first completed promise was
+      fulfilled, or rejected with the reason that the first completed promise
+      was rejected with.
+    */
+    function race(promises) {
+      /*jshint validthis:true */
+      var Promise = this;
+
+      if (!isArray(promises)) {
+        throw new TypeError('You must pass an array to race.');
+      }
+      return new Promise(function(resolve, reject) {
+        var results = [], promise;
+
+        for (var i = 0; i < promises.length; i++) {
+          promise = promises[i];
+
+          if (promise && typeof promise.then === 'function') {
+            promise.then(resolve, reject);
+          } else {
+            resolve(promise);
+          }
+        }
+      });
+    }
+
+    __exports__.race = race;
+  });
+define("promise/reject", 
+  ["exports"],
+  function(__exports__) {
+    "use strict";
+    /**
+      `RSVP.reject` returns a promise that will become rejected with the passed
+      `reason`. `RSVP.reject` is essentially shorthand for the following:
+
+      ```javascript
+      var promise = new RSVP.Promise(function(resolve, reject){
+        reject(new Error('WHOOPS'));
+      });
+
+      promise.then(function(value){
+        // Code here doesn't run because the promise is rejected!
+      }, function(reason){
+        // reason.message === 'WHOOPS'
+      });
+      ```
+
+      Instead of writing the above, your code now simply becomes the following:
+
+      ```javascript
+      var promise = RSVP.reject(new Error('WHOOPS'));
+
+      promise.then(function(value){
+        // Code here doesn't run because the promise is rejected!
+      }, function(reason){
+        // reason.message === 'WHOOPS'
+      });
+      ```
+
+      @method reject
+      @for RSVP
+      @param {Any} reason value that the returned promise will be rejected with.
+      @param {String} label optional string for identifying the returned promise.
+      Useful for tooling.
+      @return {Promise} a promise that will become rejected with the given
+      `reason`.
+    */
+    function reject(reason) {
+      /*jshint validthis:true */
+      var Promise = this;
+
+      return new Promise(function (resolve, reject) {
+        reject(reason);
+      });
+    }
+
+    __exports__.reject = reject;
+  });
+define("promise/resolve", 
+  ["exports"],
+  function(__exports__) {
+    "use strict";
+    function resolve(value) {
+      /*jshint validthis:true */
+      if (value && typeof value === 'object' && value.constructor === this) {
+        return value;
+      }
+
+      var Promise = this;
+
+      return new Promise(function(resolve) {
+        resolve(value);
+      });
+    }
+
+    __exports__.resolve = resolve;
+  });
+define("promise/utils", 
+  ["exports"],
+  function(__exports__) {
+    "use strict";
+    function objectOrFunction(x) {
+      return isFunction(x) || (typeof x === "object" && x !== null);
+    }
+
+    function isFunction(x) {
+      return typeof x === "function";
+    }
+
+    function isArray(x) {
+      return Object.prototype.toString.call(x) === "[object Array]";
+    }
+
+    // Date.now is not available in browsers < IE9
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/now#Compatibility
+    var now = Date.now || function() { return new Date().getTime(); };
+
+
+    __exports__.objectOrFunction = objectOrFunction;
+    __exports__.isFunction = isFunction;
+    __exports__.isArray = isArray;
+    __exports__.now = now;
+  });
+requireModule('promise/polyfill').polyfill();
+}());
 /*
  * The MIT License (MIT) Copyright (c) 2012 Mike Ihbe
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
@@ -516,8 +3188,6 @@ ozpIwc.metricsStats.ExponentiallyWeightedMovingAverage.prototype.rate = function
 };
 
 var ozpIwc=ozpIwc || {};
-
-var ozpIwc=ozpIwc || {};
 ozpIwc.metricTypes=ozpIwc.metricTypes || {};
 
 /**
@@ -527,6 +3197,8 @@ ozpIwc.metricTypes=ozpIwc.metricTypes || {};
 
 ozpIwc.metricTypes.BaseMetric=function() {
 	this.value=0;
+    this.name="";
+    this.unitName="";
 };
 
 ozpIwc.metricTypes.BaseMetric.prototype.get=function() { 
@@ -535,119 +3207,14 @@ ozpIwc.metricTypes.BaseMetric.prototype.get=function() {
 
 ozpIwc.metricTypes.BaseMetric.prototype.unit=function(val) { 
 	if(val) {
-		this.unit=val;
+		this.unitName=val;
 		return this;
 	}
-	return this.unit; 
+	return this.unitName; 
 };
 
 
-/**
- * @class
- * A repository of metrics
- */
-ozpIwc.MetricsRegistry=function() {
-	this.metrics={};
-};
 
-/**
- * 
- * @private
- * @param {string} name - Name of the metric
- * @param {function} type - The constructor of the requested type for this metric.
- * @returns {MetricType} - Null if the metric already exists of a different type.  Otherwise a reference to the metric.
- */
-ozpIwc.MetricsRegistry.prototype.findOrCreateMetric=function(name,type) {
-	var m= this.metrics[name] = this.metrics[name] || new type();
-	if(m instanceof type){
-			return m;
-	} else {
-			return null;
-	}			
-};
-
-/**
- * Joins the arguments together into a name.
- * @private
- * @param {string[]} args - Array or the argument-like "arguments" value.
- * @returns {string}
- */
-ozpIwc.MetricsRegistry.prototype.makeName=function(args) {
-	// slice is necessary because "arguments" isn't a real array, and it's what
-	// is usually passed in, here.
-	return Array.prototype.slice.call(args).join(".");
-};
-
-/**
- * @param {...string} name - components of the name
- * @returns {ozpIwc.metricTypes.Counter}
- */
-ozpIwc.MetricsRegistry.prototype.counter=function(name) {
-	return this.findOrCreateMetric(this.makeName(arguments),ozpIwc.metricTypes.Counter);
-};
-
-/**
- * @param {...string} name - components of the name
- * @returns {ozpIwc.metricTypes.Meter}
- */
-ozpIwc.MetricsRegistry.prototype.meter=function(name) {
-	return this.findOrCreateMetric(this.makeName(arguments),ozpIwc.metricTypes.Meter);
-};
-
-/**
- * @param {...string} name - components of the name
- * @returns {ozpIwc.metricTypes.Gauge}
- */
-ozpIwc.MetricsRegistry.prototype.gauge=function(name) {
-	return this.findOrCreateMetric(this.makeName(arguments),ozpIwc.metricTypes.Gauge);
-};
-
-/**
- * @param {...string} name - components of the name
- * @returns {ozpIwc.metricTypes.Gauge}
- */
-ozpIwc.MetricsRegistry.prototype.histogram=function(name) {
-	return this.findOrCreateMetric(this.makeName(arguments),ozpIwc.metricTypes.Histogram);
-};
-
-/**
- * @param {...string} name - components of the name
- * @returns {ozpIwc.metricTypes.Gauge}
- */
-ozpIwc.MetricsRegistry.prototype.timer=function(name) {
-	return this.findOrCreateMetric(this.makeName(arguments),ozpIwc.metricTypes.Timer);
-};
-
-/**
- * @param {...string} name - components of the name
- * @returns {ozpIwc.metricTypes.Gauge}
- */
-ozpIwc.MetricsRegistry.prototype.register=function(name,metric) {
-	this.metrics[this.makeName(name)]=metric;
-	
-	return metric;
-};
-
-/**
- * 
- * @returns {unresolved}
- */
-ozpIwc.MetricsRegistry.prototype.toJson=function() {
-	var rv={};
-	for(var k in this.metrics) {
-		var path=k.split(".");
-		var pos=rv;
-		while(path.length > 1) {
-			var current=path.shift();
-			pos = pos[current]=pos[current] || {};
-		}
-		pos[path[0]]=this.metrics[k].get();
-	}
-	return rv;
-};
-
-	
-ozpIwc.metrics=new ozpIwc.MetricsRegistry();
 
 /**
  * @class
@@ -677,7 +3244,7 @@ ozpIwc.metricTypes.Counter.prototype.dec=function(delta) {
 	return this.value-=(delta?delta:1);
 };
 
-
+ozpIwc.metricTypes=ozpIwc.metricTypes || {};
 /**
  * @callback ozpIwc.metricTypes.Gauge~gaugeCallback
  * @returns {ozpIwc.metricTypes.MetricsTree} 
@@ -689,24 +3256,28 @@ ozpIwc.metricTypes.Counter.prototype.dec=function(delta) {
  * A gauge is an externally defined set of metrics returned by a callback function
  * @param {ozpIwc.metricTypes.Gauge~gaugeCallback} metricsCallback
  */
-ozpIwc.metricTypes.Gauge=function(metricsCallback) {
+ozpIwc.metricTypes.Gauge=ozpIwc.util.extend(ozpIwc.metricTypes.BaseMetric,function(metricsCallback) {
+	ozpIwc.metricTypes.BaseMetric.apply(this,arguments);
 	this.callback=metricsCallback;
-};
+});
 /**
  * Set the metrics callback for this gauge.
  * @param {ozpIwc.metricTypes.Gauge~gaugeCallback} metricsCallback
  * @returns {ozpIwc.metricTypes.Gauge} this
  */
 ozpIwc.metricTypes.Gauge.prototype.set=function(metricsCallback) { 
-	callback=metricsCallback; 
+	this.callback=metricsCallback;
 	return this;
 };
 /**
  * Executes the callback and returns a metrics tree.
  * @returns {ozpIwc.metricTypes.MetricsTree}
  */
-ozpIwc.metricTypes.Gauge.prototype.get=function() { 
-	return callback(); 
+ozpIwc.metricTypes.Gauge.prototype.get=function() {
+    if (this.callback) {
+        return this.callback();
+    }
+    return undefined;
 };
 
 /**
@@ -869,105 +3440,161 @@ ozpIwc.metricTypes.Timer.prototype.get=function() {
 	}
 	return val;
 };
-/*! jQuery v2.1.0 | (c) 2005, 2014 jQuery Foundation, Inc. | jquery.org/license */
-!function(a,b){"object"==typeof module&&"object"==typeof module.exports?module.exports=a.document?b(a,!0):function(a){if(!a.document)throw new Error("jQuery requires a window with a document");return b(a)}:b(a)}("undefined"!=typeof window?window:this,function(a,b){var c=[],d=c.slice,e=c.concat,f=c.push,g=c.indexOf,h={},i=h.toString,j=h.hasOwnProperty,k="".trim,l={},m=a.document,n="2.1.0",o=function(a,b){return new o.fn.init(a,b)},p=/^-ms-/,q=/-([\da-z])/gi,r=function(a,b){return b.toUpperCase()};o.fn=o.prototype={jquery:n,constructor:o,selector:"",length:0,toArray:function(){return d.call(this)},get:function(a){return null!=a?0>a?this[a+this.length]:this[a]:d.call(this)},pushStack:function(a){var b=o.merge(this.constructor(),a);return b.prevObject=this,b.context=this.context,b},each:function(a,b){return o.each(this,a,b)},map:function(a){return this.pushStack(o.map(this,function(b,c){return a.call(b,c,b)}))},slice:function(){return this.pushStack(d.apply(this,arguments))},first:function(){return this.eq(0)},last:function(){return this.eq(-1)},eq:function(a){var b=this.length,c=+a+(0>a?b:0);return this.pushStack(c>=0&&b>c?[this[c]]:[])},end:function(){return this.prevObject||this.constructor(null)},push:f,sort:c.sort,splice:c.splice},o.extend=o.fn.extend=function(){var a,b,c,d,e,f,g=arguments[0]||{},h=1,i=arguments.length,j=!1;for("boolean"==typeof g&&(j=g,g=arguments[h]||{},h++),"object"==typeof g||o.isFunction(g)||(g={}),h===i&&(g=this,h--);i>h;h++)if(null!=(a=arguments[h]))for(b in a)c=g[b],d=a[b],g!==d&&(j&&d&&(o.isPlainObject(d)||(e=o.isArray(d)))?(e?(e=!1,f=c&&o.isArray(c)?c:[]):f=c&&o.isPlainObject(c)?c:{},g[b]=o.extend(j,f,d)):void 0!==d&&(g[b]=d));return g},o.extend({expando:"jQuery"+(n+Math.random()).replace(/\D/g,""),isReady:!0,error:function(a){throw new Error(a)},noop:function(){},isFunction:function(a){return"function"===o.type(a)},isArray:Array.isArray,isWindow:function(a){return null!=a&&a===a.window},isNumeric:function(a){return a-parseFloat(a)>=0},isPlainObject:function(a){if("object"!==o.type(a)||a.nodeType||o.isWindow(a))return!1;try{if(a.constructor&&!j.call(a.constructor.prototype,"isPrototypeOf"))return!1}catch(b){return!1}return!0},isEmptyObject:function(a){var b;for(b in a)return!1;return!0},type:function(a){return null==a?a+"":"object"==typeof a||"function"==typeof a?h[i.call(a)]||"object":typeof a},globalEval:function(a){var b,c=eval;a=o.trim(a),a&&(1===a.indexOf("use strict")?(b=m.createElement("script"),b.text=a,m.head.appendChild(b).parentNode.removeChild(b)):c(a))},camelCase:function(a){return a.replace(p,"ms-").replace(q,r)},nodeName:function(a,b){return a.nodeName&&a.nodeName.toLowerCase()===b.toLowerCase()},each:function(a,b,c){var d,e=0,f=a.length,g=s(a);if(c){if(g){for(;f>e;e++)if(d=b.apply(a[e],c),d===!1)break}else for(e in a)if(d=b.apply(a[e],c),d===!1)break}else if(g){for(;f>e;e++)if(d=b.call(a[e],e,a[e]),d===!1)break}else for(e in a)if(d=b.call(a[e],e,a[e]),d===!1)break;return a},trim:function(a){return null==a?"":k.call(a)},makeArray:function(a,b){var c=b||[];return null!=a&&(s(Object(a))?o.merge(c,"string"==typeof a?[a]:a):f.call(c,a)),c},inArray:function(a,b,c){return null==b?-1:g.call(b,a,c)},merge:function(a,b){for(var c=+b.length,d=0,e=a.length;c>d;d++)a[e++]=b[d];return a.length=e,a},grep:function(a,b,c){for(var d,e=[],f=0,g=a.length,h=!c;g>f;f++)d=!b(a[f],f),d!==h&&e.push(a[f]);return e},map:function(a,b,c){var d,f=0,g=a.length,h=s(a),i=[];if(h)for(;g>f;f++)d=b(a[f],f,c),null!=d&&i.push(d);else for(f in a)d=b(a[f],f,c),null!=d&&i.push(d);return e.apply([],i)},guid:1,proxy:function(a,b){var c,e,f;return"string"==typeof b&&(c=a[b],b=a,a=c),o.isFunction(a)?(e=d.call(arguments,2),f=function(){return a.apply(b||this,e.concat(d.call(arguments)))},f.guid=a.guid=a.guid||o.guid++,f):void 0},now:Date.now,support:l}),o.each("Boolean Number String Function Array Date RegExp Object Error".split(" "),function(a,b){h["[object "+b+"]"]=b.toLowerCase()});function s(a){var b=a.length,c=o.type(a);return"function"===c||o.isWindow(a)?!1:1===a.nodeType&&b?!0:"array"===c||0===b||"number"==typeof b&&b>0&&b-1 in a}var t=function(a){var b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s="sizzle"+-new Date,t=a.document,u=0,v=0,w=eb(),x=eb(),y=eb(),z=function(a,b){return a===b&&(j=!0),0},A="undefined",B=1<<31,C={}.hasOwnProperty,D=[],E=D.pop,F=D.push,G=D.push,H=D.slice,I=D.indexOf||function(a){for(var b=0,c=this.length;c>b;b++)if(this[b]===a)return b;return-1},J="checked|selected|async|autofocus|autoplay|controls|defer|disabled|hidden|ismap|loop|multiple|open|readonly|required|scoped",K="[\\x20\\t\\r\\n\\f]",L="(?:\\\\.|[\\w-]|[^\\x00-\\xa0])+",M=L.replace("w","w#"),N="\\["+K+"*("+L+")"+K+"*(?:([*^$|!~]?=)"+K+"*(?:(['\"])((?:\\\\.|[^\\\\])*?)\\3|("+M+")|)|)"+K+"*\\]",O=":("+L+")(?:\\(((['\"])((?:\\\\.|[^\\\\])*?)\\3|((?:\\\\.|[^\\\\()[\\]]|"+N.replace(3,8)+")*)|.*)\\)|)",P=new RegExp("^"+K+"+|((?:^|[^\\\\])(?:\\\\.)*)"+K+"+$","g"),Q=new RegExp("^"+K+"*,"+K+"*"),R=new RegExp("^"+K+"*([>+~]|"+K+")"+K+"*"),S=new RegExp("="+K+"*([^\\]'\"]*?)"+K+"*\\]","g"),T=new RegExp(O),U=new RegExp("^"+M+"$"),V={ID:new RegExp("^#("+L+")"),CLASS:new RegExp("^\\.("+L+")"),TAG:new RegExp("^("+L.replace("w","w*")+")"),ATTR:new RegExp("^"+N),PSEUDO:new RegExp("^"+O),CHILD:new RegExp("^:(only|first|last|nth|nth-last)-(child|of-type)(?:\\("+K+"*(even|odd|(([+-]|)(\\d*)n|)"+K+"*(?:([+-]|)"+K+"*(\\d+)|))"+K+"*\\)|)","i"),bool:new RegExp("^(?:"+J+")$","i"),needsContext:new RegExp("^"+K+"*[>+~]|:(even|odd|eq|gt|lt|nth|first|last)(?:\\("+K+"*((?:-\\d)?\\d*)"+K+"*\\)|)(?=[^-]|$)","i")},W=/^(?:input|select|textarea|button)$/i,X=/^h\d$/i,Y=/^[^{]+\{\s*\[native \w/,Z=/^(?:#([\w-]+)|(\w+)|\.([\w-]+))$/,$=/[+~]/,_=/'|\\/g,ab=new RegExp("\\\\([\\da-f]{1,6}"+K+"?|("+K+")|.)","ig"),bb=function(a,b,c){var d="0x"+b-65536;return d!==d||c?b:0>d?String.fromCharCode(d+65536):String.fromCharCode(d>>10|55296,1023&d|56320)};try{G.apply(D=H.call(t.childNodes),t.childNodes),D[t.childNodes.length].nodeType}catch(cb){G={apply:D.length?function(a,b){F.apply(a,H.call(b))}:function(a,b){var c=a.length,d=0;while(a[c++]=b[d++]);a.length=c-1}}}function db(a,b,d,e){var f,g,h,i,j,m,p,q,u,v;if((b?b.ownerDocument||b:t)!==l&&k(b),b=b||l,d=d||[],!a||"string"!=typeof a)return d;if(1!==(i=b.nodeType)&&9!==i)return[];if(n&&!e){if(f=Z.exec(a))if(h=f[1]){if(9===i){if(g=b.getElementById(h),!g||!g.parentNode)return d;if(g.id===h)return d.push(g),d}else if(b.ownerDocument&&(g=b.ownerDocument.getElementById(h))&&r(b,g)&&g.id===h)return d.push(g),d}else{if(f[2])return G.apply(d,b.getElementsByTagName(a)),d;if((h=f[3])&&c.getElementsByClassName&&b.getElementsByClassName)return G.apply(d,b.getElementsByClassName(h)),d}if(c.qsa&&(!o||!o.test(a))){if(q=p=s,u=b,v=9===i&&a,1===i&&"object"!==b.nodeName.toLowerCase()){m=ob(a),(p=b.getAttribute("id"))?q=p.replace(_,"\\$&"):b.setAttribute("id",q),q="[id='"+q+"'] ",j=m.length;while(j--)m[j]=q+pb(m[j]);u=$.test(a)&&mb(b.parentNode)||b,v=m.join(",")}if(v)try{return G.apply(d,u.querySelectorAll(v)),d}catch(w){}finally{p||b.removeAttribute("id")}}}return xb(a.replace(P,"$1"),b,d,e)}function eb(){var a=[];function b(c,e){return a.push(c+" ")>d.cacheLength&&delete b[a.shift()],b[c+" "]=e}return b}function fb(a){return a[s]=!0,a}function gb(a){var b=l.createElement("div");try{return!!a(b)}catch(c){return!1}finally{b.parentNode&&b.parentNode.removeChild(b),b=null}}function hb(a,b){var c=a.split("|"),e=a.length;while(e--)d.attrHandle[c[e]]=b}function ib(a,b){var c=b&&a,d=c&&1===a.nodeType&&1===b.nodeType&&(~b.sourceIndex||B)-(~a.sourceIndex||B);if(d)return d;if(c)while(c=c.nextSibling)if(c===b)return-1;return a?1:-1}function jb(a){return function(b){var c=b.nodeName.toLowerCase();return"input"===c&&b.type===a}}function kb(a){return function(b){var c=b.nodeName.toLowerCase();return("input"===c||"button"===c)&&b.type===a}}function lb(a){return fb(function(b){return b=+b,fb(function(c,d){var e,f=a([],c.length,b),g=f.length;while(g--)c[e=f[g]]&&(c[e]=!(d[e]=c[e]))})})}function mb(a){return a&&typeof a.getElementsByTagName!==A&&a}c=db.support={},f=db.isXML=function(a){var b=a&&(a.ownerDocument||a).documentElement;return b?"HTML"!==b.nodeName:!1},k=db.setDocument=function(a){var b,e=a?a.ownerDocument||a:t,g=e.defaultView;return e!==l&&9===e.nodeType&&e.documentElement?(l=e,m=e.documentElement,n=!f(e),g&&g!==g.top&&(g.addEventListener?g.addEventListener("unload",function(){k()},!1):g.attachEvent&&g.attachEvent("onunload",function(){k()})),c.attributes=gb(function(a){return a.className="i",!a.getAttribute("className")}),c.getElementsByTagName=gb(function(a){return a.appendChild(e.createComment("")),!a.getElementsByTagName("*").length}),c.getElementsByClassName=Y.test(e.getElementsByClassName)&&gb(function(a){return a.innerHTML="<div class='a'></div><div class='a i'></div>",a.firstChild.className="i",2===a.getElementsByClassName("i").length}),c.getById=gb(function(a){return m.appendChild(a).id=s,!e.getElementsByName||!e.getElementsByName(s).length}),c.getById?(d.find.ID=function(a,b){if(typeof b.getElementById!==A&&n){var c=b.getElementById(a);return c&&c.parentNode?[c]:[]}},d.filter.ID=function(a){var b=a.replace(ab,bb);return function(a){return a.getAttribute("id")===b}}):(delete d.find.ID,d.filter.ID=function(a){var b=a.replace(ab,bb);return function(a){var c=typeof a.getAttributeNode!==A&&a.getAttributeNode("id");return c&&c.value===b}}),d.find.TAG=c.getElementsByTagName?function(a,b){return typeof b.getElementsByTagName!==A?b.getElementsByTagName(a):void 0}:function(a,b){var c,d=[],e=0,f=b.getElementsByTagName(a);if("*"===a){while(c=f[e++])1===c.nodeType&&d.push(c);return d}return f},d.find.CLASS=c.getElementsByClassName&&function(a,b){return typeof b.getElementsByClassName!==A&&n?b.getElementsByClassName(a):void 0},p=[],o=[],(c.qsa=Y.test(e.querySelectorAll))&&(gb(function(a){a.innerHTML="<select t=''><option selected=''></option></select>",a.querySelectorAll("[t^='']").length&&o.push("[*^$]="+K+"*(?:''|\"\")"),a.querySelectorAll("[selected]").length||o.push("\\["+K+"*(?:value|"+J+")"),a.querySelectorAll(":checked").length||o.push(":checked")}),gb(function(a){var b=e.createElement("input");b.setAttribute("type","hidden"),a.appendChild(b).setAttribute("name","D"),a.querySelectorAll("[name=d]").length&&o.push("name"+K+"*[*^$|!~]?="),a.querySelectorAll(":enabled").length||o.push(":enabled",":disabled"),a.querySelectorAll("*,:x"),o.push(",.*:")})),(c.matchesSelector=Y.test(q=m.webkitMatchesSelector||m.mozMatchesSelector||m.oMatchesSelector||m.msMatchesSelector))&&gb(function(a){c.disconnectedMatch=q.call(a,"div"),q.call(a,"[s!='']:x"),p.push("!=",O)}),o=o.length&&new RegExp(o.join("|")),p=p.length&&new RegExp(p.join("|")),b=Y.test(m.compareDocumentPosition),r=b||Y.test(m.contains)?function(a,b){var c=9===a.nodeType?a.documentElement:a,d=b&&b.parentNode;return a===d||!(!d||1!==d.nodeType||!(c.contains?c.contains(d):a.compareDocumentPosition&&16&a.compareDocumentPosition(d)))}:function(a,b){if(b)while(b=b.parentNode)if(b===a)return!0;return!1},z=b?function(a,b){if(a===b)return j=!0,0;var d=!a.compareDocumentPosition-!b.compareDocumentPosition;return d?d:(d=(a.ownerDocument||a)===(b.ownerDocument||b)?a.compareDocumentPosition(b):1,1&d||!c.sortDetached&&b.compareDocumentPosition(a)===d?a===e||a.ownerDocument===t&&r(t,a)?-1:b===e||b.ownerDocument===t&&r(t,b)?1:i?I.call(i,a)-I.call(i,b):0:4&d?-1:1)}:function(a,b){if(a===b)return j=!0,0;var c,d=0,f=a.parentNode,g=b.parentNode,h=[a],k=[b];if(!f||!g)return a===e?-1:b===e?1:f?-1:g?1:i?I.call(i,a)-I.call(i,b):0;if(f===g)return ib(a,b);c=a;while(c=c.parentNode)h.unshift(c);c=b;while(c=c.parentNode)k.unshift(c);while(h[d]===k[d])d++;return d?ib(h[d],k[d]):h[d]===t?-1:k[d]===t?1:0},e):l},db.matches=function(a,b){return db(a,null,null,b)},db.matchesSelector=function(a,b){if((a.ownerDocument||a)!==l&&k(a),b=b.replace(S,"='$1']"),!(!c.matchesSelector||!n||p&&p.test(b)||o&&o.test(b)))try{var d=q.call(a,b);if(d||c.disconnectedMatch||a.document&&11!==a.document.nodeType)return d}catch(e){}return db(b,l,null,[a]).length>0},db.contains=function(a,b){return(a.ownerDocument||a)!==l&&k(a),r(a,b)},db.attr=function(a,b){(a.ownerDocument||a)!==l&&k(a);var e=d.attrHandle[b.toLowerCase()],f=e&&C.call(d.attrHandle,b.toLowerCase())?e(a,b,!n):void 0;return void 0!==f?f:c.attributes||!n?a.getAttribute(b):(f=a.getAttributeNode(b))&&f.specified?f.value:null},db.error=function(a){throw new Error("Syntax error, unrecognized expression: "+a)},db.uniqueSort=function(a){var b,d=[],e=0,f=0;if(j=!c.detectDuplicates,i=!c.sortStable&&a.slice(0),a.sort(z),j){while(b=a[f++])b===a[f]&&(e=d.push(f));while(e--)a.splice(d[e],1)}return i=null,a},e=db.getText=function(a){var b,c="",d=0,f=a.nodeType;if(f){if(1===f||9===f||11===f){if("string"==typeof a.textContent)return a.textContent;for(a=a.firstChild;a;a=a.nextSibling)c+=e(a)}else if(3===f||4===f)return a.nodeValue}else while(b=a[d++])c+=e(b);return c},d=db.selectors={cacheLength:50,createPseudo:fb,match:V,attrHandle:{},find:{},relative:{">":{dir:"parentNode",first:!0}," ":{dir:"parentNode"},"+":{dir:"previousSibling",first:!0},"~":{dir:"previousSibling"}},preFilter:{ATTR:function(a){return a[1]=a[1].replace(ab,bb),a[3]=(a[4]||a[5]||"").replace(ab,bb),"~="===a[2]&&(a[3]=" "+a[3]+" "),a.slice(0,4)},CHILD:function(a){return a[1]=a[1].toLowerCase(),"nth"===a[1].slice(0,3)?(a[3]||db.error(a[0]),a[4]=+(a[4]?a[5]+(a[6]||1):2*("even"===a[3]||"odd"===a[3])),a[5]=+(a[7]+a[8]||"odd"===a[3])):a[3]&&db.error(a[0]),a},PSEUDO:function(a){var b,c=!a[5]&&a[2];return V.CHILD.test(a[0])?null:(a[3]&&void 0!==a[4]?a[2]=a[4]:c&&T.test(c)&&(b=ob(c,!0))&&(b=c.indexOf(")",c.length-b)-c.length)&&(a[0]=a[0].slice(0,b),a[2]=c.slice(0,b)),a.slice(0,3))}},filter:{TAG:function(a){var b=a.replace(ab,bb).toLowerCase();return"*"===a?function(){return!0}:function(a){return a.nodeName&&a.nodeName.toLowerCase()===b}},CLASS:function(a){var b=w[a+" "];return b||(b=new RegExp("(^|"+K+")"+a+"("+K+"|$)"))&&w(a,function(a){return b.test("string"==typeof a.className&&a.className||typeof a.getAttribute!==A&&a.getAttribute("class")||"")})},ATTR:function(a,b,c){return function(d){var e=db.attr(d,a);return null==e?"!="===b:b?(e+="","="===b?e===c:"!="===b?e!==c:"^="===b?c&&0===e.indexOf(c):"*="===b?c&&e.indexOf(c)>-1:"$="===b?c&&e.slice(-c.length)===c:"~="===b?(" "+e+" ").indexOf(c)>-1:"|="===b?e===c||e.slice(0,c.length+1)===c+"-":!1):!0}},CHILD:function(a,b,c,d,e){var f="nth"!==a.slice(0,3),g="last"!==a.slice(-4),h="of-type"===b;return 1===d&&0===e?function(a){return!!a.parentNode}:function(b,c,i){var j,k,l,m,n,o,p=f!==g?"nextSibling":"previousSibling",q=b.parentNode,r=h&&b.nodeName.toLowerCase(),t=!i&&!h;if(q){if(f){while(p){l=b;while(l=l[p])if(h?l.nodeName.toLowerCase()===r:1===l.nodeType)return!1;o=p="only"===a&&!o&&"nextSibling"}return!0}if(o=[g?q.firstChild:q.lastChild],g&&t){k=q[s]||(q[s]={}),j=k[a]||[],n=j[0]===u&&j[1],m=j[0]===u&&j[2],l=n&&q.childNodes[n];while(l=++n&&l&&l[p]||(m=n=0)||o.pop())if(1===l.nodeType&&++m&&l===b){k[a]=[u,n,m];break}}else if(t&&(j=(b[s]||(b[s]={}))[a])&&j[0]===u)m=j[1];else while(l=++n&&l&&l[p]||(m=n=0)||o.pop())if((h?l.nodeName.toLowerCase()===r:1===l.nodeType)&&++m&&(t&&((l[s]||(l[s]={}))[a]=[u,m]),l===b))break;return m-=e,m===d||m%d===0&&m/d>=0}}},PSEUDO:function(a,b){var c,e=d.pseudos[a]||d.setFilters[a.toLowerCase()]||db.error("unsupported pseudo: "+a);return e[s]?e(b):e.length>1?(c=[a,a,"",b],d.setFilters.hasOwnProperty(a.toLowerCase())?fb(function(a,c){var d,f=e(a,b),g=f.length;while(g--)d=I.call(a,f[g]),a[d]=!(c[d]=f[g])}):function(a){return e(a,0,c)}):e}},pseudos:{not:fb(function(a){var b=[],c=[],d=g(a.replace(P,"$1"));return d[s]?fb(function(a,b,c,e){var f,g=d(a,null,e,[]),h=a.length;while(h--)(f=g[h])&&(a[h]=!(b[h]=f))}):function(a,e,f){return b[0]=a,d(b,null,f,c),!c.pop()}}),has:fb(function(a){return function(b){return db(a,b).length>0}}),contains:fb(function(a){return function(b){return(b.textContent||b.innerText||e(b)).indexOf(a)>-1}}),lang:fb(function(a){return U.test(a||"")||db.error("unsupported lang: "+a),a=a.replace(ab,bb).toLowerCase(),function(b){var c;do if(c=n?b.lang:b.getAttribute("xml:lang")||b.getAttribute("lang"))return c=c.toLowerCase(),c===a||0===c.indexOf(a+"-");while((b=b.parentNode)&&1===b.nodeType);return!1}}),target:function(b){var c=a.location&&a.location.hash;return c&&c.slice(1)===b.id},root:function(a){return a===m},focus:function(a){return a===l.activeElement&&(!l.hasFocus||l.hasFocus())&&!!(a.type||a.href||~a.tabIndex)},enabled:function(a){return a.disabled===!1},disabled:function(a){return a.disabled===!0},checked:function(a){var b=a.nodeName.toLowerCase();return"input"===b&&!!a.checked||"option"===b&&!!a.selected},selected:function(a){return a.parentNode&&a.parentNode.selectedIndex,a.selected===!0},empty:function(a){for(a=a.firstChild;a;a=a.nextSibling)if(a.nodeType<6)return!1;return!0},parent:function(a){return!d.pseudos.empty(a)},header:function(a){return X.test(a.nodeName)},input:function(a){return W.test(a.nodeName)},button:function(a){var b=a.nodeName.toLowerCase();return"input"===b&&"button"===a.type||"button"===b},text:function(a){var b;return"input"===a.nodeName.toLowerCase()&&"text"===a.type&&(null==(b=a.getAttribute("type"))||"text"===b.toLowerCase())},first:lb(function(){return[0]}),last:lb(function(a,b){return[b-1]}),eq:lb(function(a,b,c){return[0>c?c+b:c]}),even:lb(function(a,b){for(var c=0;b>c;c+=2)a.push(c);return a}),odd:lb(function(a,b){for(var c=1;b>c;c+=2)a.push(c);return a}),lt:lb(function(a,b,c){for(var d=0>c?c+b:c;--d>=0;)a.push(d);return a}),gt:lb(function(a,b,c){for(var d=0>c?c+b:c;++d<b;)a.push(d);return a})}},d.pseudos.nth=d.pseudos.eq;for(b in{radio:!0,checkbox:!0,file:!0,password:!0,image:!0})d.pseudos[b]=jb(b);for(b in{submit:!0,reset:!0})d.pseudos[b]=kb(b);function nb(){}nb.prototype=d.filters=d.pseudos,d.setFilters=new nb;function ob(a,b){var c,e,f,g,h,i,j,k=x[a+" "];if(k)return b?0:k.slice(0);h=a,i=[],j=d.preFilter;while(h){(!c||(e=Q.exec(h)))&&(e&&(h=h.slice(e[0].length)||h),i.push(f=[])),c=!1,(e=R.exec(h))&&(c=e.shift(),f.push({value:c,type:e[0].replace(P," ")}),h=h.slice(c.length));for(g in d.filter)!(e=V[g].exec(h))||j[g]&&!(e=j[g](e))||(c=e.shift(),f.push({value:c,type:g,matches:e}),h=h.slice(c.length));if(!c)break}return b?h.length:h?db.error(a):x(a,i).slice(0)}function pb(a){for(var b=0,c=a.length,d="";c>b;b++)d+=a[b].value;return d}function qb(a,b,c){var d=b.dir,e=c&&"parentNode"===d,f=v++;return b.first?function(b,c,f){while(b=b[d])if(1===b.nodeType||e)return a(b,c,f)}:function(b,c,g){var h,i,j=[u,f];if(g){while(b=b[d])if((1===b.nodeType||e)&&a(b,c,g))return!0}else while(b=b[d])if(1===b.nodeType||e){if(i=b[s]||(b[s]={}),(h=i[d])&&h[0]===u&&h[1]===f)return j[2]=h[2];if(i[d]=j,j[2]=a(b,c,g))return!0}}}function rb(a){return a.length>1?function(b,c,d){var e=a.length;while(e--)if(!a[e](b,c,d))return!1;return!0}:a[0]}function sb(a,b,c,d,e){for(var f,g=[],h=0,i=a.length,j=null!=b;i>h;h++)(f=a[h])&&(!c||c(f,d,e))&&(g.push(f),j&&b.push(h));return g}function tb(a,b,c,d,e,f){return d&&!d[s]&&(d=tb(d)),e&&!e[s]&&(e=tb(e,f)),fb(function(f,g,h,i){var j,k,l,m=[],n=[],o=g.length,p=f||wb(b||"*",h.nodeType?[h]:h,[]),q=!a||!f&&b?p:sb(p,m,a,h,i),r=c?e||(f?a:o||d)?[]:g:q;if(c&&c(q,r,h,i),d){j=sb(r,n),d(j,[],h,i),k=j.length;while(k--)(l=j[k])&&(r[n[k]]=!(q[n[k]]=l))}if(f){if(e||a){if(e){j=[],k=r.length;while(k--)(l=r[k])&&j.push(q[k]=l);e(null,r=[],j,i)}k=r.length;while(k--)(l=r[k])&&(j=e?I.call(f,l):m[k])>-1&&(f[j]=!(g[j]=l))}}else r=sb(r===g?r.splice(o,r.length):r),e?e(null,g,r,i):G.apply(g,r)})}function ub(a){for(var b,c,e,f=a.length,g=d.relative[a[0].type],i=g||d.relative[" "],j=g?1:0,k=qb(function(a){return a===b},i,!0),l=qb(function(a){return I.call(b,a)>-1},i,!0),m=[function(a,c,d){return!g&&(d||c!==h)||((b=c).nodeType?k(a,c,d):l(a,c,d))}];f>j;j++)if(c=d.relative[a[j].type])m=[qb(rb(m),c)];else{if(c=d.filter[a[j].type].apply(null,a[j].matches),c[s]){for(e=++j;f>e;e++)if(d.relative[a[e].type])break;return tb(j>1&&rb(m),j>1&&pb(a.slice(0,j-1).concat({value:" "===a[j-2].type?"*":""})).replace(P,"$1"),c,e>j&&ub(a.slice(j,e)),f>e&&ub(a=a.slice(e)),f>e&&pb(a))}m.push(c)}return rb(m)}function vb(a,b){var c=b.length>0,e=a.length>0,f=function(f,g,i,j,k){var m,n,o,p=0,q="0",r=f&&[],s=[],t=h,v=f||e&&d.find.TAG("*",k),w=u+=null==t?1:Math.random()||.1,x=v.length;for(k&&(h=g!==l&&g);q!==x&&null!=(m=v[q]);q++){if(e&&m){n=0;while(o=a[n++])if(o(m,g,i)){j.push(m);break}k&&(u=w)}c&&((m=!o&&m)&&p--,f&&r.push(m))}if(p+=q,c&&q!==p){n=0;while(o=b[n++])o(r,s,g,i);if(f){if(p>0)while(q--)r[q]||s[q]||(s[q]=E.call(j));s=sb(s)}G.apply(j,s),k&&!f&&s.length>0&&p+b.length>1&&db.uniqueSort(j)}return k&&(u=w,h=t),r};return c?fb(f):f}g=db.compile=function(a,b){var c,d=[],e=[],f=y[a+" "];if(!f){b||(b=ob(a)),c=b.length;while(c--)f=ub(b[c]),f[s]?d.push(f):e.push(f);f=y(a,vb(e,d))}return f};function wb(a,b,c){for(var d=0,e=b.length;e>d;d++)db(a,b[d],c);return c}function xb(a,b,e,f){var h,i,j,k,l,m=ob(a);if(!f&&1===m.length){if(i=m[0]=m[0].slice(0),i.length>2&&"ID"===(j=i[0]).type&&c.getById&&9===b.nodeType&&n&&d.relative[i[1].type]){if(b=(d.find.ID(j.matches[0].replace(ab,bb),b)||[])[0],!b)return e;a=a.slice(i.shift().value.length)}h=V.needsContext.test(a)?0:i.length;while(h--){if(j=i[h],d.relative[k=j.type])break;if((l=d.find[k])&&(f=l(j.matches[0].replace(ab,bb),$.test(i[0].type)&&mb(b.parentNode)||b))){if(i.splice(h,1),a=f.length&&pb(i),!a)return G.apply(e,f),e;break}}}return g(a,m)(f,b,!n,e,$.test(a)&&mb(b.parentNode)||b),e}return c.sortStable=s.split("").sort(z).join("")===s,c.detectDuplicates=!!j,k(),c.sortDetached=gb(function(a){return 1&a.compareDocumentPosition(l.createElement("div"))}),gb(function(a){return a.innerHTML="<a href='#'></a>","#"===a.firstChild.getAttribute("href")})||hb("type|href|height|width",function(a,b,c){return c?void 0:a.getAttribute(b,"type"===b.toLowerCase()?1:2)}),c.attributes&&gb(function(a){return a.innerHTML="<input/>",a.firstChild.setAttribute("value",""),""===a.firstChild.getAttribute("value")})||hb("value",function(a,b,c){return c||"input"!==a.nodeName.toLowerCase()?void 0:a.defaultValue}),gb(function(a){return null==a.getAttribute("disabled")})||hb(J,function(a,b,c){var d;return c?void 0:a[b]===!0?b.toLowerCase():(d=a.getAttributeNode(b))&&d.specified?d.value:null}),db}(a);o.find=t,o.expr=t.selectors,o.expr[":"]=o.expr.pseudos,o.unique=t.uniqueSort,o.text=t.getText,o.isXMLDoc=t.isXML,o.contains=t.contains;var u=o.expr.match.needsContext,v=/^<(\w+)\s*\/?>(?:<\/\1>|)$/,w=/^.[^:#\[\.,]*$/;function x(a,b,c){if(o.isFunction(b))return o.grep(a,function(a,d){return!!b.call(a,d,a)!==c});if(b.nodeType)return o.grep(a,function(a){return a===b!==c});if("string"==typeof b){if(w.test(b))return o.filter(b,a,c);b=o.filter(b,a)}return o.grep(a,function(a){return g.call(b,a)>=0!==c})}o.filter=function(a,b,c){var d=b[0];return c&&(a=":not("+a+")"),1===b.length&&1===d.nodeType?o.find.matchesSelector(d,a)?[d]:[]:o.find.matches(a,o.grep(b,function(a){return 1===a.nodeType}))},o.fn.extend({find:function(a){var b,c=this.length,d=[],e=this;if("string"!=typeof a)return this.pushStack(o(a).filter(function(){for(b=0;c>b;b++)if(o.contains(e[b],this))return!0}));for(b=0;c>b;b++)o.find(a,e[b],d);return d=this.pushStack(c>1?o.unique(d):d),d.selector=this.selector?this.selector+" "+a:a,d},filter:function(a){return this.pushStack(x(this,a||[],!1))},not:function(a){return this.pushStack(x(this,a||[],!0))},is:function(a){return!!x(this,"string"==typeof a&&u.test(a)?o(a):a||[],!1).length}});var y,z=/^(?:\s*(<[\w\W]+>)[^>]*|#([\w-]*))$/,A=o.fn.init=function(a,b){var c,d;if(!a)return this;if("string"==typeof a){if(c="<"===a[0]&&">"===a[a.length-1]&&a.length>=3?[null,a,null]:z.exec(a),!c||!c[1]&&b)return!b||b.jquery?(b||y).find(a):this.constructor(b).find(a);if(c[1]){if(b=b instanceof o?b[0]:b,o.merge(this,o.parseHTML(c[1],b&&b.nodeType?b.ownerDocument||b:m,!0)),v.test(c[1])&&o.isPlainObject(b))for(c in b)o.isFunction(this[c])?this[c](b[c]):this.attr(c,b[c]);return this}return d=m.getElementById(c[2]),d&&d.parentNode&&(this.length=1,this[0]=d),this.context=m,this.selector=a,this}return a.nodeType?(this.context=this[0]=a,this.length=1,this):o.isFunction(a)?"undefined"!=typeof y.ready?y.ready(a):a(o):(void 0!==a.selector&&(this.selector=a.selector,this.context=a.context),o.makeArray(a,this))};A.prototype=o.fn,y=o(m);var B=/^(?:parents|prev(?:Until|All))/,C={children:!0,contents:!0,next:!0,prev:!0};o.extend({dir:function(a,b,c){var d=[],e=void 0!==c;while((a=a[b])&&9!==a.nodeType)if(1===a.nodeType){if(e&&o(a).is(c))break;d.push(a)}return d},sibling:function(a,b){for(var c=[];a;a=a.nextSibling)1===a.nodeType&&a!==b&&c.push(a);return c}}),o.fn.extend({has:function(a){var b=o(a,this),c=b.length;return this.filter(function(){for(var a=0;c>a;a++)if(o.contains(this,b[a]))return!0})},closest:function(a,b){for(var c,d=0,e=this.length,f=[],g=u.test(a)||"string"!=typeof a?o(a,b||this.context):0;e>d;d++)for(c=this[d];c&&c!==b;c=c.parentNode)if(c.nodeType<11&&(g?g.index(c)>-1:1===c.nodeType&&o.find.matchesSelector(c,a))){f.push(c);break}return this.pushStack(f.length>1?o.unique(f):f)},index:function(a){return a?"string"==typeof a?g.call(o(a),this[0]):g.call(this,a.jquery?a[0]:a):this[0]&&this[0].parentNode?this.first().prevAll().length:-1},add:function(a,b){return this.pushStack(o.unique(o.merge(this.get(),o(a,b))))},addBack:function(a){return this.add(null==a?this.prevObject:this.prevObject.filter(a))}});function D(a,b){while((a=a[b])&&1!==a.nodeType);return a}o.each({parent:function(a){var b=a.parentNode;return b&&11!==b.nodeType?b:null},parents:function(a){return o.dir(a,"parentNode")},parentsUntil:function(a,b,c){return o.dir(a,"parentNode",c)},next:function(a){return D(a,"nextSibling")},prev:function(a){return D(a,"previousSibling")},nextAll:function(a){return o.dir(a,"nextSibling")},prevAll:function(a){return o.dir(a,"previousSibling")},nextUntil:function(a,b,c){return o.dir(a,"nextSibling",c)},prevUntil:function(a,b,c){return o.dir(a,"previousSibling",c)},siblings:function(a){return o.sibling((a.parentNode||{}).firstChild,a)},children:function(a){return o.sibling(a.firstChild)},contents:function(a){return a.contentDocument||o.merge([],a.childNodes)}},function(a,b){o.fn[a]=function(c,d){var e=o.map(this,b,c);return"Until"!==a.slice(-5)&&(d=c),d&&"string"==typeof d&&(e=o.filter(d,e)),this.length>1&&(C[a]||o.unique(e),B.test(a)&&e.reverse()),this.pushStack(e)}});var E=/\S+/g,F={};function G(a){var b=F[a]={};return o.each(a.match(E)||[],function(a,c){b[c]=!0}),b}o.Callbacks=function(a){a="string"==typeof a?F[a]||G(a):o.extend({},a);var b,c,d,e,f,g,h=[],i=!a.once&&[],j=function(l){for(b=a.memory&&l,c=!0,g=e||0,e=0,f=h.length,d=!0;h&&f>g;g++)if(h[g].apply(l[0],l[1])===!1&&a.stopOnFalse){b=!1;break}d=!1,h&&(i?i.length&&j(i.shift()):b?h=[]:k.disable())},k={add:function(){if(h){var c=h.length;!function g(b){o.each(b,function(b,c){var d=o.type(c);"function"===d?a.unique&&k.has(c)||h.push(c):c&&c.length&&"string"!==d&&g(c)})}(arguments),d?f=h.length:b&&(e=c,j(b))}return this},remove:function(){return h&&o.each(arguments,function(a,b){var c;while((c=o.inArray(b,h,c))>-1)h.splice(c,1),d&&(f>=c&&f--,g>=c&&g--)}),this},has:function(a){return a?o.inArray(a,h)>-1:!(!h||!h.length)},empty:function(){return h=[],f=0,this},disable:function(){return h=i=b=void 0,this},disabled:function(){return!h},lock:function(){return i=void 0,b||k.disable(),this},locked:function(){return!i},fireWith:function(a,b){return!h||c&&!i||(b=b||[],b=[a,b.slice?b.slice():b],d?i.push(b):j(b)),this},fire:function(){return k.fireWith(this,arguments),this},fired:function(){return!!c}};return k},o.extend({Deferred:function(a){var b=[["resolve","done",o.Callbacks("once memory"),"resolved"],["reject","fail",o.Callbacks("once memory"),"rejected"],["notify","progress",o.Callbacks("memory")]],c="pending",d={state:function(){return c},always:function(){return e.done(arguments).fail(arguments),this},then:function(){var a=arguments;return o.Deferred(function(c){o.each(b,function(b,f){var g=o.isFunction(a[b])&&a[b];e[f[1]](function(){var a=g&&g.apply(this,arguments);a&&o.isFunction(a.promise)?a.promise().done(c.resolve).fail(c.reject).progress(c.notify):c[f[0]+"With"](this===d?c.promise():this,g?[a]:arguments)})}),a=null}).promise()},promise:function(a){return null!=a?o.extend(a,d):d}},e={};return d.pipe=d.then,o.each(b,function(a,f){var g=f[2],h=f[3];d[f[1]]=g.add,h&&g.add(function(){c=h},b[1^a][2].disable,b[2][2].lock),e[f[0]]=function(){return e[f[0]+"With"](this===e?d:this,arguments),this},e[f[0]+"With"]=g.fireWith}),d.promise(e),a&&a.call(e,e),e},when:function(a){var b=0,c=d.call(arguments),e=c.length,f=1!==e||a&&o.isFunction(a.promise)?e:0,g=1===f?a:o.Deferred(),h=function(a,b,c){return function(e){b[a]=this,c[a]=arguments.length>1?d.call(arguments):e,c===i?g.notifyWith(b,c):--f||g.resolveWith(b,c)}},i,j,k;if(e>1)for(i=new Array(e),j=new Array(e),k=new Array(e);e>b;b++)c[b]&&o.isFunction(c[b].promise)?c[b].promise().done(h(b,k,c)).fail(g.reject).progress(h(b,j,i)):--f;return f||g.resolveWith(k,c),g.promise()}});var H;o.fn.ready=function(a){return o.ready.promise().done(a),this},o.extend({isReady:!1,readyWait:1,holdReady:function(a){a?o.readyWait++:o.ready(!0)},ready:function(a){(a===!0?--o.readyWait:o.isReady)||(o.isReady=!0,a!==!0&&--o.readyWait>0||(H.resolveWith(m,[o]),o.fn.trigger&&o(m).trigger("ready").off("ready")))}});function I(){m.removeEventListener("DOMContentLoaded",I,!1),a.removeEventListener("load",I,!1),o.ready()}o.ready.promise=function(b){return H||(H=o.Deferred(),"complete"===m.readyState?setTimeout(o.ready):(m.addEventListener("DOMContentLoaded",I,!1),a.addEventListener("load",I,!1))),H.promise(b)},o.ready.promise();var J=o.access=function(a,b,c,d,e,f,g){var h=0,i=a.length,j=null==c;if("object"===o.type(c)){e=!0;for(h in c)o.access(a,b,h,c[h],!0,f,g)}else if(void 0!==d&&(e=!0,o.isFunction(d)||(g=!0),j&&(g?(b.call(a,d),b=null):(j=b,b=function(a,b,c){return j.call(o(a),c)})),b))for(;i>h;h++)b(a[h],c,g?d:d.call(a[h],h,b(a[h],c)));return e?a:j?b.call(a):i?b(a[0],c):f};o.acceptData=function(a){return 1===a.nodeType||9===a.nodeType||!+a.nodeType};function K(){Object.defineProperty(this.cache={},0,{get:function(){return{}}}),this.expando=o.expando+Math.random()}K.uid=1,K.accepts=o.acceptData,K.prototype={key:function(a){if(!K.accepts(a))return 0;var b={},c=a[this.expando];if(!c){c=K.uid++;try{b[this.expando]={value:c},Object.defineProperties(a,b)}catch(d){b[this.expando]=c,o.extend(a,b)}}return this.cache[c]||(this.cache[c]={}),c},set:function(a,b,c){var d,e=this.key(a),f=this.cache[e];if("string"==typeof b)f[b]=c;else if(o.isEmptyObject(f))o.extend(this.cache[e],b);else for(d in b)f[d]=b[d];return f},get:function(a,b){var c=this.cache[this.key(a)];return void 0===b?c:c[b]},access:function(a,b,c){var d;return void 0===b||b&&"string"==typeof b&&void 0===c?(d=this.get(a,b),void 0!==d?d:this.get(a,o.camelCase(b))):(this.set(a,b,c),void 0!==c?c:b)},remove:function(a,b){var c,d,e,f=this.key(a),g=this.cache[f];if(void 0===b)this.cache[f]={};else{o.isArray(b)?d=b.concat(b.map(o.camelCase)):(e=o.camelCase(b),b in g?d=[b,e]:(d=e,d=d in g?[d]:d.match(E)||[])),c=d.length;while(c--)delete g[d[c]]}},hasData:function(a){return!o.isEmptyObject(this.cache[a[this.expando]]||{})},discard:function(a){a[this.expando]&&delete this.cache[a[this.expando]]}};var L=new K,M=new K,N=/^(?:\{[\w\W]*\}|\[[\w\W]*\])$/,O=/([A-Z])/g;function P(a,b,c){var d;if(void 0===c&&1===a.nodeType)if(d="data-"+b.replace(O,"-$1").toLowerCase(),c=a.getAttribute(d),"string"==typeof c){try{c="true"===c?!0:"false"===c?!1:"null"===c?null:+c+""===c?+c:N.test(c)?o.parseJSON(c):c}catch(e){}M.set(a,b,c)}else c=void 0;return c}o.extend({hasData:function(a){return M.hasData(a)||L.hasData(a)},data:function(a,b,c){return M.access(a,b,c)},removeData:function(a,b){M.remove(a,b)},_data:function(a,b,c){return L.access(a,b,c)},_removeData:function(a,b){L.remove(a,b)}}),o.fn.extend({data:function(a,b){var c,d,e,f=this[0],g=f&&f.attributes;if(void 0===a){if(this.length&&(e=M.get(f),1===f.nodeType&&!L.get(f,"hasDataAttrs"))){c=g.length;
-while(c--)d=g[c].name,0===d.indexOf("data-")&&(d=o.camelCase(d.slice(5)),P(f,d,e[d]));L.set(f,"hasDataAttrs",!0)}return e}return"object"==typeof a?this.each(function(){M.set(this,a)}):J(this,function(b){var c,d=o.camelCase(a);if(f&&void 0===b){if(c=M.get(f,a),void 0!==c)return c;if(c=M.get(f,d),void 0!==c)return c;if(c=P(f,d,void 0),void 0!==c)return c}else this.each(function(){var c=M.get(this,d);M.set(this,d,b),-1!==a.indexOf("-")&&void 0!==c&&M.set(this,a,b)})},null,b,arguments.length>1,null,!0)},removeData:function(a){return this.each(function(){M.remove(this,a)})}}),o.extend({queue:function(a,b,c){var d;return a?(b=(b||"fx")+"queue",d=L.get(a,b),c&&(!d||o.isArray(c)?d=L.access(a,b,o.makeArray(c)):d.push(c)),d||[]):void 0},dequeue:function(a,b){b=b||"fx";var c=o.queue(a,b),d=c.length,e=c.shift(),f=o._queueHooks(a,b),g=function(){o.dequeue(a,b)};"inprogress"===e&&(e=c.shift(),d--),e&&("fx"===b&&c.unshift("inprogress"),delete f.stop,e.call(a,g,f)),!d&&f&&f.empty.fire()},_queueHooks:function(a,b){var c=b+"queueHooks";return L.get(a,c)||L.access(a,c,{empty:o.Callbacks("once memory").add(function(){L.remove(a,[b+"queue",c])})})}}),o.fn.extend({queue:function(a,b){var c=2;return"string"!=typeof a&&(b=a,a="fx",c--),arguments.length<c?o.queue(this[0],a):void 0===b?this:this.each(function(){var c=o.queue(this,a,b);o._queueHooks(this,a),"fx"===a&&"inprogress"!==c[0]&&o.dequeue(this,a)})},dequeue:function(a){return this.each(function(){o.dequeue(this,a)})},clearQueue:function(a){return this.queue(a||"fx",[])},promise:function(a,b){var c,d=1,e=o.Deferred(),f=this,g=this.length,h=function(){--d||e.resolveWith(f,[f])};"string"!=typeof a&&(b=a,a=void 0),a=a||"fx";while(g--)c=L.get(f[g],a+"queueHooks"),c&&c.empty&&(d++,c.empty.add(h));return h(),e.promise(b)}});var Q=/[+-]?(?:\d*\.|)\d+(?:[eE][+-]?\d+|)/.source,R=["Top","Right","Bottom","Left"],S=function(a,b){return a=b||a,"none"===o.css(a,"display")||!o.contains(a.ownerDocument,a)},T=/^(?:checkbox|radio)$/i;!function(){var a=m.createDocumentFragment(),b=a.appendChild(m.createElement("div"));b.innerHTML="<input type='radio' checked='checked' name='t'/>",l.checkClone=b.cloneNode(!0).cloneNode(!0).lastChild.checked,b.innerHTML="<textarea>x</textarea>",l.noCloneChecked=!!b.cloneNode(!0).lastChild.defaultValue}();var U="undefined";l.focusinBubbles="onfocusin"in a;var V=/^key/,W=/^(?:mouse|contextmenu)|click/,X=/^(?:focusinfocus|focusoutblur)$/,Y=/^([^.]*)(?:\.(.+)|)$/;function Z(){return!0}function $(){return!1}function _(){try{return m.activeElement}catch(a){}}o.event={global:{},add:function(a,b,c,d,e){var f,g,h,i,j,k,l,m,n,p,q,r=L.get(a);if(r){c.handler&&(f=c,c=f.handler,e=f.selector),c.guid||(c.guid=o.guid++),(i=r.events)||(i=r.events={}),(g=r.handle)||(g=r.handle=function(b){return typeof o!==U&&o.event.triggered!==b.type?o.event.dispatch.apply(a,arguments):void 0}),b=(b||"").match(E)||[""],j=b.length;while(j--)h=Y.exec(b[j])||[],n=q=h[1],p=(h[2]||"").split(".").sort(),n&&(l=o.event.special[n]||{},n=(e?l.delegateType:l.bindType)||n,l=o.event.special[n]||{},k=o.extend({type:n,origType:q,data:d,handler:c,guid:c.guid,selector:e,needsContext:e&&o.expr.match.needsContext.test(e),namespace:p.join(".")},f),(m=i[n])||(m=i[n]=[],m.delegateCount=0,l.setup&&l.setup.call(a,d,p,g)!==!1||a.addEventListener&&a.addEventListener(n,g,!1)),l.add&&(l.add.call(a,k),k.handler.guid||(k.handler.guid=c.guid)),e?m.splice(m.delegateCount++,0,k):m.push(k),o.event.global[n]=!0)}},remove:function(a,b,c,d,e){var f,g,h,i,j,k,l,m,n,p,q,r=L.hasData(a)&&L.get(a);if(r&&(i=r.events)){b=(b||"").match(E)||[""],j=b.length;while(j--)if(h=Y.exec(b[j])||[],n=q=h[1],p=(h[2]||"").split(".").sort(),n){l=o.event.special[n]||{},n=(d?l.delegateType:l.bindType)||n,m=i[n]||[],h=h[2]&&new RegExp("(^|\\.)"+p.join("\\.(?:.*\\.|)")+"(\\.|$)"),g=f=m.length;while(f--)k=m[f],!e&&q!==k.origType||c&&c.guid!==k.guid||h&&!h.test(k.namespace)||d&&d!==k.selector&&("**"!==d||!k.selector)||(m.splice(f,1),k.selector&&m.delegateCount--,l.remove&&l.remove.call(a,k));g&&!m.length&&(l.teardown&&l.teardown.call(a,p,r.handle)!==!1||o.removeEvent(a,n,r.handle),delete i[n])}else for(n in i)o.event.remove(a,n+b[j],c,d,!0);o.isEmptyObject(i)&&(delete r.handle,L.remove(a,"events"))}},trigger:function(b,c,d,e){var f,g,h,i,k,l,n,p=[d||m],q=j.call(b,"type")?b.type:b,r=j.call(b,"namespace")?b.namespace.split("."):[];if(g=h=d=d||m,3!==d.nodeType&&8!==d.nodeType&&!X.test(q+o.event.triggered)&&(q.indexOf(".")>=0&&(r=q.split("."),q=r.shift(),r.sort()),k=q.indexOf(":")<0&&"on"+q,b=b[o.expando]?b:new o.Event(q,"object"==typeof b&&b),b.isTrigger=e?2:3,b.namespace=r.join("."),b.namespace_re=b.namespace?new RegExp("(^|\\.)"+r.join("\\.(?:.*\\.|)")+"(\\.|$)"):null,b.result=void 0,b.target||(b.target=d),c=null==c?[b]:o.makeArray(c,[b]),n=o.event.special[q]||{},e||!n.trigger||n.trigger.apply(d,c)!==!1)){if(!e&&!n.noBubble&&!o.isWindow(d)){for(i=n.delegateType||q,X.test(i+q)||(g=g.parentNode);g;g=g.parentNode)p.push(g),h=g;h===(d.ownerDocument||m)&&p.push(h.defaultView||h.parentWindow||a)}f=0;while((g=p[f++])&&!b.isPropagationStopped())b.type=f>1?i:n.bindType||q,l=(L.get(g,"events")||{})[b.type]&&L.get(g,"handle"),l&&l.apply(g,c),l=k&&g[k],l&&l.apply&&o.acceptData(g)&&(b.result=l.apply(g,c),b.result===!1&&b.preventDefault());return b.type=q,e||b.isDefaultPrevented()||n._default&&n._default.apply(p.pop(),c)!==!1||!o.acceptData(d)||k&&o.isFunction(d[q])&&!o.isWindow(d)&&(h=d[k],h&&(d[k]=null),o.event.triggered=q,d[q](),o.event.triggered=void 0,h&&(d[k]=h)),b.result}},dispatch:function(a){a=o.event.fix(a);var b,c,e,f,g,h=[],i=d.call(arguments),j=(L.get(this,"events")||{})[a.type]||[],k=o.event.special[a.type]||{};if(i[0]=a,a.delegateTarget=this,!k.preDispatch||k.preDispatch.call(this,a)!==!1){h=o.event.handlers.call(this,a,j),b=0;while((f=h[b++])&&!a.isPropagationStopped()){a.currentTarget=f.elem,c=0;while((g=f.handlers[c++])&&!a.isImmediatePropagationStopped())(!a.namespace_re||a.namespace_re.test(g.namespace))&&(a.handleObj=g,a.data=g.data,e=((o.event.special[g.origType]||{}).handle||g.handler).apply(f.elem,i),void 0!==e&&(a.result=e)===!1&&(a.preventDefault(),a.stopPropagation()))}return k.postDispatch&&k.postDispatch.call(this,a),a.result}},handlers:function(a,b){var c,d,e,f,g=[],h=b.delegateCount,i=a.target;if(h&&i.nodeType&&(!a.button||"click"!==a.type))for(;i!==this;i=i.parentNode||this)if(i.disabled!==!0||"click"!==a.type){for(d=[],c=0;h>c;c++)f=b[c],e=f.selector+" ",void 0===d[e]&&(d[e]=f.needsContext?o(e,this).index(i)>=0:o.find(e,this,null,[i]).length),d[e]&&d.push(f);d.length&&g.push({elem:i,handlers:d})}return h<b.length&&g.push({elem:this,handlers:b.slice(h)}),g},props:"altKey bubbles cancelable ctrlKey currentTarget eventPhase metaKey relatedTarget shiftKey target timeStamp view which".split(" "),fixHooks:{},keyHooks:{props:"char charCode key keyCode".split(" "),filter:function(a,b){return null==a.which&&(a.which=null!=b.charCode?b.charCode:b.keyCode),a}},mouseHooks:{props:"button buttons clientX clientY offsetX offsetY pageX pageY screenX screenY toElement".split(" "),filter:function(a,b){var c,d,e,f=b.button;return null==a.pageX&&null!=b.clientX&&(c=a.target.ownerDocument||m,d=c.documentElement,e=c.body,a.pageX=b.clientX+(d&&d.scrollLeft||e&&e.scrollLeft||0)-(d&&d.clientLeft||e&&e.clientLeft||0),a.pageY=b.clientY+(d&&d.scrollTop||e&&e.scrollTop||0)-(d&&d.clientTop||e&&e.clientTop||0)),a.which||void 0===f||(a.which=1&f?1:2&f?3:4&f?2:0),a}},fix:function(a){if(a[o.expando])return a;var b,c,d,e=a.type,f=a,g=this.fixHooks[e];g||(this.fixHooks[e]=g=W.test(e)?this.mouseHooks:V.test(e)?this.keyHooks:{}),d=g.props?this.props.concat(g.props):this.props,a=new o.Event(f),b=d.length;while(b--)c=d[b],a[c]=f[c];return a.target||(a.target=m),3===a.target.nodeType&&(a.target=a.target.parentNode),g.filter?g.filter(a,f):a},special:{load:{noBubble:!0},focus:{trigger:function(){return this!==_()&&this.focus?(this.focus(),!1):void 0},delegateType:"focusin"},blur:{trigger:function(){return this===_()&&this.blur?(this.blur(),!1):void 0},delegateType:"focusout"},click:{trigger:function(){return"checkbox"===this.type&&this.click&&o.nodeName(this,"input")?(this.click(),!1):void 0},_default:function(a){return o.nodeName(a.target,"a")}},beforeunload:{postDispatch:function(a){void 0!==a.result&&(a.originalEvent.returnValue=a.result)}}},simulate:function(a,b,c,d){var e=o.extend(new o.Event,c,{type:a,isSimulated:!0,originalEvent:{}});d?o.event.trigger(e,null,b):o.event.dispatch.call(b,e),e.isDefaultPrevented()&&c.preventDefault()}},o.removeEvent=function(a,b,c){a.removeEventListener&&a.removeEventListener(b,c,!1)},o.Event=function(a,b){return this instanceof o.Event?(a&&a.type?(this.originalEvent=a,this.type=a.type,this.isDefaultPrevented=a.defaultPrevented||void 0===a.defaultPrevented&&a.getPreventDefault&&a.getPreventDefault()?Z:$):this.type=a,b&&o.extend(this,b),this.timeStamp=a&&a.timeStamp||o.now(),void(this[o.expando]=!0)):new o.Event(a,b)},o.Event.prototype={isDefaultPrevented:$,isPropagationStopped:$,isImmediatePropagationStopped:$,preventDefault:function(){var a=this.originalEvent;this.isDefaultPrevented=Z,a&&a.preventDefault&&a.preventDefault()},stopPropagation:function(){var a=this.originalEvent;this.isPropagationStopped=Z,a&&a.stopPropagation&&a.stopPropagation()},stopImmediatePropagation:function(){this.isImmediatePropagationStopped=Z,this.stopPropagation()}},o.each({mouseenter:"mouseover",mouseleave:"mouseout"},function(a,b){o.event.special[a]={delegateType:b,bindType:b,handle:function(a){var c,d=this,e=a.relatedTarget,f=a.handleObj;return(!e||e!==d&&!o.contains(d,e))&&(a.type=f.origType,c=f.handler.apply(this,arguments),a.type=b),c}}}),l.focusinBubbles||o.each({focus:"focusin",blur:"focusout"},function(a,b){var c=function(a){o.event.simulate(b,a.target,o.event.fix(a),!0)};o.event.special[b]={setup:function(){var d=this.ownerDocument||this,e=L.access(d,b);e||d.addEventListener(a,c,!0),L.access(d,b,(e||0)+1)},teardown:function(){var d=this.ownerDocument||this,e=L.access(d,b)-1;e?L.access(d,b,e):(d.removeEventListener(a,c,!0),L.remove(d,b))}}}),o.fn.extend({on:function(a,b,c,d,e){var f,g;if("object"==typeof a){"string"!=typeof b&&(c=c||b,b=void 0);for(g in a)this.on(g,b,c,a[g],e);return this}if(null==c&&null==d?(d=b,c=b=void 0):null==d&&("string"==typeof b?(d=c,c=void 0):(d=c,c=b,b=void 0)),d===!1)d=$;else if(!d)return this;return 1===e&&(f=d,d=function(a){return o().off(a),f.apply(this,arguments)},d.guid=f.guid||(f.guid=o.guid++)),this.each(function(){o.event.add(this,a,d,c,b)})},one:function(a,b,c,d){return this.on(a,b,c,d,1)},off:function(a,b,c){var d,e;if(a&&a.preventDefault&&a.handleObj)return d=a.handleObj,o(a.delegateTarget).off(d.namespace?d.origType+"."+d.namespace:d.origType,d.selector,d.handler),this;if("object"==typeof a){for(e in a)this.off(e,b,a[e]);return this}return(b===!1||"function"==typeof b)&&(c=b,b=void 0),c===!1&&(c=$),this.each(function(){o.event.remove(this,a,c,b)})},trigger:function(a,b){return this.each(function(){o.event.trigger(a,b,this)})},triggerHandler:function(a,b){var c=this[0];return c?o.event.trigger(a,b,c,!0):void 0}});var ab=/<(?!area|br|col|embed|hr|img|input|link|meta|param)(([\w:]+)[^>]*)\/>/gi,bb=/<([\w:]+)/,cb=/<|&#?\w+;/,db=/<(?:script|style|link)/i,eb=/checked\s*(?:[^=]|=\s*.checked.)/i,fb=/^$|\/(?:java|ecma)script/i,gb=/^true\/(.*)/,hb=/^\s*<!(?:\[CDATA\[|--)|(?:\]\]|--)>\s*$/g,ib={option:[1,"<select multiple='multiple'>","</select>"],thead:[1,"<table>","</table>"],col:[2,"<table><colgroup>","</colgroup></table>"],tr:[2,"<table><tbody>","</tbody></table>"],td:[3,"<table><tbody><tr>","</tr></tbody></table>"],_default:[0,"",""]};ib.optgroup=ib.option,ib.tbody=ib.tfoot=ib.colgroup=ib.caption=ib.thead,ib.th=ib.td;function jb(a,b){return o.nodeName(a,"table")&&o.nodeName(11!==b.nodeType?b:b.firstChild,"tr")?a.getElementsByTagName("tbody")[0]||a.appendChild(a.ownerDocument.createElement("tbody")):a}function kb(a){return a.type=(null!==a.getAttribute("type"))+"/"+a.type,a}function lb(a){var b=gb.exec(a.type);return b?a.type=b[1]:a.removeAttribute("type"),a}function mb(a,b){for(var c=0,d=a.length;d>c;c++)L.set(a[c],"globalEval",!b||L.get(b[c],"globalEval"))}function nb(a,b){var c,d,e,f,g,h,i,j;if(1===b.nodeType){if(L.hasData(a)&&(f=L.access(a),g=L.set(b,f),j=f.events)){delete g.handle,g.events={};for(e in j)for(c=0,d=j[e].length;d>c;c++)o.event.add(b,e,j[e][c])}M.hasData(a)&&(h=M.access(a),i=o.extend({},h),M.set(b,i))}}function ob(a,b){var c=a.getElementsByTagName?a.getElementsByTagName(b||"*"):a.querySelectorAll?a.querySelectorAll(b||"*"):[];return void 0===b||b&&o.nodeName(a,b)?o.merge([a],c):c}function pb(a,b){var c=b.nodeName.toLowerCase();"input"===c&&T.test(a.type)?b.checked=a.checked:("input"===c||"textarea"===c)&&(b.defaultValue=a.defaultValue)}o.extend({clone:function(a,b,c){var d,e,f,g,h=a.cloneNode(!0),i=o.contains(a.ownerDocument,a);if(!(l.noCloneChecked||1!==a.nodeType&&11!==a.nodeType||o.isXMLDoc(a)))for(g=ob(h),f=ob(a),d=0,e=f.length;e>d;d++)pb(f[d],g[d]);if(b)if(c)for(f=f||ob(a),g=g||ob(h),d=0,e=f.length;e>d;d++)nb(f[d],g[d]);else nb(a,h);return g=ob(h,"script"),g.length>0&&mb(g,!i&&ob(a,"script")),h},buildFragment:function(a,b,c,d){for(var e,f,g,h,i,j,k=b.createDocumentFragment(),l=[],m=0,n=a.length;n>m;m++)if(e=a[m],e||0===e)if("object"===o.type(e))o.merge(l,e.nodeType?[e]:e);else if(cb.test(e)){f=f||k.appendChild(b.createElement("div")),g=(bb.exec(e)||["",""])[1].toLowerCase(),h=ib[g]||ib._default,f.innerHTML=h[1]+e.replace(ab,"<$1></$2>")+h[2],j=h[0];while(j--)f=f.lastChild;o.merge(l,f.childNodes),f=k.firstChild,f.textContent=""}else l.push(b.createTextNode(e));k.textContent="",m=0;while(e=l[m++])if((!d||-1===o.inArray(e,d))&&(i=o.contains(e.ownerDocument,e),f=ob(k.appendChild(e),"script"),i&&mb(f),c)){j=0;while(e=f[j++])fb.test(e.type||"")&&c.push(e)}return k},cleanData:function(a){for(var b,c,d,e,f,g,h=o.event.special,i=0;void 0!==(c=a[i]);i++){if(o.acceptData(c)&&(f=c[L.expando],f&&(b=L.cache[f]))){if(d=Object.keys(b.events||{}),d.length)for(g=0;void 0!==(e=d[g]);g++)h[e]?o.event.remove(c,e):o.removeEvent(c,e,b.handle);L.cache[f]&&delete L.cache[f]}delete M.cache[c[M.expando]]}}}),o.fn.extend({text:function(a){return J(this,function(a){return void 0===a?o.text(this):this.empty().each(function(){(1===this.nodeType||11===this.nodeType||9===this.nodeType)&&(this.textContent=a)})},null,a,arguments.length)},append:function(){return this.domManip(arguments,function(a){if(1===this.nodeType||11===this.nodeType||9===this.nodeType){var b=jb(this,a);b.appendChild(a)}})},prepend:function(){return this.domManip(arguments,function(a){if(1===this.nodeType||11===this.nodeType||9===this.nodeType){var b=jb(this,a);b.insertBefore(a,b.firstChild)}})},before:function(){return this.domManip(arguments,function(a){this.parentNode&&this.parentNode.insertBefore(a,this)})},after:function(){return this.domManip(arguments,function(a){this.parentNode&&this.parentNode.insertBefore(a,this.nextSibling)})},remove:function(a,b){for(var c,d=a?o.filter(a,this):this,e=0;null!=(c=d[e]);e++)b||1!==c.nodeType||o.cleanData(ob(c)),c.parentNode&&(b&&o.contains(c.ownerDocument,c)&&mb(ob(c,"script")),c.parentNode.removeChild(c));return this},empty:function(){for(var a,b=0;null!=(a=this[b]);b++)1===a.nodeType&&(o.cleanData(ob(a,!1)),a.textContent="");return this},clone:function(a,b){return a=null==a?!1:a,b=null==b?a:b,this.map(function(){return o.clone(this,a,b)})},html:function(a){return J(this,function(a){var b=this[0]||{},c=0,d=this.length;if(void 0===a&&1===b.nodeType)return b.innerHTML;if("string"==typeof a&&!db.test(a)&&!ib[(bb.exec(a)||["",""])[1].toLowerCase()]){a=a.replace(ab,"<$1></$2>");try{for(;d>c;c++)b=this[c]||{},1===b.nodeType&&(o.cleanData(ob(b,!1)),b.innerHTML=a);b=0}catch(e){}}b&&this.empty().append(a)},null,a,arguments.length)},replaceWith:function(){var a=arguments[0];return this.domManip(arguments,function(b){a=this.parentNode,o.cleanData(ob(this)),a&&a.replaceChild(b,this)}),a&&(a.length||a.nodeType)?this:this.remove()},detach:function(a){return this.remove(a,!0)},domManip:function(a,b){a=e.apply([],a);var c,d,f,g,h,i,j=0,k=this.length,m=this,n=k-1,p=a[0],q=o.isFunction(p);if(q||k>1&&"string"==typeof p&&!l.checkClone&&eb.test(p))return this.each(function(c){var d=m.eq(c);q&&(a[0]=p.call(this,c,d.html())),d.domManip(a,b)});if(k&&(c=o.buildFragment(a,this[0].ownerDocument,!1,this),d=c.firstChild,1===c.childNodes.length&&(c=d),d)){for(f=o.map(ob(c,"script"),kb),g=f.length;k>j;j++)h=c,j!==n&&(h=o.clone(h,!0,!0),g&&o.merge(f,ob(h,"script"))),b.call(this[j],h,j);if(g)for(i=f[f.length-1].ownerDocument,o.map(f,lb),j=0;g>j;j++)h=f[j],fb.test(h.type||"")&&!L.access(h,"globalEval")&&o.contains(i,h)&&(h.src?o._evalUrl&&o._evalUrl(h.src):o.globalEval(h.textContent.replace(hb,"")))}return this}}),o.each({appendTo:"append",prependTo:"prepend",insertBefore:"before",insertAfter:"after",replaceAll:"replaceWith"},function(a,b){o.fn[a]=function(a){for(var c,d=[],e=o(a),g=e.length-1,h=0;g>=h;h++)c=h===g?this:this.clone(!0),o(e[h])[b](c),f.apply(d,c.get());return this.pushStack(d)}});var qb,rb={};function sb(b,c){var d=o(c.createElement(b)).appendTo(c.body),e=a.getDefaultComputedStyle?a.getDefaultComputedStyle(d[0]).display:o.css(d[0],"display");return d.detach(),e}function tb(a){var b=m,c=rb[a];return c||(c=sb(a,b),"none"!==c&&c||(qb=(qb||o("<iframe frameborder='0' width='0' height='0'/>")).appendTo(b.documentElement),b=qb[0].contentDocument,b.write(),b.close(),c=sb(a,b),qb.detach()),rb[a]=c),c}var ub=/^margin/,vb=new RegExp("^("+Q+")(?!px)[a-z%]+$","i"),wb=function(a){return a.ownerDocument.defaultView.getComputedStyle(a,null)};function xb(a,b,c){var d,e,f,g,h=a.style;return c=c||wb(a),c&&(g=c.getPropertyValue(b)||c[b]),c&&(""!==g||o.contains(a.ownerDocument,a)||(g=o.style(a,b)),vb.test(g)&&ub.test(b)&&(d=h.width,e=h.minWidth,f=h.maxWidth,h.minWidth=h.maxWidth=h.width=g,g=c.width,h.width=d,h.minWidth=e,h.maxWidth=f)),void 0!==g?g+"":g}function yb(a,b){return{get:function(){return a()?void delete this.get:(this.get=b).apply(this,arguments)}}}!function(){var b,c,d="padding:0;margin:0;border:0;display:block;-webkit-box-sizing:content-box;-moz-box-sizing:content-box;box-sizing:content-box",e=m.documentElement,f=m.createElement("div"),g=m.createElement("div");g.style.backgroundClip="content-box",g.cloneNode(!0).style.backgroundClip="",l.clearCloneStyle="content-box"===g.style.backgroundClip,f.style.cssText="border:0;width:0;height:0;position:absolute;top:0;left:-9999px;margin-top:1px",f.appendChild(g);function h(){g.style.cssText="-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box;padding:1px;border:1px;display:block;width:4px;margin-top:1%;position:absolute;top:1%",e.appendChild(f);var d=a.getComputedStyle(g,null);b="1%"!==d.top,c="4px"===d.width,e.removeChild(f)}a.getComputedStyle&&o.extend(l,{pixelPosition:function(){return h(),b},boxSizingReliable:function(){return null==c&&h(),c},reliableMarginRight:function(){var b,c=g.appendChild(m.createElement("div"));return c.style.cssText=g.style.cssText=d,c.style.marginRight=c.style.width="0",g.style.width="1px",e.appendChild(f),b=!parseFloat(a.getComputedStyle(c,null).marginRight),e.removeChild(f),g.innerHTML="",b}})}(),o.swap=function(a,b,c,d){var e,f,g={};for(f in b)g[f]=a.style[f],a.style[f]=b[f];e=c.apply(a,d||[]);for(f in b)a.style[f]=g[f];return e};var zb=/^(none|table(?!-c[ea]).+)/,Ab=new RegExp("^("+Q+")(.*)$","i"),Bb=new RegExp("^([+-])=("+Q+")","i"),Cb={position:"absolute",visibility:"hidden",display:"block"},Db={letterSpacing:0,fontWeight:400},Eb=["Webkit","O","Moz","ms"];function Fb(a,b){if(b in a)return b;var c=b[0].toUpperCase()+b.slice(1),d=b,e=Eb.length;while(e--)if(b=Eb[e]+c,b in a)return b;return d}function Gb(a,b,c){var d=Ab.exec(b);return d?Math.max(0,d[1]-(c||0))+(d[2]||"px"):b}function Hb(a,b,c,d,e){for(var f=c===(d?"border":"content")?4:"width"===b?1:0,g=0;4>f;f+=2)"margin"===c&&(g+=o.css(a,c+R[f],!0,e)),d?("content"===c&&(g-=o.css(a,"padding"+R[f],!0,e)),"margin"!==c&&(g-=o.css(a,"border"+R[f]+"Width",!0,e))):(g+=o.css(a,"padding"+R[f],!0,e),"padding"!==c&&(g+=o.css(a,"border"+R[f]+"Width",!0,e)));return g}function Ib(a,b,c){var d=!0,e="width"===b?a.offsetWidth:a.offsetHeight,f=wb(a),g="border-box"===o.css(a,"boxSizing",!1,f);if(0>=e||null==e){if(e=xb(a,b,f),(0>e||null==e)&&(e=a.style[b]),vb.test(e))return e;d=g&&(l.boxSizingReliable()||e===a.style[b]),e=parseFloat(e)||0}return e+Hb(a,b,c||(g?"border":"content"),d,f)+"px"}function Jb(a,b){for(var c,d,e,f=[],g=0,h=a.length;h>g;g++)d=a[g],d.style&&(f[g]=L.get(d,"olddisplay"),c=d.style.display,b?(f[g]||"none"!==c||(d.style.display=""),""===d.style.display&&S(d)&&(f[g]=L.access(d,"olddisplay",tb(d.nodeName)))):f[g]||(e=S(d),(c&&"none"!==c||!e)&&L.set(d,"olddisplay",e?c:o.css(d,"display"))));for(g=0;h>g;g++)d=a[g],d.style&&(b&&"none"!==d.style.display&&""!==d.style.display||(d.style.display=b?f[g]||"":"none"));return a}o.extend({cssHooks:{opacity:{get:function(a,b){if(b){var c=xb(a,"opacity");return""===c?"1":c}}}},cssNumber:{columnCount:!0,fillOpacity:!0,fontWeight:!0,lineHeight:!0,opacity:!0,order:!0,orphans:!0,widows:!0,zIndex:!0,zoom:!0},cssProps:{"float":"cssFloat"},style:function(a,b,c,d){if(a&&3!==a.nodeType&&8!==a.nodeType&&a.style){var e,f,g,h=o.camelCase(b),i=a.style;return b=o.cssProps[h]||(o.cssProps[h]=Fb(i,h)),g=o.cssHooks[b]||o.cssHooks[h],void 0===c?g&&"get"in g&&void 0!==(e=g.get(a,!1,d))?e:i[b]:(f=typeof c,"string"===f&&(e=Bb.exec(c))&&(c=(e[1]+1)*e[2]+parseFloat(o.css(a,b)),f="number"),null!=c&&c===c&&("number"!==f||o.cssNumber[h]||(c+="px"),l.clearCloneStyle||""!==c||0!==b.indexOf("background")||(i[b]="inherit"),g&&"set"in g&&void 0===(c=g.set(a,c,d))||(i[b]="",i[b]=c)),void 0)}},css:function(a,b,c,d){var e,f,g,h=o.camelCase(b);return b=o.cssProps[h]||(o.cssProps[h]=Fb(a.style,h)),g=o.cssHooks[b]||o.cssHooks[h],g&&"get"in g&&(e=g.get(a,!0,c)),void 0===e&&(e=xb(a,b,d)),"normal"===e&&b in Db&&(e=Db[b]),""===c||c?(f=parseFloat(e),c===!0||o.isNumeric(f)?f||0:e):e}}),o.each(["height","width"],function(a,b){o.cssHooks[b]={get:function(a,c,d){return c?0===a.offsetWidth&&zb.test(o.css(a,"display"))?o.swap(a,Cb,function(){return Ib(a,b,d)}):Ib(a,b,d):void 0},set:function(a,c,d){var e=d&&wb(a);return Gb(a,c,d?Hb(a,b,d,"border-box"===o.css(a,"boxSizing",!1,e),e):0)}}}),o.cssHooks.marginRight=yb(l.reliableMarginRight,function(a,b){return b?o.swap(a,{display:"inline-block"},xb,[a,"marginRight"]):void 0}),o.each({margin:"",padding:"",border:"Width"},function(a,b){o.cssHooks[a+b]={expand:function(c){for(var d=0,e={},f="string"==typeof c?c.split(" "):[c];4>d;d++)e[a+R[d]+b]=f[d]||f[d-2]||f[0];return e}},ub.test(a)||(o.cssHooks[a+b].set=Gb)}),o.fn.extend({css:function(a,b){return J(this,function(a,b,c){var d,e,f={},g=0;if(o.isArray(b)){for(d=wb(a),e=b.length;e>g;g++)f[b[g]]=o.css(a,b[g],!1,d);return f}return void 0!==c?o.style(a,b,c):o.css(a,b)},a,b,arguments.length>1)},show:function(){return Jb(this,!0)},hide:function(){return Jb(this)},toggle:function(a){return"boolean"==typeof a?a?this.show():this.hide():this.each(function(){S(this)?o(this).show():o(this).hide()})}});function Kb(a,b,c,d,e){return new Kb.prototype.init(a,b,c,d,e)}o.Tween=Kb,Kb.prototype={constructor:Kb,init:function(a,b,c,d,e,f){this.elem=a,this.prop=c,this.easing=e||"swing",this.options=b,this.start=this.now=this.cur(),this.end=d,this.unit=f||(o.cssNumber[c]?"":"px")},cur:function(){var a=Kb.propHooks[this.prop];return a&&a.get?a.get(this):Kb.propHooks._default.get(this)},run:function(a){var b,c=Kb.propHooks[this.prop];return this.pos=b=this.options.duration?o.easing[this.easing](a,this.options.duration*a,0,1,this.options.duration):a,this.now=(this.end-this.start)*b+this.start,this.options.step&&this.options.step.call(this.elem,this.now,this),c&&c.set?c.set(this):Kb.propHooks._default.set(this),this}},Kb.prototype.init.prototype=Kb.prototype,Kb.propHooks={_default:{get:function(a){var b;return null==a.elem[a.prop]||a.elem.style&&null!=a.elem.style[a.prop]?(b=o.css(a.elem,a.prop,""),b&&"auto"!==b?b:0):a.elem[a.prop]},set:function(a){o.fx.step[a.prop]?o.fx.step[a.prop](a):a.elem.style&&(null!=a.elem.style[o.cssProps[a.prop]]||o.cssHooks[a.prop])?o.style(a.elem,a.prop,a.now+a.unit):a.elem[a.prop]=a.now}}},Kb.propHooks.scrollTop=Kb.propHooks.scrollLeft={set:function(a){a.elem.nodeType&&a.elem.parentNode&&(a.elem[a.prop]=a.now)}},o.easing={linear:function(a){return a},swing:function(a){return.5-Math.cos(a*Math.PI)/2}},o.fx=Kb.prototype.init,o.fx.step={};var Lb,Mb,Nb=/^(?:toggle|show|hide)$/,Ob=new RegExp("^(?:([+-])=|)("+Q+")([a-z%]*)$","i"),Pb=/queueHooks$/,Qb=[Vb],Rb={"*":[function(a,b){var c=this.createTween(a,b),d=c.cur(),e=Ob.exec(b),f=e&&e[3]||(o.cssNumber[a]?"":"px"),g=(o.cssNumber[a]||"px"!==f&&+d)&&Ob.exec(o.css(c.elem,a)),h=1,i=20;if(g&&g[3]!==f){f=f||g[3],e=e||[],g=+d||1;do h=h||".5",g/=h,o.style(c.elem,a,g+f);while(h!==(h=c.cur()/d)&&1!==h&&--i)}return e&&(g=c.start=+g||+d||0,c.unit=f,c.end=e[1]?g+(e[1]+1)*e[2]:+e[2]),c}]};function Sb(){return setTimeout(function(){Lb=void 0}),Lb=o.now()}function Tb(a,b){var c,d=0,e={height:a};for(b=b?1:0;4>d;d+=2-b)c=R[d],e["margin"+c]=e["padding"+c]=a;return b&&(e.opacity=e.width=a),e}function Ub(a,b,c){for(var d,e=(Rb[b]||[]).concat(Rb["*"]),f=0,g=e.length;g>f;f++)if(d=e[f].call(c,b,a))return d}function Vb(a,b,c){var d,e,f,g,h,i,j,k=this,l={},m=a.style,n=a.nodeType&&S(a),p=L.get(a,"fxshow");c.queue||(h=o._queueHooks(a,"fx"),null==h.unqueued&&(h.unqueued=0,i=h.empty.fire,h.empty.fire=function(){h.unqueued||i()}),h.unqueued++,k.always(function(){k.always(function(){h.unqueued--,o.queue(a,"fx").length||h.empty.fire()})})),1===a.nodeType&&("height"in b||"width"in b)&&(c.overflow=[m.overflow,m.overflowX,m.overflowY],j=o.css(a,"display"),"none"===j&&(j=tb(a.nodeName)),"inline"===j&&"none"===o.css(a,"float")&&(m.display="inline-block")),c.overflow&&(m.overflow="hidden",k.always(function(){m.overflow=c.overflow[0],m.overflowX=c.overflow[1],m.overflowY=c.overflow[2]}));for(d in b)if(e=b[d],Nb.exec(e)){if(delete b[d],f=f||"toggle"===e,e===(n?"hide":"show")){if("show"!==e||!p||void 0===p[d])continue;n=!0}l[d]=p&&p[d]||o.style(a,d)}if(!o.isEmptyObject(l)){p?"hidden"in p&&(n=p.hidden):p=L.access(a,"fxshow",{}),f&&(p.hidden=!n),n?o(a).show():k.done(function(){o(a).hide()}),k.done(function(){var b;L.remove(a,"fxshow");for(b in l)o.style(a,b,l[b])});for(d in l)g=Ub(n?p[d]:0,d,k),d in p||(p[d]=g.start,n&&(g.end=g.start,g.start="width"===d||"height"===d?1:0))}}function Wb(a,b){var c,d,e,f,g;for(c in a)if(d=o.camelCase(c),e=b[d],f=a[c],o.isArray(f)&&(e=f[1],f=a[c]=f[0]),c!==d&&(a[d]=f,delete a[c]),g=o.cssHooks[d],g&&"expand"in g){f=g.expand(f),delete a[d];for(c in f)c in a||(a[c]=f[c],b[c]=e)}else b[d]=e}function Xb(a,b,c){var d,e,f=0,g=Qb.length,h=o.Deferred().always(function(){delete i.elem}),i=function(){if(e)return!1;for(var b=Lb||Sb(),c=Math.max(0,j.startTime+j.duration-b),d=c/j.duration||0,f=1-d,g=0,i=j.tweens.length;i>g;g++)j.tweens[g].run(f);return h.notifyWith(a,[j,f,c]),1>f&&i?c:(h.resolveWith(a,[j]),!1)},j=h.promise({elem:a,props:o.extend({},b),opts:o.extend(!0,{specialEasing:{}},c),originalProperties:b,originalOptions:c,startTime:Lb||Sb(),duration:c.duration,tweens:[],createTween:function(b,c){var d=o.Tween(a,j.opts,b,c,j.opts.specialEasing[b]||j.opts.easing);return j.tweens.push(d),d},stop:function(b){var c=0,d=b?j.tweens.length:0;if(e)return this;for(e=!0;d>c;c++)j.tweens[c].run(1);return b?h.resolveWith(a,[j,b]):h.rejectWith(a,[j,b]),this}}),k=j.props;for(Wb(k,j.opts.specialEasing);g>f;f++)if(d=Qb[f].call(j,a,k,j.opts))return d;return o.map(k,Ub,j),o.isFunction(j.opts.start)&&j.opts.start.call(a,j),o.fx.timer(o.extend(i,{elem:a,anim:j,queue:j.opts.queue})),j.progress(j.opts.progress).done(j.opts.done,j.opts.complete).fail(j.opts.fail).always(j.opts.always)}o.Animation=o.extend(Xb,{tweener:function(a,b){o.isFunction(a)?(b=a,a=["*"]):a=a.split(" ");for(var c,d=0,e=a.length;e>d;d++)c=a[d],Rb[c]=Rb[c]||[],Rb[c].unshift(b)},prefilter:function(a,b){b?Qb.unshift(a):Qb.push(a)}}),o.speed=function(a,b,c){var d=a&&"object"==typeof a?o.extend({},a):{complete:c||!c&&b||o.isFunction(a)&&a,duration:a,easing:c&&b||b&&!o.isFunction(b)&&b};return d.duration=o.fx.off?0:"number"==typeof d.duration?d.duration:d.duration in o.fx.speeds?o.fx.speeds[d.duration]:o.fx.speeds._default,(null==d.queue||d.queue===!0)&&(d.queue="fx"),d.old=d.complete,d.complete=function(){o.isFunction(d.old)&&d.old.call(this),d.queue&&o.dequeue(this,d.queue)},d},o.fn.extend({fadeTo:function(a,b,c,d){return this.filter(S).css("opacity",0).show().end().animate({opacity:b},a,c,d)},animate:function(a,b,c,d){var e=o.isEmptyObject(a),f=o.speed(b,c,d),g=function(){var b=Xb(this,o.extend({},a),f);(e||L.get(this,"finish"))&&b.stop(!0)};return g.finish=g,e||f.queue===!1?this.each(g):this.queue(f.queue,g)},stop:function(a,b,c){var d=function(a){var b=a.stop;delete a.stop,b(c)};return"string"!=typeof a&&(c=b,b=a,a=void 0),b&&a!==!1&&this.queue(a||"fx",[]),this.each(function(){var b=!0,e=null!=a&&a+"queueHooks",f=o.timers,g=L.get(this);if(e)g[e]&&g[e].stop&&d(g[e]);else for(e in g)g[e]&&g[e].stop&&Pb.test(e)&&d(g[e]);for(e=f.length;e--;)f[e].elem!==this||null!=a&&f[e].queue!==a||(f[e].anim.stop(c),b=!1,f.splice(e,1));(b||!c)&&o.dequeue(this,a)})},finish:function(a){return a!==!1&&(a=a||"fx"),this.each(function(){var b,c=L.get(this),d=c[a+"queue"],e=c[a+"queueHooks"],f=o.timers,g=d?d.length:0;for(c.finish=!0,o.queue(this,a,[]),e&&e.stop&&e.stop.call(this,!0),b=f.length;b--;)f[b].elem===this&&f[b].queue===a&&(f[b].anim.stop(!0),f.splice(b,1));for(b=0;g>b;b++)d[b]&&d[b].finish&&d[b].finish.call(this);delete c.finish})}}),o.each(["toggle","show","hide"],function(a,b){var c=o.fn[b];o.fn[b]=function(a,d,e){return null==a||"boolean"==typeof a?c.apply(this,arguments):this.animate(Tb(b,!0),a,d,e)}}),o.each({slideDown:Tb("show"),slideUp:Tb("hide"),slideToggle:Tb("toggle"),fadeIn:{opacity:"show"},fadeOut:{opacity:"hide"},fadeToggle:{opacity:"toggle"}},function(a,b){o.fn[a]=function(a,c,d){return this.animate(b,a,c,d)}}),o.timers=[],o.fx.tick=function(){var a,b=0,c=o.timers;for(Lb=o.now();b<c.length;b++)a=c[b],a()||c[b]!==a||c.splice(b--,1);c.length||o.fx.stop(),Lb=void 0},o.fx.timer=function(a){o.timers.push(a),a()?o.fx.start():o.timers.pop()},o.fx.interval=13,o.fx.start=function(){Mb||(Mb=setInterval(o.fx.tick,o.fx.interval))},o.fx.stop=function(){clearInterval(Mb),Mb=null},o.fx.speeds={slow:600,fast:200,_default:400},o.fn.delay=function(a,b){return a=o.fx?o.fx.speeds[a]||a:a,b=b||"fx",this.queue(b,function(b,c){var d=setTimeout(b,a);c.stop=function(){clearTimeout(d)}})},function(){var a=m.createElement("input"),b=m.createElement("select"),c=b.appendChild(m.createElement("option"));a.type="checkbox",l.checkOn=""!==a.value,l.optSelected=c.selected,b.disabled=!0,l.optDisabled=!c.disabled,a=m.createElement("input"),a.value="t",a.type="radio",l.radioValue="t"===a.value}();var Yb,Zb,$b=o.expr.attrHandle;o.fn.extend({attr:function(a,b){return J(this,o.attr,a,b,arguments.length>1)},removeAttr:function(a){return this.each(function(){o.removeAttr(this,a)})}}),o.extend({attr:function(a,b,c){var d,e,f=a.nodeType;if(a&&3!==f&&8!==f&&2!==f)return typeof a.getAttribute===U?o.prop(a,b,c):(1===f&&o.isXMLDoc(a)||(b=b.toLowerCase(),d=o.attrHooks[b]||(o.expr.match.bool.test(b)?Zb:Yb)),void 0===c?d&&"get"in d&&null!==(e=d.get(a,b))?e:(e=o.find.attr(a,b),null==e?void 0:e):null!==c?d&&"set"in d&&void 0!==(e=d.set(a,c,b))?e:(a.setAttribute(b,c+""),c):void o.removeAttr(a,b))},removeAttr:function(a,b){var c,d,e=0,f=b&&b.match(E);if(f&&1===a.nodeType)while(c=f[e++])d=o.propFix[c]||c,o.expr.match.bool.test(c)&&(a[d]=!1),a.removeAttribute(c)},attrHooks:{type:{set:function(a,b){if(!l.radioValue&&"radio"===b&&o.nodeName(a,"input")){var c=a.value;return a.setAttribute("type",b),c&&(a.value=c),b}}}}}),Zb={set:function(a,b,c){return b===!1?o.removeAttr(a,c):a.setAttribute(c,c),c}},o.each(o.expr.match.bool.source.match(/\w+/g),function(a,b){var c=$b[b]||o.find.attr;$b[b]=function(a,b,d){var e,f;
-return d||(f=$b[b],$b[b]=e,e=null!=c(a,b,d)?b.toLowerCase():null,$b[b]=f),e}});var _b=/^(?:input|select|textarea|button)$/i;o.fn.extend({prop:function(a,b){return J(this,o.prop,a,b,arguments.length>1)},removeProp:function(a){return this.each(function(){delete this[o.propFix[a]||a]})}}),o.extend({propFix:{"for":"htmlFor","class":"className"},prop:function(a,b,c){var d,e,f,g=a.nodeType;if(a&&3!==g&&8!==g&&2!==g)return f=1!==g||!o.isXMLDoc(a),f&&(b=o.propFix[b]||b,e=o.propHooks[b]),void 0!==c?e&&"set"in e&&void 0!==(d=e.set(a,c,b))?d:a[b]=c:e&&"get"in e&&null!==(d=e.get(a,b))?d:a[b]},propHooks:{tabIndex:{get:function(a){return a.hasAttribute("tabindex")||_b.test(a.nodeName)||a.href?a.tabIndex:-1}}}}),l.optSelected||(o.propHooks.selected={get:function(a){var b=a.parentNode;return b&&b.parentNode&&b.parentNode.selectedIndex,null}}),o.each(["tabIndex","readOnly","maxLength","cellSpacing","cellPadding","rowSpan","colSpan","useMap","frameBorder","contentEditable"],function(){o.propFix[this.toLowerCase()]=this});var ac=/[\t\r\n\f]/g;o.fn.extend({addClass:function(a){var b,c,d,e,f,g,h="string"==typeof a&&a,i=0,j=this.length;if(o.isFunction(a))return this.each(function(b){o(this).addClass(a.call(this,b,this.className))});if(h)for(b=(a||"").match(E)||[];j>i;i++)if(c=this[i],d=1===c.nodeType&&(c.className?(" "+c.className+" ").replace(ac," "):" ")){f=0;while(e=b[f++])d.indexOf(" "+e+" ")<0&&(d+=e+" ");g=o.trim(d),c.className!==g&&(c.className=g)}return this},removeClass:function(a){var b,c,d,e,f,g,h=0===arguments.length||"string"==typeof a&&a,i=0,j=this.length;if(o.isFunction(a))return this.each(function(b){o(this).removeClass(a.call(this,b,this.className))});if(h)for(b=(a||"").match(E)||[];j>i;i++)if(c=this[i],d=1===c.nodeType&&(c.className?(" "+c.className+" ").replace(ac," "):"")){f=0;while(e=b[f++])while(d.indexOf(" "+e+" ")>=0)d=d.replace(" "+e+" "," ");g=a?o.trim(d):"",c.className!==g&&(c.className=g)}return this},toggleClass:function(a,b){var c=typeof a;return"boolean"==typeof b&&"string"===c?b?this.addClass(a):this.removeClass(a):this.each(o.isFunction(a)?function(c){o(this).toggleClass(a.call(this,c,this.className,b),b)}:function(){if("string"===c){var b,d=0,e=o(this),f=a.match(E)||[];while(b=f[d++])e.hasClass(b)?e.removeClass(b):e.addClass(b)}else(c===U||"boolean"===c)&&(this.className&&L.set(this,"__className__",this.className),this.className=this.className||a===!1?"":L.get(this,"__className__")||"")})},hasClass:function(a){for(var b=" "+a+" ",c=0,d=this.length;d>c;c++)if(1===this[c].nodeType&&(" "+this[c].className+" ").replace(ac," ").indexOf(b)>=0)return!0;return!1}});var bc=/\r/g;o.fn.extend({val:function(a){var b,c,d,e=this[0];{if(arguments.length)return d=o.isFunction(a),this.each(function(c){var e;1===this.nodeType&&(e=d?a.call(this,c,o(this).val()):a,null==e?e="":"number"==typeof e?e+="":o.isArray(e)&&(e=o.map(e,function(a){return null==a?"":a+""})),b=o.valHooks[this.type]||o.valHooks[this.nodeName.toLowerCase()],b&&"set"in b&&void 0!==b.set(this,e,"value")||(this.value=e))});if(e)return b=o.valHooks[e.type]||o.valHooks[e.nodeName.toLowerCase()],b&&"get"in b&&void 0!==(c=b.get(e,"value"))?c:(c=e.value,"string"==typeof c?c.replace(bc,""):null==c?"":c)}}}),o.extend({valHooks:{select:{get:function(a){for(var b,c,d=a.options,e=a.selectedIndex,f="select-one"===a.type||0>e,g=f?null:[],h=f?e+1:d.length,i=0>e?h:f?e:0;h>i;i++)if(c=d[i],!(!c.selected&&i!==e||(l.optDisabled?c.disabled:null!==c.getAttribute("disabled"))||c.parentNode.disabled&&o.nodeName(c.parentNode,"optgroup"))){if(b=o(c).val(),f)return b;g.push(b)}return g},set:function(a,b){var c,d,e=a.options,f=o.makeArray(b),g=e.length;while(g--)d=e[g],(d.selected=o.inArray(o(d).val(),f)>=0)&&(c=!0);return c||(a.selectedIndex=-1),f}}}}),o.each(["radio","checkbox"],function(){o.valHooks[this]={set:function(a,b){return o.isArray(b)?a.checked=o.inArray(o(a).val(),b)>=0:void 0}},l.checkOn||(o.valHooks[this].get=function(a){return null===a.getAttribute("value")?"on":a.value})}),o.each("blur focus focusin focusout load resize scroll unload click dblclick mousedown mouseup mousemove mouseover mouseout mouseenter mouseleave change select submit keydown keypress keyup error contextmenu".split(" "),function(a,b){o.fn[b]=function(a,c){return arguments.length>0?this.on(b,null,a,c):this.trigger(b)}}),o.fn.extend({hover:function(a,b){return this.mouseenter(a).mouseleave(b||a)},bind:function(a,b,c){return this.on(a,null,b,c)},unbind:function(a,b){return this.off(a,null,b)},delegate:function(a,b,c,d){return this.on(b,a,c,d)},undelegate:function(a,b,c){return 1===arguments.length?this.off(a,"**"):this.off(b,a||"**",c)}});var cc=o.now(),dc=/\?/;o.parseJSON=function(a){return JSON.parse(a+"")},o.parseXML=function(a){var b,c;if(!a||"string"!=typeof a)return null;try{c=new DOMParser,b=c.parseFromString(a,"text/xml")}catch(d){b=void 0}return(!b||b.getElementsByTagName("parsererror").length)&&o.error("Invalid XML: "+a),b};var ec,fc,gc=/#.*$/,hc=/([?&])_=[^&]*/,ic=/^(.*?):[ \t]*([^\r\n]*)$/gm,jc=/^(?:about|app|app-storage|.+-extension|file|res|widget):$/,kc=/^(?:GET|HEAD)$/,lc=/^\/\//,mc=/^([\w.+-]+:)(?:\/\/(?:[^\/?#]*@|)([^\/?#:]*)(?::(\d+)|)|)/,nc={},oc={},pc="*/".concat("*");try{fc=location.href}catch(qc){fc=m.createElement("a"),fc.href="",fc=fc.href}ec=mc.exec(fc.toLowerCase())||[];function rc(a){return function(b,c){"string"!=typeof b&&(c=b,b="*");var d,e=0,f=b.toLowerCase().match(E)||[];if(o.isFunction(c))while(d=f[e++])"+"===d[0]?(d=d.slice(1)||"*",(a[d]=a[d]||[]).unshift(c)):(a[d]=a[d]||[]).push(c)}}function sc(a,b,c,d){var e={},f=a===oc;function g(h){var i;return e[h]=!0,o.each(a[h]||[],function(a,h){var j=h(b,c,d);return"string"!=typeof j||f||e[j]?f?!(i=j):void 0:(b.dataTypes.unshift(j),g(j),!1)}),i}return g(b.dataTypes[0])||!e["*"]&&g("*")}function tc(a,b){var c,d,e=o.ajaxSettings.flatOptions||{};for(c in b)void 0!==b[c]&&((e[c]?a:d||(d={}))[c]=b[c]);return d&&o.extend(!0,a,d),a}function uc(a,b,c){var d,e,f,g,h=a.contents,i=a.dataTypes;while("*"===i[0])i.shift(),void 0===d&&(d=a.mimeType||b.getResponseHeader("Content-Type"));if(d)for(e in h)if(h[e]&&h[e].test(d)){i.unshift(e);break}if(i[0]in c)f=i[0];else{for(e in c){if(!i[0]||a.converters[e+" "+i[0]]){f=e;break}g||(g=e)}f=f||g}return f?(f!==i[0]&&i.unshift(f),c[f]):void 0}function vc(a,b,c,d){var e,f,g,h,i,j={},k=a.dataTypes.slice();if(k[1])for(g in a.converters)j[g.toLowerCase()]=a.converters[g];f=k.shift();while(f)if(a.responseFields[f]&&(c[a.responseFields[f]]=b),!i&&d&&a.dataFilter&&(b=a.dataFilter(b,a.dataType)),i=f,f=k.shift())if("*"===f)f=i;else if("*"!==i&&i!==f){if(g=j[i+" "+f]||j["* "+f],!g)for(e in j)if(h=e.split(" "),h[1]===f&&(g=j[i+" "+h[0]]||j["* "+h[0]])){g===!0?g=j[e]:j[e]!==!0&&(f=h[0],k.unshift(h[1]));break}if(g!==!0)if(g&&a["throws"])b=g(b);else try{b=g(b)}catch(l){return{state:"parsererror",error:g?l:"No conversion from "+i+" to "+f}}}return{state:"success",data:b}}o.extend({active:0,lastModified:{},etag:{},ajaxSettings:{url:fc,type:"GET",isLocal:jc.test(ec[1]),global:!0,processData:!0,async:!0,contentType:"application/x-www-form-urlencoded; charset=UTF-8",accepts:{"*":pc,text:"text/plain",html:"text/html",xml:"application/xml, text/xml",json:"application/json, text/javascript"},contents:{xml:/xml/,html:/html/,json:/json/},responseFields:{xml:"responseXML",text:"responseText",json:"responseJSON"},converters:{"* text":String,"text html":!0,"text json":o.parseJSON,"text xml":o.parseXML},flatOptions:{url:!0,context:!0}},ajaxSetup:function(a,b){return b?tc(tc(a,o.ajaxSettings),b):tc(o.ajaxSettings,a)},ajaxPrefilter:rc(nc),ajaxTransport:rc(oc),ajax:function(a,b){"object"==typeof a&&(b=a,a=void 0),b=b||{};var c,d,e,f,g,h,i,j,k=o.ajaxSetup({},b),l=k.context||k,m=k.context&&(l.nodeType||l.jquery)?o(l):o.event,n=o.Deferred(),p=o.Callbacks("once memory"),q=k.statusCode||{},r={},s={},t=0,u="canceled",v={readyState:0,getResponseHeader:function(a){var b;if(2===t){if(!f){f={};while(b=ic.exec(e))f[b[1].toLowerCase()]=b[2]}b=f[a.toLowerCase()]}return null==b?null:b},getAllResponseHeaders:function(){return 2===t?e:null},setRequestHeader:function(a,b){var c=a.toLowerCase();return t||(a=s[c]=s[c]||a,r[a]=b),this},overrideMimeType:function(a){return t||(k.mimeType=a),this},statusCode:function(a){var b;if(a)if(2>t)for(b in a)q[b]=[q[b],a[b]];else v.always(a[v.status]);return this},abort:function(a){var b=a||u;return c&&c.abort(b),x(0,b),this}};if(n.promise(v).complete=p.add,v.success=v.done,v.error=v.fail,k.url=((a||k.url||fc)+"").replace(gc,"").replace(lc,ec[1]+"//"),k.type=b.method||b.type||k.method||k.type,k.dataTypes=o.trim(k.dataType||"*").toLowerCase().match(E)||[""],null==k.crossDomain&&(h=mc.exec(k.url.toLowerCase()),k.crossDomain=!(!h||h[1]===ec[1]&&h[2]===ec[2]&&(h[3]||("http:"===h[1]?"80":"443"))===(ec[3]||("http:"===ec[1]?"80":"443")))),k.data&&k.processData&&"string"!=typeof k.data&&(k.data=o.param(k.data,k.traditional)),sc(nc,k,b,v),2===t)return v;i=k.global,i&&0===o.active++&&o.event.trigger("ajaxStart"),k.type=k.type.toUpperCase(),k.hasContent=!kc.test(k.type),d=k.url,k.hasContent||(k.data&&(d=k.url+=(dc.test(d)?"&":"?")+k.data,delete k.data),k.cache===!1&&(k.url=hc.test(d)?d.replace(hc,"$1_="+cc++):d+(dc.test(d)?"&":"?")+"_="+cc++)),k.ifModified&&(o.lastModified[d]&&v.setRequestHeader("If-Modified-Since",o.lastModified[d]),o.etag[d]&&v.setRequestHeader("If-None-Match",o.etag[d])),(k.data&&k.hasContent&&k.contentType!==!1||b.contentType)&&v.setRequestHeader("Content-Type",k.contentType),v.setRequestHeader("Accept",k.dataTypes[0]&&k.accepts[k.dataTypes[0]]?k.accepts[k.dataTypes[0]]+("*"!==k.dataTypes[0]?", "+pc+"; q=0.01":""):k.accepts["*"]);for(j in k.headers)v.setRequestHeader(j,k.headers[j]);if(k.beforeSend&&(k.beforeSend.call(l,v,k)===!1||2===t))return v.abort();u="abort";for(j in{success:1,error:1,complete:1})v[j](k[j]);if(c=sc(oc,k,b,v)){v.readyState=1,i&&m.trigger("ajaxSend",[v,k]),k.async&&k.timeout>0&&(g=setTimeout(function(){v.abort("timeout")},k.timeout));try{t=1,c.send(r,x)}catch(w){if(!(2>t))throw w;x(-1,w)}}else x(-1,"No Transport");function x(a,b,f,h){var j,r,s,u,w,x=b;2!==t&&(t=2,g&&clearTimeout(g),c=void 0,e=h||"",v.readyState=a>0?4:0,j=a>=200&&300>a||304===a,f&&(u=uc(k,v,f)),u=vc(k,u,v,j),j?(k.ifModified&&(w=v.getResponseHeader("Last-Modified"),w&&(o.lastModified[d]=w),w=v.getResponseHeader("etag"),w&&(o.etag[d]=w)),204===a||"HEAD"===k.type?x="nocontent":304===a?x="notmodified":(x=u.state,r=u.data,s=u.error,j=!s)):(s=x,(a||!x)&&(x="error",0>a&&(a=0))),v.status=a,v.statusText=(b||x)+"",j?n.resolveWith(l,[r,x,v]):n.rejectWith(l,[v,x,s]),v.statusCode(q),q=void 0,i&&m.trigger(j?"ajaxSuccess":"ajaxError",[v,k,j?r:s]),p.fireWith(l,[v,x]),i&&(m.trigger("ajaxComplete",[v,k]),--o.active||o.event.trigger("ajaxStop")))}return v},getJSON:function(a,b,c){return o.get(a,b,c,"json")},getScript:function(a,b){return o.get(a,void 0,b,"script")}}),o.each(["get","post"],function(a,b){o[b]=function(a,c,d,e){return o.isFunction(c)&&(e=e||d,d=c,c=void 0),o.ajax({url:a,type:b,dataType:e,data:c,success:d})}}),o.each(["ajaxStart","ajaxStop","ajaxComplete","ajaxError","ajaxSuccess","ajaxSend"],function(a,b){o.fn[b]=function(a){return this.on(b,a)}}),o._evalUrl=function(a){return o.ajax({url:a,type:"GET",dataType:"script",async:!1,global:!1,"throws":!0})},o.fn.extend({wrapAll:function(a){var b;return o.isFunction(a)?this.each(function(b){o(this).wrapAll(a.call(this,b))}):(this[0]&&(b=o(a,this[0].ownerDocument).eq(0).clone(!0),this[0].parentNode&&b.insertBefore(this[0]),b.map(function(){var a=this;while(a.firstElementChild)a=a.firstElementChild;return a}).append(this)),this)},wrapInner:function(a){return this.each(o.isFunction(a)?function(b){o(this).wrapInner(a.call(this,b))}:function(){var b=o(this),c=b.contents();c.length?c.wrapAll(a):b.append(a)})},wrap:function(a){var b=o.isFunction(a);return this.each(function(c){o(this).wrapAll(b?a.call(this,c):a)})},unwrap:function(){return this.parent().each(function(){o.nodeName(this,"body")||o(this).replaceWith(this.childNodes)}).end()}}),o.expr.filters.hidden=function(a){return a.offsetWidth<=0&&a.offsetHeight<=0},o.expr.filters.visible=function(a){return!o.expr.filters.hidden(a)};var wc=/%20/g,xc=/\[\]$/,yc=/\r?\n/g,zc=/^(?:submit|button|image|reset|file)$/i,Ac=/^(?:input|select|textarea|keygen)/i;function Bc(a,b,c,d){var e;if(o.isArray(b))o.each(b,function(b,e){c||xc.test(a)?d(a,e):Bc(a+"["+("object"==typeof e?b:"")+"]",e,c,d)});else if(c||"object"!==o.type(b))d(a,b);else for(e in b)Bc(a+"["+e+"]",b[e],c,d)}o.param=function(a,b){var c,d=[],e=function(a,b){b=o.isFunction(b)?b():null==b?"":b,d[d.length]=encodeURIComponent(a)+"="+encodeURIComponent(b)};if(void 0===b&&(b=o.ajaxSettings&&o.ajaxSettings.traditional),o.isArray(a)||a.jquery&&!o.isPlainObject(a))o.each(a,function(){e(this.name,this.value)});else for(c in a)Bc(c,a[c],b,e);return d.join("&").replace(wc,"+")},o.fn.extend({serialize:function(){return o.param(this.serializeArray())},serializeArray:function(){return this.map(function(){var a=o.prop(this,"elements");return a?o.makeArray(a):this}).filter(function(){var a=this.type;return this.name&&!o(this).is(":disabled")&&Ac.test(this.nodeName)&&!zc.test(a)&&(this.checked||!T.test(a))}).map(function(a,b){var c=o(this).val();return null==c?null:o.isArray(c)?o.map(c,function(a){return{name:b.name,value:a.replace(yc,"\r\n")}}):{name:b.name,value:c.replace(yc,"\r\n")}}).get()}}),o.ajaxSettings.xhr=function(){try{return new XMLHttpRequest}catch(a){}};var Cc=0,Dc={},Ec={0:200,1223:204},Fc=o.ajaxSettings.xhr();a.ActiveXObject&&o(a).on("unload",function(){for(var a in Dc)Dc[a]()}),l.cors=!!Fc&&"withCredentials"in Fc,l.ajax=Fc=!!Fc,o.ajaxTransport(function(a){var b;return l.cors||Fc&&!a.crossDomain?{send:function(c,d){var e,f=a.xhr(),g=++Cc;if(f.open(a.type,a.url,a.async,a.username,a.password),a.xhrFields)for(e in a.xhrFields)f[e]=a.xhrFields[e];a.mimeType&&f.overrideMimeType&&f.overrideMimeType(a.mimeType),a.crossDomain||c["X-Requested-With"]||(c["X-Requested-With"]="XMLHttpRequest");for(e in c)f.setRequestHeader(e,c[e]);b=function(a){return function(){b&&(delete Dc[g],b=f.onload=f.onerror=null,"abort"===a?f.abort():"error"===a?d(f.status,f.statusText):d(Ec[f.status]||f.status,f.statusText,"string"==typeof f.responseText?{text:f.responseText}:void 0,f.getAllResponseHeaders()))}},f.onload=b(),f.onerror=b("error"),b=Dc[g]=b("abort"),f.send(a.hasContent&&a.data||null)},abort:function(){b&&b()}}:void 0}),o.ajaxSetup({accepts:{script:"text/javascript, application/javascript, application/ecmascript, application/x-ecmascript"},contents:{script:/(?:java|ecma)script/},converters:{"text script":function(a){return o.globalEval(a),a}}}),o.ajaxPrefilter("script",function(a){void 0===a.cache&&(a.cache=!1),a.crossDomain&&(a.type="GET")}),o.ajaxTransport("script",function(a){if(a.crossDomain){var b,c;return{send:function(d,e){b=o("<script>").prop({async:!0,charset:a.scriptCharset,src:a.url}).on("load error",c=function(a){b.remove(),c=null,a&&e("error"===a.type?404:200,a.type)}),m.head.appendChild(b[0])},abort:function(){c&&c()}}}});var Gc=[],Hc=/(=)\?(?=&|$)|\?\?/;o.ajaxSetup({jsonp:"callback",jsonpCallback:function(){var a=Gc.pop()||o.expando+"_"+cc++;return this[a]=!0,a}}),o.ajaxPrefilter("json jsonp",function(b,c,d){var e,f,g,h=b.jsonp!==!1&&(Hc.test(b.url)?"url":"string"==typeof b.data&&!(b.contentType||"").indexOf("application/x-www-form-urlencoded")&&Hc.test(b.data)&&"data");return h||"jsonp"===b.dataTypes[0]?(e=b.jsonpCallback=o.isFunction(b.jsonpCallback)?b.jsonpCallback():b.jsonpCallback,h?b[h]=b[h].replace(Hc,"$1"+e):b.jsonp!==!1&&(b.url+=(dc.test(b.url)?"&":"?")+b.jsonp+"="+e),b.converters["script json"]=function(){return g||o.error(e+" was not called"),g[0]},b.dataTypes[0]="json",f=a[e],a[e]=function(){g=arguments},d.always(function(){a[e]=f,b[e]&&(b.jsonpCallback=c.jsonpCallback,Gc.push(e)),g&&o.isFunction(f)&&f(g[0]),g=f=void 0}),"script"):void 0}),o.parseHTML=function(a,b,c){if(!a||"string"!=typeof a)return null;"boolean"==typeof b&&(c=b,b=!1),b=b||m;var d=v.exec(a),e=!c&&[];return d?[b.createElement(d[1])]:(d=o.buildFragment([a],b,e),e&&e.length&&o(e).remove(),o.merge([],d.childNodes))};var Ic=o.fn.load;o.fn.load=function(a,b,c){if("string"!=typeof a&&Ic)return Ic.apply(this,arguments);var d,e,f,g=this,h=a.indexOf(" ");return h>=0&&(d=a.slice(h),a=a.slice(0,h)),o.isFunction(b)?(c=b,b=void 0):b&&"object"==typeof b&&(e="POST"),g.length>0&&o.ajax({url:a,type:e,dataType:"html",data:b}).done(function(a){f=arguments,g.html(d?o("<div>").append(o.parseHTML(a)).find(d):a)}).complete(c&&function(a,b){g.each(c,f||[a.responseText,b,a])}),this},o.expr.filters.animated=function(a){return o.grep(o.timers,function(b){return a===b.elem}).length};var Jc=a.document.documentElement;function Kc(a){return o.isWindow(a)?a:9===a.nodeType&&a.defaultView}o.offset={setOffset:function(a,b,c){var d,e,f,g,h,i,j,k=o.css(a,"position"),l=o(a),m={};"static"===k&&(a.style.position="relative"),h=l.offset(),f=o.css(a,"top"),i=o.css(a,"left"),j=("absolute"===k||"fixed"===k)&&(f+i).indexOf("auto")>-1,j?(d=l.position(),g=d.top,e=d.left):(g=parseFloat(f)||0,e=parseFloat(i)||0),o.isFunction(b)&&(b=b.call(a,c,h)),null!=b.top&&(m.top=b.top-h.top+g),null!=b.left&&(m.left=b.left-h.left+e),"using"in b?b.using.call(a,m):l.css(m)}},o.fn.extend({offset:function(a){if(arguments.length)return void 0===a?this:this.each(function(b){o.offset.setOffset(this,a,b)});var b,c,d=this[0],e={top:0,left:0},f=d&&d.ownerDocument;if(f)return b=f.documentElement,o.contains(b,d)?(typeof d.getBoundingClientRect!==U&&(e=d.getBoundingClientRect()),c=Kc(f),{top:e.top+c.pageYOffset-b.clientTop,left:e.left+c.pageXOffset-b.clientLeft}):e},position:function(){if(this[0]){var a,b,c=this[0],d={top:0,left:0};return"fixed"===o.css(c,"position")?b=c.getBoundingClientRect():(a=this.offsetParent(),b=this.offset(),o.nodeName(a[0],"html")||(d=a.offset()),d.top+=o.css(a[0],"borderTopWidth",!0),d.left+=o.css(a[0],"borderLeftWidth",!0)),{top:b.top-d.top-o.css(c,"marginTop",!0),left:b.left-d.left-o.css(c,"marginLeft",!0)}}},offsetParent:function(){return this.map(function(){var a=this.offsetParent||Jc;while(a&&!o.nodeName(a,"html")&&"static"===o.css(a,"position"))a=a.offsetParent;return a||Jc})}}),o.each({scrollLeft:"pageXOffset",scrollTop:"pageYOffset"},function(b,c){var d="pageYOffset"===c;o.fn[b]=function(e){return J(this,function(b,e,f){var g=Kc(b);return void 0===f?g?g[c]:b[e]:void(g?g.scrollTo(d?a.pageXOffset:f,d?f:a.pageYOffset):b[e]=f)},b,e,arguments.length,null)}}),o.each(["top","left"],function(a,b){o.cssHooks[b]=yb(l.pixelPosition,function(a,c){return c?(c=xb(a,b),vb.test(c)?o(a).position()[b]+"px":c):void 0})}),o.each({Height:"height",Width:"width"},function(a,b){o.each({padding:"inner"+a,content:b,"":"outer"+a},function(c,d){o.fn[d]=function(d,e){var f=arguments.length&&(c||"boolean"!=typeof d),g=c||(d===!0||e===!0?"margin":"border");return J(this,function(b,c,d){var e;return o.isWindow(b)?b.document.documentElement["client"+a]:9===b.nodeType?(e=b.documentElement,Math.max(b.body["scroll"+a],e["scroll"+a],b.body["offset"+a],e["offset"+a],e["client"+a])):void 0===d?o.css(b,c,g):o.style(b,c,d,g)},b,f?d:void 0,f,null)}})}),o.fn.size=function(){return this.length},o.fn.andSelf=o.fn.addBack,"function"==typeof define&&define.amd&&define("jquery",[],function(){return o});var Lc=a.jQuery,Mc=a.$;return o.noConflict=function(b){return a.$===o&&(a.$=Mc),b&&a.jQuery===o&&(a.jQuery=Lc),o},typeof b===U&&(a.jQuery=a.$=o),o});
+var ozpIwc=ozpIwc || {};
+
+/**
+ * @class
+ * A repository of metrics
+ */
+ozpIwc.MetricsRegistry=function() {
+	this.metrics={};
+    var self=this;
+    this.gauge('registry.metrics.types').set(function() {
+        return Object.keys(self.metrics).length;
+    });
+
+};
+
+/**
+ * 
+ * @private
+ * @param {string} name - Name of the metric
+ * @param {function} type - The constructor of the requested type for this metric.
+ * @returns {MetricType} - Null if the metric already exists of a different type.  Otherwise a reference to the metric.
+ */
+ozpIwc.MetricsRegistry.prototype.findOrCreateMetric=function(name,type) {
+	var m= this.metrics[name];
+    if(!m) {
+        m = this.metrics[name] = new type();
+        m.name=name;
+        return m;
+    }
+	if(m instanceof type){
+			return m;
+	} else {
+			return null;
+	}			
+};
+
+/**
+ * Joins the arguments together into a name.
+ * @private
+ * @param {string[]} args - Array or the argument-like "arguments" value.
+ * @returns {string}
+ */
+ozpIwc.MetricsRegistry.prototype.makeName=function(args) {
+	// slice is necessary because "arguments" isn't a real array, and it's what
+	// is usually passed in, here.
+	return Array.prototype.slice.call(args).join(".");
+};
+
+/**
+ * @param {...string} name - components of the name
+ * @returns {ozpIwc.metricTypes.Counter}
+ */
+ozpIwc.MetricsRegistry.prototype.counter=function(name) {
+	return this.findOrCreateMetric(this.makeName(arguments),ozpIwc.metricTypes.Counter);
+};
+
+/**
+ * @param {...string} name - components of the name
+ * @returns {ozpIwc.metricTypes.Meter}
+ */
+ozpIwc.MetricsRegistry.prototype.meter=function(name) {
+	return this.findOrCreateMetric(this.makeName(arguments),ozpIwc.metricTypes.Meter);
+};
+
+/**
+ * @param {...string} name - components of the name
+ * @returns {ozpIwc.metricTypes.Gauge}
+ */
+ozpIwc.MetricsRegistry.prototype.gauge=function(name) {
+	return this.findOrCreateMetric(this.makeName(arguments),ozpIwc.metricTypes.Gauge);
+};
+
+/**
+ * @param {...string} name - components of the name
+ * @returns {ozpIwc.metricTypes.Gauge}
+ */
+ozpIwc.MetricsRegistry.prototype.histogram=function(name) {
+	return this.findOrCreateMetric(this.makeName(arguments),ozpIwc.metricTypes.Histogram);
+};
+
+/**
+ * @param {...string} name - components of the name
+ * @returns {ozpIwc.metricTypes.Gauge}
+ */
+ozpIwc.MetricsRegistry.prototype.timer=function(name) {
+	return this.findOrCreateMetric(this.makeName(arguments),ozpIwc.metricTypes.Timer);
+};
+
+/**
+ * @param {...string} name - components of the name
+ * @returns {ozpIwc.metricTypes.Gauge}
+ */
+ozpIwc.MetricsRegistry.prototype.register=function(name,metric) {
+	this.metrics[this.makeName(name)]=metric;
+	
+	return metric;
+};
+
+/**
+ * 
+ * @returns {unresolved}
+ */
+ozpIwc.MetricsRegistry.prototype.toJson=function() {
+	var rv={};
+	for(var k in this.metrics) {
+		var path=k.split(".");
+		var pos=rv;
+		while(path.length > 1) {
+			var current=path.shift();
+			pos = pos[current]=pos[current] || {};
+		}
+		pos[path[0]]=this.metrics[k].get();
+	}
+	return rv;
+};
+
+ozpIwc.MetricsRegistry.prototype.allMetrics=function() {
+    var rv=[];
+    for(var k in this.metrics) {
+        rv.push(this.metrics[k]);
+    }
+    return rv;
+};
+
+ozpIwc.metrics=new ozpIwc.MetricsRegistry();
 
 /** @namespace */
 var ozpIwc=ozpIwc || {};
 
-/**
-	* @class
-	*/
-ozpIwc.Event=function() {
-	this.events={};
-};
+/** @namespace */
+ozpIwc.util=ozpIwc.util || {};
 
-/**
- * Registers a handler for the the event.
- * @param {string} event The name of the event to trigger on
- * @param {function} callback Function to be invoked
- * @param {object} [self] Used as the this pointer when callback is invoked.
- * @returns {object} A handle that can be used to unregister the callback via [off()]{@link ozpIwc.Event#off}
- */
-ozpIwc.Event.prototype.on=function(event,callback,self) {
-	var wrapped=callback;
-	if(self) {
-		wrapped=function() {
-			callback.apply(self,arguments);
-		};
-		wrapped.ozpIwcDelegateFor=callback;
-	}
-	this.events[event]=this.events[event]||[];
-	this.events[event].push(wrapped);
-	return wrapped;
-};
+ozpIwc.util.ajax = function (config) {
+    return new Promise(function(resolve,reject) {
+        var request = new XMLHttpRequest();
+        request.onreadystatechange = function() {
+            if (request.readyState !== 4) {
+                return;
+            }
 
-/**
- * Unregisters an event handler previously registered.
- * @param {type} event
- * @param {type} callback
- */
-ozpIwc.Event.prototype.off=function(event,callback) {
-	this.events[event]=(this.events[event]||[]).filter( function(h) {
-		return h!==callback && h.ozpIwcDelegateFor !== callback;
-	});
-};
+            if (request.status === 200) {
+                resolve(JSON.parse(this.responseText));
+            } else {
+                reject(this);
+            }
+        };
+        request.open(config.method, config.href, true);
 
-/**
- * Fires an event that will be received by all handlers.
- * @param {string} eventName  - Name of the event
- * @param {object} event - Event object to pass to the handers.
- * @returns {object} The event after all handlers have processed it
- */
-ozpIwc.Event.prototype.trigger=function(eventName,event) {
-	event = event || new ozpIwc.CancelableEvent();
-	var handlers=this.events[eventName] || [];
-
-	handlers.forEach(function(h) {
-		h(event);
-	});
-	return event;
-};
-
-
-/**
- * Adds an on() and off() function to the target that delegate to this object
- * @param {object} target Target to receive the on/off functions
- */
-ozpIwc.Event.prototype.mixinOnOff=function(target) {
-	var self=this;
-	target.on=function() { return self.on.apply(self,arguments);};
-	target.off=function() { return self.off.apply(self,arguments);};
-};
-
-/**
- * Convenient base for events that can be canceled.  Provides and manages
- * the properties canceled and cancelReason, as well as the member function
- * cancel().
- * @class
- * @param {object} data - Data that will be copied into the event
- */
-ozpIwc.CancelableEvent=function(data) {
-	data = data || {};
-	for(var k in data) {
-		this[k]=data[k];
-	}
-	this.canceled=false;
-	this.cancelReason=null;
-};
-
-/**
- * Marks the event as canceled.
- * @param {type} reason - A text description of why the event was canceled.
- * @returns {ozpIwc.CancelableEvent} Reference to self
- */
-ozpIwc.CancelableEvent.prototype.cancel=function(reason) {
-	reason= reason || "Unknown";
-	this.canceled=true;
-	this.cancelReason=reason;
-	return this;
+        if(config.method === "POST") {
+            request.send(config.data);
+        }
+        request.setRequestHeader("Content-Type", "application/json");
+        request.setRequestHeader("Cache-Control", "no-cache");
+        request.send();
+    });
 };
 
 /** @namespace */
@@ -1036,88 +3663,245 @@ ozpIwc.log=ozpIwc.log || {
 	}
 };
 
-/*!
- * https://github.com/es-shims/es5-shim
- * @license es5-shim Copyright 2009-2014 by contributors, MIT License
- * see https://github.com/es-shims/es5-shim/blob/master/LICENSE
- */
-(function(e){if(typeof define==="function"){define(e)}else if(typeof YUI==="function"){YUI.add("es5-sham",e)}else{e()}})(function(){var e=Function.prototype.call;var t=Object.prototype;var r=e.bind(t.hasOwnProperty);var n;var o;var i;var c;var f;if(f=r(t,"__defineGetter__")){n=e.bind(t.__defineGetter__);o=e.bind(t.__defineSetter__);i=e.bind(t.__lookupGetter__);c=e.bind(t.__lookupSetter__)}if(!Object.getPrototypeOf){Object.getPrototypeOf=function g(e){var r=e.__proto__;if(r||r===null){return r}else if(e.constructor){return e.constructor.prototype}else{return t}}}function u(e){try{e.sentinel=0;return Object.getOwnPropertyDescriptor(e,"sentinel").value===0}catch(t){}}if(Object.defineProperty){var p=u({});var a=typeof document==="undefined"||u(document.createElement("div"));if(!a||!p){var l=Object.getOwnPropertyDescriptor}}if(!Object.getOwnPropertyDescriptor||l){var b="Object.getOwnPropertyDescriptor called on a non-object: ";Object.getOwnPropertyDescriptor=function E(e,n){if(typeof e!=="object"&&typeof e!=="function"||e===null){throw new TypeError(b+e)}if(l){try{return l.call(Object,e,n)}catch(o){}}if(!r(e,n)){return}var u={enumerable:true,configurable:true};if(f){var p=e.__proto__;var a=e!==t;if(a){e.__proto__=t}var _=i(e,n);var s=c(e,n);if(a){e.__proto__=p}if(_||s){if(_){u.get=_}if(s){u.set=s}return u}}u.value=e[n];u.writable=true;return u}}if(!Object.getOwnPropertyNames){Object.getOwnPropertyNames=function z(e){return Object.keys(e)}}if(!Object.create){var _;var s=!({__proto__:null}instanceof Object);if(s||typeof document==="undefined"){_=function(){return{__proto__:null}}}else{_=function(){var e=document.createElement("iframe");var t=document.body||document.documentElement;e.style.display="none";t.appendChild(e);e.src="javascript:";var r=e.contentWindow.Object.prototype;t.removeChild(e);e=null;delete r.constructor;delete r.hasOwnProperty;delete r.propertyIsEnumerable;delete r.isPrototypeOf;delete r.toLocaleString;delete r.toString;delete r.valueOf;r.__proto__=null;function n(){}n.prototype=r;_=function(){return new n};return new n}}Object.create=function S(e,t){var r;function n(){}if(e===null){r=_()}else{if(typeof e!=="object"&&typeof e!=="function"){throw new TypeError("Object prototype may only be an Object or null")}n.prototype=e;r=new n;r.__proto__=e}if(t!==void 0){Object.defineProperties(r,t)}return r}}function d(e){try{Object.defineProperty(e,"sentinel",{});return"sentinel"in e}catch(t){}}if(Object.defineProperty){var y=d({});var O=typeof document==="undefined"||d(document.createElement("div"));if(!y||!O){var j=Object.defineProperty,v=Object.defineProperties}}if(!Object.defineProperty||j){var w="Property description must be an object: ";var P="Object.defineProperty called on non-object: ";var m="getters & setters can not be defined "+"on this javascript engine";Object.defineProperty=function T(e,u,p){if(typeof e!=="object"&&typeof e!=="function"||e===null){throw new TypeError(P+e)}if(typeof p!=="object"&&typeof p!=="function"||p===null){throw new TypeError(w+p)}if(j){try{return j.call(Object,e,u,p)}catch(a){}}if(r(p,"value")){if(f&&(i(e,u)||c(e,u))){var l=e.__proto__;e.__proto__=t;delete e[u];e[u]=p.value;e.__proto__=l}else{e[u]=p.value}}else{if(!f){throw new TypeError(m)}if(r(p,"get")){n(e,u,p.get)}if(r(p,"set")){o(e,u,p.set)}}return e}}if(!Object.defineProperties||v){Object.defineProperties=function D(e,t){if(v){try{return v.call(Object,e,t)}catch(n){}}for(var o in t){if(r(t,o)&&o!=="__proto__"){Object.defineProperty(e,o,t[o])}}return e}}if(!Object.seal){Object.seal=function x(e){return e}}if(!Object.freeze){Object.freeze=function k(e){return e}}try{Object.freeze(function(){})}catch(h){Object.freeze=function F(e){return function t(r){if(typeof r==="function"){return r}else{return e(r)}}}(Object.freeze)}if(!Object.preventExtensions){Object.preventExtensions=function G(e){return e}}if(!Object.isSealed){Object.isSealed=function I(e){return false}}if(!Object.isFrozen){Object.isFrozen=function C(e){return false}}if(!Object.isExtensible){Object.isExtensible=function N(e){if(Object(e)!==e){throw new TypeError}var t="";while(r(e,t)){t+="?"}e[t]=true;var n=r(e,t);delete e[t];return n}}});
-//# sourceMappingURL=es5-sham.map
+(function (global, undefined) {
+    "use strict";
+
+    if (global.setImmediate) {
+        return;
+    }
+
+    var nextHandle = 1; // Spec says greater than zero
+    var tasksByHandle = {};
+    var currentlyRunningATask = false;
+    var doc = global.document;
+    var setImmediate;
+
+    function addFromSetImmediateArguments(args) {
+        tasksByHandle[nextHandle] = partiallyApplied.apply(undefined, args);
+        return nextHandle++;
+    }
+
+    // This function accepts the same arguments as setImmediate, but
+    // returns a function that requires no arguments.
+    function partiallyApplied(handler) {
+        var args = [].slice.call(arguments, 1);
+        return function() {
+            if (typeof handler === "function") {
+                handler.apply(undefined, args);
+            } else {
+                (new Function("" + handler))();
+            }
+        };
+    }
+
+    function runIfPresent(handle) {
+        // From the spec: "Wait until any invocations of this algorithm started before this one have completed."
+        // So if we're currently running a task, we'll need to delay this invocation.
+        if (currentlyRunningATask) {
+            // Delay by doing a setTimeout. setImmediate was tried instead, but in Firefox 7 it generated a
+            // "too much recursion" error.
+            setTimeout(partiallyApplied(runIfPresent, handle), 0);
+        } else {
+            var task = tasksByHandle[handle];
+            if (task) {
+                currentlyRunningATask = true;
+                try {
+                    task();
+                } finally {
+                    clearImmediate(handle);
+                    currentlyRunningATask = false;
+                }
+            }
+        }
+    }
+
+    function clearImmediate(handle) {
+        delete tasksByHandle[handle];
+    }
+
+    function installNextTickImplementation() {
+        setImmediate = function() {
+            var handle = addFromSetImmediateArguments(arguments);
+            process.nextTick(partiallyApplied(runIfPresent, handle));
+            return handle;
+        };
+    }
+
+    function canUsePostMessage() {
+        // The test against `importScripts` prevents this implementation from being installed inside a web worker,
+        // where `global.postMessage` means something completely different and can't be used for this purpose.
+        if (global.postMessage && !global.importScripts) {
+            var postMessageIsAsynchronous = true;
+            var oldOnMessage = global.onmessage;
+            global.onmessage = function() {
+                postMessageIsAsynchronous = false;
+            };
+            global.postMessage("", "*");
+            global.onmessage = oldOnMessage;
+            return postMessageIsAsynchronous;
+        }
+    }
+
+    function installPostMessageImplementation() {
+        // Installs an event handler on `global` for the `message` event: see
+        // * https://developer.mozilla.org/en/DOM/window.postMessage
+        // * http://www.whatwg.org/specs/web-apps/current-work/multipage/comms.html#crossDocumentMessages
+
+        var messagePrefix = "setImmediate$" + Math.random() + "$";
+        var onGlobalMessage = function(event) {
+            if (event.source === global &&
+                typeof event.data === "string" &&
+                event.data.indexOf(messagePrefix) === 0) {
+                runIfPresent(+event.data.slice(messagePrefix.length));
+            }
+        };
+
+        if (global.addEventListener) {
+            global.addEventListener("message", onGlobalMessage, false);
+        } else {
+            global.attachEvent("onmessage", onGlobalMessage);
+        }
+
+        setImmediate = function() {
+            var handle = addFromSetImmediateArguments(arguments);
+            global.postMessage(messagePrefix + handle, "*");
+            return handle;
+        };
+    }
+
+    function installMessageChannelImplementation() {
+        var channel = new MessageChannel();
+        channel.port1.onmessage = function(event) {
+            var handle = event.data;
+            runIfPresent(handle);
+        };
+
+        setImmediate = function() {
+            var handle = addFromSetImmediateArguments(arguments);
+            channel.port2.postMessage(handle);
+            return handle;
+        };
+    }
+
+    function installReadyStateChangeImplementation() {
+        var html = doc.documentElement;
+        setImmediate = function() {
+            var handle = addFromSetImmediateArguments(arguments);
+            // Create a <script> element; its readystatechange event will be fired asynchronously once it is inserted
+            // into the document. Do so, thus queuing up the task. Remember to clean up once it's been called.
+            var script = doc.createElement("script");
+            script.onreadystatechange = function () {
+                runIfPresent(handle);
+                script.onreadystatechange = null;
+                html.removeChild(script);
+                script = null;
+            };
+            html.appendChild(script);
+            return handle;
+        };
+    }
+
+    function installSetTimeoutImplementation() {
+        setImmediate = function() {
+            var handle = addFromSetImmediateArguments(arguments);
+            setTimeout(partiallyApplied(runIfPresent, handle), 0);
+            return handle;
+        };
+    }
+
+    // If supported, we should attach to the prototype of global, since that is where setTimeout et al. live.
+    var attachTo = Object.getPrototypeOf && Object.getPrototypeOf(global);
+    attachTo = attachTo && attachTo.setTimeout ? attachTo : global;
+
+    // Don't get fooled by e.g. browserify environments.
+    if ({}.toString.call(global.process) === "[object process]") {
+        // For Node.js before 0.9
+        installNextTickImplementation();
+
+    } else if (canUsePostMessage()) {
+        // For non-IE10 modern browsers
+        installPostMessageImplementation();
+
+    } else if (global.MessageChannel) {
+        // For web workers, where supported
+        installMessageChannelImplementation();
+
+    } else if (doc && "onreadystatechange" in doc.createElement("script")) {
+        // For IE 6–8
+        installReadyStateChangeImplementation();
+
+    } else {
+        // For older browsers
+        installSetTimeoutImplementation();
+    }
+
+    attachTo.setImmediate = setImmediate;
+    attachTo.clearImmediate = clearImmediate;
+}(new Function("return this")()));
+
+/** @namespace */
 var ozpIwc=ozpIwc || {};
 
+/** @namespace */
+ozpIwc.util=ozpIwc.util || {};
+
 /**
- * @class
- * @param {object} [config]
- * @param {function} [config.defaultData] - The default data for a node if accessed.
- * @param {function} [config.copyValue] - How to copy values.  The default is JSON.parse(JSON.stringify(value)).
+ * Generates a large hexidecimal string to serve as a unique ID.  Not a guid.
+ * @returns {String}
  */
-ozpIwc.KeyValueStore = function(config) {
-	config=config || {};
-	this.defaultData=config.defaultData || function() { return undefined;};
-	this.copyValue=config.copyValue || function(value) { 
-		if(typeof(value) === 'array' || typeof(value) === 'object') {
-			return JSON.parse(JSON.stringify(value));
-		} else {
-			return value;
-		}
-	};
-	this.data={};
-	this.events=new ozpIwc.Event();
-	this.events.mixinOnOff(this);	
+ozpIwc.util.generateId=function() {
+    return Math.floor(Math.random() * 0xffffffff).toString(16);
 };
 
-ozpIwc.KeyValueStore.prototype.set=function(path,newValue) {
-	var oldValue=this.data[path];
-	var evt=new ozpIwc.CancelableEvent({
-			'path': path,
-			'newValue': this.copyValue(newValue),
-			'oldValue': this.copyValue(oldValue)
-	});
-	if(!this.events.trigger("preSet",evt).canceled) {
-		this.data[path]=evt.newValue;
-		this.events.trigger("set",{
-			'path': path,
-			'newValue': this.copyValue(evt.newValue),
-			'oldValue': this.copyValue(oldValue)
-		});
-	}
+/**
+ * Invokes the callback handler on another event loop as soon as possible.
+*/
+ozpIwc.util.setImmediate=function(f) {
+//    window.setTimeout(f,0);
+    window.setImmediate(f);
 };
 
-ozpIwc.KeyValueStore.prototype.hasKey=function(path) {
-	return path in this.data;
+/**
+ * Returns true if every needle is found in the haystack.
+ * @param {array} haystack - The array to search.
+ * @param {array} needles - All of the values to search.
+ * @param {function} [equal] - What constitutes equality.  Defaults to a===b.
+ * @returns {boolean}
+ */
+ozpIwc.util.arrayContainsAll=function(haystack,needles,equal) {
+    equal=equal || function(a,b) { return a===b;};
+    return needles.every(function(needle) { 
+        return haystack.some(function(hay) { 
+            return equal(hay,needle);
+        });
+    });
 };
 
-ozpIwc.KeyValueStore.prototype.get=function(path) {
-	if(!(path in this.data)) {
-		this.data[path]=this.defaultData();
-	}
-	
-	var evt=new ozpIwc.CancelableEvent({
-			'path': path,
-			'value': this.copyValue(this.data[path])
-	});
-	
-	if(!this.events.trigger("preGet",evt).canceled) {
-		return evt.value;
-	}
+
+/**
+ * Returns true if the value every attribute in needs is equal to 
+ * value of the same attribute in haystack.
+ * @param {array} haystack - The object that must contain all attributes and values.
+ * @param {array} needles - The reference object for the attributes and values.
+ * @param {function} [equal] - What constitutes equality.  Defaults to a===b.
+ * @returns {boolean}
+ */
+ozpIwc.util.objectContainsAll=function(haystack,needles,equal) {
+    equal=equal || function(a,b) { return a===b;};
+    
+    for(var attribute in needles) {
+        if(!equal(haystack[attribute],needles[attribute])) {
+            return false;
+        }
+    }
+    return true;
 };
 
-ozpIwc.KeyValueStore.prototype.delete=function(path,value) {
-	var value=this.data[path];
-	var evt=new ozpIwc.CancelableEvent({
-			'path': path,
-			'value': this.copyValue(value)
-	});
-	if(!this.events.trigger("preDelete",evt).canceled) {
-		var d=this.data;
-		delete d[path];
-	}
-};
-
-ozpIwc.KeyValueStore.prototype.keys=function() {
-	return Object.keys(this.data);
-};
-
+(function() {
+    ozpIwc.BUS_ROOT=window.location.protocol + "//" 
+            + window.location.host
+            +window.location.pathname.replace(/[^\/]+$/,"");
+})();
 
 ozpIwc.abacPolicies={};
 
@@ -1164,7 +3948,22 @@ var ozpIwc=ozpIwc || {};
  * @class
  */
 ozpIwc.BasicAuthentication=function() {
-	this.roles={};	
+	this.roles={};
+    var self = this;
+    ozpIwc.metrics.gauge('security.authentication.roles').set(function() {
+        return self.getRoleCount();
+    });
+};
+
+/**
+ * Returns the number of roles currently defined
+ * @returns {number} the number of roles defined
+ */
+ozpIwc.BasicAuthentication.prototype.getRoleCount=function() {
+    if (!this.roles || !Object.keys(this.roles)) {
+        return 0;
+    }
+    return Object.keys(this.roles).length;
 };
 
 /**
@@ -1221,7 +4020,23 @@ ozpIwc.BasicAuthorization=function(config) {
         ozpIwc.abacPolicies.permitWhenObjectHasNoAttributes,
         ozpIwc.abacPolicies.subjectHasAllObjectAttributes
     ];
+
+    var self = this;
+    ozpIwc.metrics.gauge('security.authorization.roles').set(function() {
+        return self.getRoleCount();
+    });
 };
+/**
+ * Returns the number of roles currently defined
+ * @returns {number} the number of roles defined
+ */
+ozpIwc.BasicAuthorization.prototype.getRoleCount=function() {
+    if (!this.roles || !Object.keys(this.roles)) {
+        return 0;
+    }
+    return Object.keys(this.roles).length;
+};
+
 
 ozpIwc.BasicAuthorization.prototype.implies=function(subjectVal,objectVal) {
     // no object value is trivially true
@@ -1270,15 +4085,14 @@ var ozpIwc = ozpIwc || {};
 /**
  * <p>This link connects peers using the HTML5 localstorage API.  It is a second generation version of
  * the localStorageLink that bypasses most of the garbage collection issues.
- * 
+ *
  * <p> When a packet is sent, this link turns it to a string, creates a key with that value, and
  * immediately deletes it.  This still sends the storage event containing the packet as the key.
  * This completely eliminates the need to garbage collect the localstorage space, with the associated
  * mutex contention and full-buffer issues.
- * 
- * @todo Fragment the packet if it's more than storage can handle.
+ *
  * @todo Compress the key
- * 
+ *
  * @class
  * @param {Object} [config] - Configuration for this link
  * @param {ozpIwc.Peer} [config.peer=ozpIwc.defaultPeer] - The peer to connect to.
@@ -1286,120 +4100,309 @@ var ozpIwc = ozpIwc || {};
  * @param {string} [config.selfId] - Unique name within the peer network.  Defaults to the peer id.
  * @param {Number} [config.maxRetries] - Number of times packet transmission will retry if failed. Defaults to 6.
  * @param {Number} [config.queueSize] - Number of packets allowed to be queued at one time. Defaults to 1024.
+ * @param {Number} [config.fragmentSize] - Size in bytes of which any TransportPacket exceeds will be sent in FragmentPackets.
+ * @param {Number} [config.fragmentTime] - Time in milliseconds after a fragment is received and additional expected
+ *                                         fragments are not received that the message is dropped.
  */
-ozpIwc.KeyBroadcastLocalStorageLink = function(config) {
-	config=config || {};
+ozpIwc.KeyBroadcastLocalStorageLink = function (config) {
+    config = config || {};
 
-	this.prefix=config.prefix || 'ozpIwc';
-	this.peer=config.peer || ozpIwc.defaultPeer;
-	this.selfId=config.selfId || this.peer.selfId;
-	this.myKeysTimeout = config.myKeysTimeout || 5000; // 5 seconds
-	this.otherKeysTimeout = config.otherKeysTimeout || 2*60000; // 2 minutes
-	this.maxRetries = config.maxRetries || 6;
-	this.queueSize = config.queueSize || 1024;
-	this.sendQueue = this.sendQueue || [];
+    this.prefix = config.prefix || 'ozpIwc';
+    this.peer = config.peer || ozpIwc.defaultPeer;
+    this.selfId = config.selfId || this.peer.selfId;
+    this.myKeysTimeout = config.myKeysTimeout || 5000; // 5 seconds
+    this.otherKeysTimeout = config.otherKeysTimeout || 2 * 60000; // 2 minutes
+    this.maxRetries = config.maxRetries || 6;
+    this.queueSize = config.queueSize || 1024;
+    this.sendQueue = this.sendQueue || [];
+    this.fragmentSize = config.fragmentSize || (5 * 1024 * 1024) / 2 / 2; //50% of 5mb, divide by 2 for utf-16 characters
+    this.fragmentTimeout = config.fragmentTimeout || 1000; // 1 second
 
-  // Hook into the system
-	var self=this;
-	var packet;
-	var receiveStorageEvent=function(event) {
-		try {
-			packet=JSON.parse(event.key);
-		} catch(e) {
-			console.log("Parse error on " + event.key );
-			ozpIwc.metrics.counter('links.keyBroadcastLocalStorage.packets.parseError').inc();
-			return;
-		}
-		self.peer.receive(self.linkId,packet);
-		ozpIwc.metrics.counter('links.keyBroadcastLocalStorage.packets.received').inc();
+    //Add fragmenting capabilities
+    String.prototype.chunk = function (size) {
+        var res = [];
+        for (var i = 0; i < this.length; i += size) {
+            res.push(this.slice(i, i + size));
+        }
+        return res;
+    };
 
-	};
-	window.addEventListener('storage',receiveStorageEvent , false); 
-	
-	this.peer.on("send",function(event) { 
-		self.send(event.packet); 
-	});
-	
-	this.peer.on("beforeShutdown",function() {
-		window.removeEventListener('storage',receiveStorageEvent);
-	},this);
+    // Hook into the system
+    var self = this;
+    var packet;
+    var receiveStorageEvent = function (event) {
+        try {
+            packet = JSON.parse(event.key);
+        } catch (e) {
+            console.log("Parse error on " + event.key);
+            ozpIwc.metrics.counter('links.keyBroadcastLocalStorage.packets.parseError').inc();
+            return;
+        }
+        if (packet.data.fragment) {
+            self.handleFragment(packet);
+        } else {
+            self.peer.receive(self.linkId, packet);
+            ozpIwc.metrics.counter('links.keyBroadcastLocalStorage.packets.received').inc();
+        }
+    };
+    window.addEventListener('storage', receiveStorageEvent, false);
 
+    this.peer.on("send", function (event) {
+        self.send(event.packet);
+    });
+
+    this.peer.on("beforeShutdown", function () {
+        window.removeEventListener('storage', receiveStorageEvent);
+    }, this);
+
+};
+
+/**
+ * @typedef ozpIwc.FragmentPacket
+ * @property {boolean} fragment - Flag for knowing this is a fragment packet. Should be true.
+ * @property {Number} msgId - The msgId from the TransportPacket broken up into fragments.
+ * @property {Number} id - The position amongst other fragments of the TransportPacket.
+ * @property {Number} total - Total number of fragments of the TransportPacket expected.
+ * @property {String} chunk - A segment of the TransportPacket in string form.
+ *
+ */
+
+/**
+ * @typedef ozpIwc.FragmentStore
+ * @property {Number} sequence - The sequence of the latest fragment received.
+ * @property {Number} total - The total number of fragments expected.
+ * @property {String} src_peer - The src_peer of the fragments expected.
+ * @property {Array(String)} chunks - String segments of the TransportPacket.
+ */
+
+/**
+ * Handles fragmented packets received from the router. When all fragments of a message have been received,
+ * the resulting packet will be passed on to the registered peer of the KeyBroadcastLocalStorageLink.
+ * @param {ozpIwc.NetworkPacket} packet - NetworkPacket containing an ozpIwc.FragmentPacket as its data property
+ */
+ozpIwc.KeyBroadcastLocalStorageLink.prototype.handleFragment = function (packet) {
+    // Check to make sure the packet is a fragment and we haven't seen it
+    if (this.peer.haveSeen(packet)) {
+        return;
+    }
+
+    var key = packet.data.msgId;
+
+    this.storeFragment(packet);
+
+    var defragmentedPacket = this.defragmentPacket(this.fragments[key]);
+
+    if (defragmentedPacket) {
+
+        // clear the fragment timeout
+        window.clearTimeout(this.fragments[key].fragmentTimer);
+
+        // Remove the last sequence from the known packets to reuse it for the defragmented packet
+        var packetIndex = this.peer.packetsSeen[defragmentedPacket.src_peer].indexOf(defragmentedPacket.sequence);
+        delete this.peer.packetsSeen[defragmentedPacket.src_peer][packetIndex];
+
+        this.peer.receive(this.linkId, defragmentedPacket);
+        ozpIwc.metrics.counter('links.keyBroadcastLocalStorage.packets.received').inc();
+
+        delete this.fragments[key];
+    }
+};
+
+/**
+ *  Stores a received fragment. When the first fragment of a message is received, a timer is set to destroy the storage
+ *  of the message fragments should not all messages be received.
+ * @param {ozpIwc.NetworkPacket} packet - NetworkPacket containing an ozpIwc.FragmentPacket as its data property
+ * @returns {boolean} result - true if successful.
+ */
+ozpIwc.KeyBroadcastLocalStorageLink.prototype.storeFragment = function (packet) {
+    if (!packet.data.fragment) {
+        return null;
+    }
+
+    this.fragments = this.fragments || [];
+    // NetworkPacket properties
+    var sequence = packet.sequence;
+    var src_peer = packet.src_peer;
+    // FragmentPacket Properties
+    var key = packet.data.msgId;
+    var id = packet.data.id;
+    var chunk = packet.data.chunk;
+    var total = packet.data.total;
+
+    if (key === undefined || id === undefined) {
+        return null;
+    }
+
+    // If this is the first fragment of a message, add the storage object
+    if (!this.fragments[key]) {
+        this.fragments[key] = {};
+        this.fragments[key].chunks = [];
+
+        var self = this;
+        self.key = key;
+        self.total = total ;
+
+        // Add a timeout to destroy the fragment should the whole message not be received.
+        this.fragments[key].timeoutFunc = function () {
+            ozpIwc.metrics.counter('network.packets.dropped').inc();
+            ozpIwc.metrics.counter('network.fragments.dropped').inc(self.total );
+            delete self.fragments[self.key];
+        };
+    }
+
+    // Restart the fragment drop countdown
+    window.clearTimeout(this.fragments[key].fragmentTimer);
+    this.fragments[key].fragmentTimer = window.setTimeout(this.fragments[key].timeoutFunc, this.fragmentTimeout);
+
+    // keep a copy of properties needed for defragmenting, the last sequence & src_peer received will be
+    // reused in the defragmented packet
+    this.fragments[key].total = total || this.fragments[key].total ;
+    this.fragments[key].sequence = (sequence !== undefined) ? sequence : this.fragments[key].sequence;
+    this.fragments[key].src_peer = src_peer || this.fragments[key].src_peer;
+    this.fragments[key].chunks[id] = chunk;
+
+    // If the necessary properties for defragmenting aren't set the storage fails
+    if (this.fragments[key].total === undefined || this.fragments[key].sequence === undefined ||
+        this.fragments[key].src_peer === undefined) {
+        return null;
+    } else {
+        ozpIwc.metrics.counter('links.keyBroadcastLocalStorage.fragments.received').inc();
+        return true;
+    }
+};
+
+/**
+ * Rebuilds the original packet sent across the keyBroadcastLocalStorageLink from the fragments it was broken up into.
+ * @param {ozpIwc.FragmentStore} fragments - the grouping of fragments to reconstruct
+ * @returns {ozpIwc.NetworkPacket} result - the reconstructed NetworkPacket with TransportPacket as its data property.
+ */
+ozpIwc.KeyBroadcastLocalStorageLink.prototype.defragmentPacket = function (fragments) {
+    if (fragments.total != fragments.chunks.length) {
+        return null;
+    }
+    try {
+        var result = JSON.parse(fragments.chunks.join(''));
+        return {
+            defragmented: true,
+            sequence: fragments.sequence,
+            src_peer: fragments.src_peer,
+            data: result
+        };
+    } catch (e) {
+        return null;
+    }
 };
 
 /**
  * <p>Publishes a packet to other peers.
  * <p>If the sendQueue is full (KeyBroadcastLocalStorageLink.queueSize) send will not occur.
- * 
+ * <p>If the TransportPacket is too large (KeyBroadcastLocalStorageLink.fragmentSize) ozpIwc.FragmentPacket's will
+ *    be sent instead.
+ *
  * @class
  * @param {ozpIwc.NetworkPacket} - packet
  */
-ozpIwc.KeyBroadcastLocalStorageLink.prototype.send = function(packet) { 
-  if (this.sendQueue.length < this.queueSize) {
-    this.sendQueue = this.sendQueue.concat(packet);
-    while (this.sendQueue.length > 0) {
-      this.attemptSend(this.sendQueue.shift());
+ozpIwc.KeyBroadcastLocalStorageLink.prototype.send = function (packet) {
+    var str = JSON.stringify(packet.data);
+
+    if (str.length < this.fragmentSize) {
+        this.queueSend(packet);
+    } else {
+        var fragments = str.chunk(this.fragmentSize);
+
+        // Use the original packet as a template, delete the data and
+        // generate new packets.
+        var self = this;
+        self.data= packet.data;
+        delete packet.data;
+
+        var fragmentGen = function (chunk, template) {
+
+            template.sequence = self.peer.sequenceCounter++;
+            template.data = {
+                fragment: true,
+                msgId: self.data.msgId,
+                id: i,
+                total: fragments.length,
+                chunk: chunk
+            };
+            return template;
+        };
+
+        // Generate & queue the fragments
+        for (var i = 0; i < fragments.length; i++) {
+            this.queueSend(fragmentGen(fragments[i], packet));
+        }
     }
-  } else {
-    ozpIwc.metrics.counter('links.keyBroadcastLocalStorage.packets.failed').inc();
-    ozpIwc.log.error("Failed to write packet(len=" + packet.length + "):" + " Send queue full.");
-  }
+};
+
+ozpIwc.KeyBroadcastLocalStorageLink.prototype.queueSend = function (packet) {
+    if (this.sendQueue.length < this.queueSize) {
+        this.sendQueue = this.sendQueue.concat(packet);
+        while (this.sendQueue.length > 0) {
+            this.attemptSend(this.sendQueue.shift());
+        }
+    } else {
+        ozpIwc.metrics.counter('links.keyBroadcastLocalStorage.packets.failed').inc();
+        ozpIwc.log.error("Failed to write packet(len=" + packet.length + "):" + " Send queue full.");
+    }
 };
 
 /**
  * <p> Recursively tries sending the packet (KeyBroadcastLocalStorageLink.maxRetries) times
  * The packet is dropped and the send fails after reaching max attempts.
- * 
+ *
  * @class
- * @param {ozpIwc.NetworkPacket} - packet  
- * @param {Number} [attemptCount] - number of times attempted to send packet.  
+ * @param {ozpIwc.NetworkPacket} - packet
+ * @param {Number} [attemptCount] - number of times attempted to send packet.
  */
-ozpIwc.KeyBroadcastLocalStorageLink.prototype.attemptSend = function(packet, retryCount) {
+ozpIwc.KeyBroadcastLocalStorageLink.prototype.attemptSend = function (packet, retryCount) {
 
-  var sendStatus = this.sendImpl(packet);  
-  if(sendStatus) {
-    var self = this;
-    retryCount = retryCount || 0;
-    var timeOut = Math.max(1, Math.pow(2, (retryCount-1))) - 1;
-    
-    if (retryCount < self.maxRetries) {
-      retryCount++;
-      // Call again but back off for an exponential amount of time.
-      window.setTimeout(function() {
-        self.attemptSend(packet, retryCount);
-      }, timeOut);
-    } else {
-      ozpIwc.metrics.counter('links.keyBroadcastLocalStorage.packets.failed').inc();
-      ozpIwc.log.error("Failed to write packet(len=" + packet.length + "):" + sendStatus);
-      return sendStatus;
-    }       
-  }
+    var sendStatus = this.sendImpl(packet);
+    if (sendStatus) {
+        var self = this;
+        retryCount = retryCount || 0;
+        var timeOut = Math.max(1, Math.pow(2, (retryCount - 1))) - 1;
+
+        if (retryCount < self.maxRetries) {
+            retryCount++;
+            // Call again but back off for an exponential amount of time.
+            window.setTimeout(function () {
+                self.attemptSend(packet, retryCount);
+            }, timeOut);
+        } else {
+            ozpIwc.metrics.counter('links.keyBroadcastLocalStorage.packets.failed').inc();
+            ozpIwc.log.error("Failed to write packet(len=" + packet.length + "):" + sendStatus);
+            return sendStatus;
+        }
+    }
 };
 
 /**
  * <p>Implementation of publishing packets to peers through localStorage.
  * <p>If the localStorage is full or a write collision occurs, the send will not occur.
  * <p>Returns status of localStorage write, null if success.
- * 
+ *
  * @todo move counter.inc() out of the impl and handle in attemptSend?
- * 
+ *
  * @class
- * @param {ozpIwc.NetworkPacket} - packet  
+ * @param {ozpIwc.NetworkPacket} - packet
  */
-ozpIwc.KeyBroadcastLocalStorageLink.prototype.sendImpl = function(packet) {
-  var sendStatus;
-  try {
-		var p=JSON.stringify(packet);
-    localStorage.setItem(p,"");
-    ozpIwc.metrics.counter('links.keyBroadcastLocalStorage.packets.sent').inc();
-    localStorage.removeItem(p);
-    sendStatus = null;
-  }
-  catch (e) {
-    sendStatus = e;
-  }
-  finally {
-    return sendStatus;
-  }
+ozpIwc.KeyBroadcastLocalStorageLink.prototype.sendImpl = function (packet) {
+    var sendStatus;
+    try {
+        var p = JSON.stringify(packet);
+        localStorage.setItem(p, "");
+        ozpIwc.metrics.counter('links.keyBroadcastLocalStorage.packets.sent').inc();
+        localStorage.removeItem(p);
+        sendStatus = null;
+    }
+    catch (e) {
+        sendStatus = e;
+    }
+    finally {
+        return sendStatus;
+    }
 };
 
 /** @namespace **/
@@ -1754,6 +4757,17 @@ ozpIwc.Participant=function() {
 	this.events.mixinOnOff(this);
 	this.securityAttributes={};
     this.msgId=0;
+    var fakeMeter=new ozpIwc.metricTypes.Meter();
+    this.sentPacketsMeter=fakeMeter;
+    this.receivedPacketsMeter=fakeMeter;
+    this.forbiddenPacketsMeter=fakeMeter;
+    
+    this.participantType=this.constructor.name;
+    this.heartBeatContentType="application/ozpIwc-address-v1+json";
+    this.heartBeatStatus={
+        name: this.name,
+        type: this.participantType || this.constructor.name
+    };
 };
 
 /**
@@ -1761,10 +4775,32 @@ ozpIwc.Participant=function() {
  * @returns {boolean} true if this packet could have additional recipients
  */
 ozpIwc.Participant.prototype.receiveFromRouter=function(packetContext) {
+    var self = this;
+    ozpIwc.authorization.isPermitted({
+        'subject': this.securityAttributes,
+        'object': packetContext.packet.permissions
+    })
+        .success(function(){
+            self.receivedPacketsMeter.mark();
+
+            self.receiveFromRouterImpl(packetContext);
+        })
+        .failure(function() {
+            /** @todo do we send a "denied" message to the destination?  drop?  who knows? */
+            self.forbiddenPacketsMeter.mark();
+        });
+};
+
+/**
+ * Overridden by inherited Participants.
+ * @override
+ * @param packetContext
+ * @returns {boolean}
+ */
+ozpIwc.Participant.prototype.receiveFromRouterImpl = function (packetContext) {
     // doesn't really do anything other than return a bool and prevent "unused param" warnings
     return !packetContext;
 };
-
 /**
  * @param {ozpIwc.Router} router
  * @param {string} address
@@ -1775,6 +4811,17 @@ ozpIwc.Participant.prototype.connectToRouter=function(router,address) {
     this.router=router;
     this.securityAttributes.rawAddress=address;
     this.msgId=0;
+    this.metricRoot="participants."+ this.address.split(".").reverse().join(".");
+    this.sentPacketsMeter=ozpIwc.metrics.meter(this.metricRoot,"sentPackets").unit("packets");
+    this.receivedPacketsMeter=ozpIwc.metrics.meter(this.metricRoot,"receivedPackets").unit("packets");
+    this.forbiddenPacketsMeter=ozpIwc.metrics.meter(this.metricRoot,"forbiddenPackets").unit("packets");
+    
+    this.namesResource="/address/"+this.address;
+    this.heartBeatStatus.address=this.address;
+    this.heartBeatStatus.name=this.name;
+    this.heartBeatStatus.type=this.participantType || this.constructor.name;
+
+    this.events.trigger("connectedToRouter");
 };
 
 /**
@@ -1804,6 +4851,7 @@ ozpIwc.Participant.prototype.fixPacket=function(packet) {
  */
 ozpIwc.Participant.prototype.send=function(packet) {
     packet=this.fixPacket(packet);
+    this.sentPacketsMeter.mark();
     this.router.send(packet,this);
     return packet;
 };
@@ -1813,13 +4861,16 @@ ozpIwc.Participant.prototype.generateMsgId=function() {
     return "i:" + this.msgId++;
 };
 
-ozpIwc.Participant.prototype.heartbeatStatus=function() {
-    return {
-        address: this.address,
-        securityAttributes: this.securityAttributes,
-        type: this.participantType || this.constructor.name,
-        name: this.name
-    };
+ozpIwc.Participant.prototype.heartbeat=function() {
+    if(this.router) {
+        this.send({
+            'dst': "names.api",
+            'resource': this.namesResource,
+            'action' : "set",
+            'entity' : this.heartBeatStatus,
+            'contentType' : this.heartBeatContentType
+        },function() {/* eat the response*/});
+    }
 };
 
 ozpIwc.InternalParticipant=ozpIwc.util.extend(ozpIwc.Participant,function(config) {
@@ -1828,30 +4879,51 @@ ozpIwc.InternalParticipant=ozpIwc.util.extend(ozpIwc.Participant,function(config
 	this.replyCallbacks={};
 	this.participantType="internal";
 	this.name=config.name;
+
+    var self = this;
+    this.on("connectedToRouter",function() {
+        ozpIwc.metrics.gauge(self.metricRoot,"registeredCallbacks").set(function() {
+            return self.getCallbackCount();
+        });
+    });
 });
+
+/**
+ * Gets the count of the registered reply callbacks
+ * @returns {number} the number of registered callbacks
+ */
+ozpIwc.InternalParticipant.prototype.getCallbackCount=function() {
+    if (!this.replyCallbacks | !Object.keys(this.replyCallbacks)) {
+        return 0;
+    }
+    return Object.keys(this.replyCallbacks).length;
+};
 
 /**
  * @param {ozpIwc.PacketContext} packetContext
  * @returns {boolean} true if this packet could have additional recipients
  */
-ozpIwc.InternalParticipant.prototype.receiveFromRouter=function(packetContext) { 
+ozpIwc.InternalParticipant.prototype.receiveFromRouterImpl=function(packetContext) {
 	var packet=packetContext.packet;
 	if(packet.replyTo && this.replyCallbacks[packet.replyTo]) {
 		if (!this.replyCallbacks[packet.replyTo](packet)) {
-            this.cancelCallback(msgId);
+            this.cancelCallback(packet.replyTo);
         }
 	} else {
-		this.events.trigger("receive",packet);
+		this.events.trigger("receive",packetContext);
 	}
 };
 
 
-ozpIwc.InternalParticipant.prototype.send=function(packet,callback) {
-	var packet=this.fixPacket(packet);
+ozpIwc.InternalParticipant.prototype.send=function(originalPacket,callback) {
+    var packet=this.fixPacket(originalPacket);
 	if(callback) {
 		this.replyCallbacks[packet.msgId]=callback;
 	}
-	ozpIwc.Participant.prototype.send.apply(this,arguments);
+    var self=this;
+	ozpIwc.util.setImmediate(function() {
+        ozpIwc.Participant.prototype.send.call(self,packet);
+    });
 
 	return packet;
 };
@@ -1883,7 +4955,7 @@ var ozpIwc=ozpIwc || {};
  */
 
 /**
- * @class 
+ * @class
  * @param {object} config
  * @param {ozpIwc.TransportPacket} config.packet
  * @param {ozpIwc.Router} config.router
@@ -1895,28 +4967,30 @@ var ozpIwc=ozpIwc || {};
  * @property {ozpIwc.Participant} [dstParticpant]
  */
 ozpIwc.TransportPacketContext=function(config) {
-	for(var i in config) {
-		this[i]=config[i];
-	}
+    for(var i in config) {
+        this[i]=config[i];
+    }
 };
 
 /**
- * 
+ *
  * @param {ozpIwc.TransportPacket} response
  * @returns {ozpIwc.TransportPacket} the packet that was sent
  */
 ozpIwc.TransportPacketContext.prototype.replyTo=function(response) {
-	var now=new Date().getTime();
-	response.ver = response.ver || 1;
-	response.time = response.time || now;
-	// TODO: track the last used timestamp and make sure we don't send a duplicate messageId
-	// default the msgId to the current timestamp
-	response.msgId = response.msgId || now;
-	response.replyTo=response.replyTo || this.packet.msgId;
-	response.src=response.src || this.packet.dst;
-	response.dst=response.dst || this.packet.src;
-	this.router.send(response);
-	return response;
+    var now=new Date().getTime();
+    response.ver = response.ver || 1;
+    response.time = response.time || now;
+    response.replyTo=response.replyTo || this.packet.msgId;
+    response.src=response.src || this.packet.dst;
+    response.dst=response.dst || this.packet.src;
+    if(this.dstParticipant) {
+        this.dstParticipant.send(response);
+    } else{
+        response.msgId = response.msgId || now;
+        this.router.send(response);
+    }
+    return response;
 };
 
 /**
@@ -1952,42 +5026,6 @@ ozpIwc.TransportPacketContext.prototype.replyTo=function(response) {
  * @property {ozpIwc.TransportPacket} packet
  * @property {ozpIwc.NetworkPacket} rawPacket
  */
-/**
- * @class
- */
-ozpIwc.RouterWatchdog=ozpIwc.util.extend(ozpIwc.InternalParticipant,function(config) {
-	ozpIwc.InternalParticipant.apply(this,arguments);
-	
-	this.participantType="routerWatchdog";
-	this.on("connected",function() {
-		this.name=this.router.self_id;
-	},this);
-	
-	this.heartbeatFrequency=config.heartbeatFrequency || 10000;
-	var self=this;
-	
-	this.timer=window.setInterval(function() {
-		var heartbeat={
-			dst: "names.api",
-			action: "set",
-			resource: "/router/" + self.router.self_id,
-			entity: { participants: {} }
-		};
-		for(var k in self.router.participants) {
-			heartbeat.entity.participants[k]=self.router.participants[k].heartbeatStatus();
-		}
-		self.send(heartbeat);
-	},this.heartbeatFrequency);
-});
-
-ozpIwc.RouterWatchdog.prototype.connectToRouter=function(router,address) {
-	ozpIwc.Participant.prototype.connectToRouter.apply(this,arguments);
-	this.name=router.self_id;
-};
-
-ozpIwc.RouterWatchdog.prototype.shutdown=function() {
-	window.clearInterval(this.timer);
-};
 
 /**
  * @class
@@ -1995,12 +5033,12 @@ ozpIwc.RouterWatchdog.prototype.shutdown=function() {
  * @param {ozpIwc.Peer} [config.peer=ozpIwc.defaultPeer]
  */
 ozpIwc.Router=function(config) {
-	config=config || {};
-	this.peer=config.peer || ozpIwc.defaultPeer;
+    config=config || {};
+    this.peer=config.peer || ozpIwc.defaultPeer;
 
 //	this.nobodyAddress="$nobody";
 //	this.routerControlAddress='$transport';
-	var self=this;	
+	var self=this;
 
 	this.self_id=ozpIwc.util.generateId();
 	
@@ -2037,44 +5075,66 @@ ozpIwc.Router=function(config) {
 	this.events.on("preSend",checkFormat);
 	this.watchdog=new ozpIwc.RouterWatchdog({router: this});
 	this.registerParticipant(this.watchdog);
+
+    ozpIwc.metrics.gauge('transport.router.participants').set(function() {
+        return self.getParticipantCount();
+    });
+};
+
+/**
+ * gets the count of participants who have registered with the router
+ * @returns {number} the number of registered participants
+ */
+ozpIwc.Router.prototype.getParticipantCount=function() {
+    if (!this.participants || !Object.keys(this.participants)) {
+        return 0;
+    }
+    return Object.keys(this.participants).length;
+
 };
 
 ozpIwc.Router.prototype.shutdown=function() {
     this.watchdog.shutdown();
-}
+};
 
 /**
- * Allows a listener to add a new participant.  
+ * Allows a listener to add a new participant.
  * @fires ozpIwc.Router#registerParticipant
  * @param {object} participant the participant object that contains a send() function.
  * @param {object} packet The handshake requesting registration.
  * @returns {string} returns participant id
  */
 ozpIwc.Router.prototype.registerParticipant=function(participant,packet) {
-	packet = packet || {};
-	var address;
-	do {
-			address=ozpIwc.util.generateId() + "." + this.self_id;
-	} while(this.participants.hasOwnProperty(address));
+    packet = packet || {};
+    var address;
+    do {
+        address=ozpIwc.util.generateId()+"."+this.self_id;
+    } while(this.participants.hasOwnProperty(address));
 
-	var registerEvent=new ozpIwc.CancelableEvent({
-		'packet': packet,
-		'registration': packet.entity,
-		'participant': participant
-	});
-	this.events.trigger("preRegisterParticipant",registerEvent);
+    var registerEvent=new ozpIwc.CancelableEvent({
+        'packet': packet,
+        'registration': packet.entity,
+        'participant': participant
+    });
+    this.events.trigger("preRegisterParticipant",registerEvent);
 
-	if(registerEvent.canceled){
-		// someone vetoed this participant
-		ozpIwc.log.log("registeredParticipant[DENIED] origin:"+participant.origin+ 
-						" because " + registerEvent.cancelReason);
-		return null;
-	}
-        this.participants[address] = participant;
-	participant.connectToRouter(this,address);
-	
+    if(registerEvent.canceled){
+        // someone vetoed this participant
+        ozpIwc.log.log("registeredParticipant[DENIED] origin:"+participant.origin+
+            " because " + registerEvent.cancelReason);
+        return null;
+    }
+
+    this.participants[address] = participant;
+    participant.connectToRouter(this,address);
+    var registeredEvent=new ozpIwc.CancelableEvent({
+        'packet': packet,
+        'participant': participant
+    });
+    this.events.trigger("registeredParticipant",registeredEvent);
+
 //	ozpIwc.log.log("registeredParticipant["+participant_id+"] origin:"+participant.origin);
-	return address;
+    return address;
 };
 
 /**
@@ -2083,45 +5143,45 @@ ozpIwc.Router.prototype.registerParticipant=function(participant,packet) {
  * @param {ozpIwc.Participant} sendingParticipant
  */
 ozpIwc.Router.prototype.deliverLocal=function(packet,sendingParticipant) {
-	if(!packet) {
-		throw "Cannot deliver a null packet!";
-	}
-	var localParticipant=this.participants[packet.dst];
-	if(!localParticipant) {
-		return;
-	}
-	var packetContext=new ozpIwc.TransportPacketContext({
-		'packet':packet,
-		'router': this,
-		'srcParticipant': sendingParticipant,
-		'dstParticipant': localParticipant
-	});
+    if(!packet) {
+        throw "Cannot deliver a null packet!";
+    }
+    var localParticipant=this.participants[packet.dst];
+    if(!localParticipant) {
+        return;
+    }
+    var packetContext=new ozpIwc.TransportPacketContext({
+        'packet':packet,
+        'router': this,
+        'srcParticipant': sendingParticipant,
+        'dstParticipant': localParticipant
+    });
 
-	var preDeliverEvent=new ozpIwc.CancelableEvent({
-		'packet': packet,
-		'dstParticipant': localParticipant,
-		'srcParticipant': sendingParticipant			
-	});
+    var preDeliverEvent=new ozpIwc.CancelableEvent({
+        'packet': packet,
+        'dstParticipant': localParticipant,
+        'srcParticipant': sendingParticipant
+    });
 
-	if(this.events.trigger("preDeliver",preDeliverEvent).canceled) {
-		ozpIwc.metrics.counter("transport.packets.rejected").inc();
-		return;
-	}
+    if(this.events.trigger("preDeliver",preDeliverEvent).canceled) {
+        ozpIwc.metrics.counter("transport.packets.rejected").inc();
+        return;
+    }
 
-	ozpIwc.authorization.isPermitted({
+    ozpIwc.authorization.isPermitted({
         'subject':localParticipant.securityAttributes,
         'object': packet.permissions,
         'action': {'action': 'receive'}
     })
-		.success(function() {
-			ozpIwc.metrics.counter("transport.packets.delivered").inc();
-			localParticipant.receiveFromRouter(packetContext);
-		})
-		.failure(function() {
-			/** @todo do we send a "denied" message to the destination?  drop?  who knows? */
-			ozpIwc.metrics.counter("transport.packets.forbidden").inc();
-		});
-	
+        .success(function() {
+            ozpIwc.metrics.counter("transport.packets.delivered").inc();
+            localParticipant.receiveFromRouter(packetContext);
+        })
+        .failure(function() {
+            /** @todo do we send a "denied" message to the destination?  drop?  who knows? */
+            ozpIwc.metrics.counter("transport.packets.forbidden").inc();
+        });
+
 };
 
 
@@ -2131,15 +5191,24 @@ ozpIwc.Router.prototype.deliverLocal=function(packet,sendingParticipant) {
  * @param {String[]} multicastGroups
  */
 ozpIwc.Router.prototype.registerMulticast=function(participant,multicastGroups) {
-	var self=this;
-	multicastGroups.forEach(function(groupName) {
-		var g=self.participants[groupName];
-		if(!g) {
-			g=self.participants[groupName]=new ozpIwc.MulticastParticipant(groupName);
-		}
-		g.addMember(participant);
-	});
-	return multicastGroups;
+    var self=this;
+    multicastGroups.forEach(function(groupName) {
+        var g=self.participants[groupName];
+        if(!g) {
+            g=self.participants[groupName]=new ozpIwc.MulticastParticipant(groupName);
+        }
+        g.addMember(participant);
+        if (participant.address) {
+            var registeredEvent = new ozpIwc.CancelableEvent({
+                'entity': {'group': groupName, 'address': participant.address}
+            });
+            self.events.trigger("registeredMulticast", registeredEvent);
+        } else {
+            console.log("no address for " +  participant.participantType + " " + participant.name + "with address " + participant.address + " for group " + groupName);
+        }
+        //console.log("registered " + participant.participantType + " " + participant.name + "with address " + participant.address + " for group " + groupName);
+    });
+    return multicastGroups;
 };
 
 /**
@@ -2153,20 +5222,20 @@ ozpIwc.Router.prototype.registerMulticast=function(participant,multicastGroups) 
  */
 ozpIwc.Router.prototype.send=function(packet,sendingParticipant) {
 
-	var preSendEvent=new ozpIwc.CancelableEvent({
-		'packet': packet,
-		'participant': sendingParticipant
-	});
-	this.events.trigger("preSend",preSendEvent);
+    var preSendEvent=new ozpIwc.CancelableEvent({
+        'packet': packet,
+        'participant': sendingParticipant
+    });
+    this.events.trigger("preSend",preSendEvent);
 
-	if(preSendEvent.canceled) {
-		ozpIwc.metrics.counter("transport.packets.sendCanceled");
-		return;
-	} 
-	ozpIwc.metrics.counter("transport.packets.sent").inc();
-	this.deliverLocal(packet,sendingParticipant);
-	this.events.trigger("send",{'packet': packet});
-	this.peer.send(packet);
+    if(preSendEvent.canceled) {
+        ozpIwc.metrics.counter("transport.packets.sendCanceled");
+        return;
+    }
+    ozpIwc.metrics.counter("transport.packets.sent").inc();
+    this.deliverLocal(packet,sendingParticipant);
+    this.events.trigger("send",{'packet': packet});
+    this.peer.send(packet);
 };
 
 /**
@@ -2175,16 +5244,16 @@ ozpIwc.Router.prototype.send=function(packet,sendingParticipant) {
  * @param packet {ozpIwc.TransportPacket} the packet to receive
  */
 ozpIwc.Router.prototype.receiveFromPeer=function(packet) {
-	ozpIwc.metrics.counter("transport.packets.receivedFromPeer").inc();
-	var peerReceiveEvent=new ozpIwc.CancelableEvent({
-		'packet' : packet.data,
-		'rawPacket' : packet
-	});
-	this.events.trigger("prePeerReceive",peerReceiveEvent);
+    ozpIwc.metrics.counter("transport.packets.receivedFromPeer").inc();
+    var peerReceiveEvent=new ozpIwc.CancelableEvent({
+        'packet' : packet.data,
+        'rawPacket' : packet
+    });
+    this.events.trigger("prePeerReceive",peerReceiveEvent);
 
-	if(!peerReceiveEvent.canceled){
-		this.deliverLocal(packet.data);
-	}
+    if(!peerReceiveEvent.canceled){
+        this.deliverLocal(packet.data);
+    }
 };
 
 
@@ -2207,8 +5276,8 @@ var ozpIwc=ozpIwc || {};
  *        Number of milliseconds to wait before declaring victory on an election. 
  
  */
-ozpIwc.LeaderGroupParticipant=ozpIwc.util.extend(ozpIwc.Participant,function(config) {
-	ozpIwc.Participant.apply(this,arguments);
+ozpIwc.LeaderGroupParticipant=ozpIwc.util.extend(ozpIwc.InternalParticipant,function(config) {
+	ozpIwc.InternalParticipant.apply(this,arguments);
 
 	if(!config.name) {
 		throw "Config must contain a name value";
@@ -2220,7 +5289,7 @@ ozpIwc.LeaderGroupParticipant=ozpIwc.util.extend(ozpIwc.Participant,function(con
 	this.electionAddress=config.electionAddress || (this.name + ".election");
 
 	// Election times and how to score them
-	this.priority = config.priority || ozpIwc.defaultLeaderPriority || Math.random();
+	this.priority = config.priority || ozpIwc.defaultLeaderPriority || -ozpIwc.util.now();
 	this.priorityLessThan = config.priorityLessThan || function(l,r) { return l < r; };
 	this.electionTimeout=config.electionTimeout || 250; // quarter second
 	this.leaderState="connecting";
@@ -2230,7 +5299,7 @@ ozpIwc.LeaderGroupParticipant=ozpIwc.util.extend(ozpIwc.Participant,function(con
 	this.leader=null;
 	this.leaderPriority=null;
 
-	this.participantType="leaderGroupMember";
+	this.participantType="leaderGroup";
 	this.name=config.name;
 	
 	this.on("startElection",function() {
@@ -2251,36 +5320,32 @@ ozpIwc.LeaderGroupParticipant=ozpIwc.util.extend(ozpIwc.Participant,function(con
 	
 	// handoff when we shut down
 	window.addEventListener("beforeunload",function() {
-		self.leaderPriority=0;
-		self.startElection();
-		
+        //Priority has to be the minimum possible
+        self.priority=-Number.MAX_VALUE;
+        self.leaderPriority=-Number.MAX_VALUE;
+        if(self.leaderState === "leader") {
+            self.events.trigger("unloadState");
+        }
 	});
-	
+
+    ozpIwc.metrics.gauge('transport.leaderGroup.election').set(function() {
+        var queue = self.getElectionQueue();
+        return {'queue': queue ? queue.length : 0};
+    });
+	this.on("connectedToRouter",function() {
+        this.router.registerMulticast(this,[this.electionAddress,this.name]);
+        this.startElection();
+    },this);
+    this.on("receive",this.routePacket,this);
 });
 
 /**
- * Override from the participant in order to register our multicast addresses
- * and start an election.
- * @param {type} router
- * @param {type} address
- * @returns {undefined}
+ * Retrieve the election queue. Called by closures which need access to the
+ * queue as it grows
+ * @returns {Array} the election queue
  */
-ozpIwc.LeaderGroupParticipant.prototype.connectToRouter=function(router,address) {
-	ozpIwc.Participant.prototype.connectToRouter.apply(this,arguments);
-	this.router.registerMulticast(this,[this.electionAddress,this.name]);
-	this.startElection();
-};
-
-/**
- * Override fixPacket to default the source address to the name of this
- * leadership group.
- * @param {type} packet
- * @returns {unresolved}
- */
-ozpIwc.LeaderGroupParticipant.prototype.fixPacket=function(packet) {
-	packet.src = packet.src || this.name;
-	
-	return ozpIwc.Participant.prototype.fixPacket.apply(this,arguments);
+ozpIwc.LeaderGroupParticipant.prototype.getElectionQueue=function() {
+    return this.electionQueue;
 };
 
 
@@ -2305,13 +5370,16 @@ ozpIwc.LeaderGroupParticipant.prototype.isLeader=function() {
  * @private
  * @param {string} type - the type of message-- "election" or "victory"
  */
-ozpIwc.LeaderGroupParticipant.prototype.sendElectionMessage=function(type) {
+ozpIwc.LeaderGroupParticipant.prototype.sendElectionMessage=function(type, config) {
+    config = config || {};
+    var state = config.state || {};
 	this.send({
 		'src': this.address,
 		'dst': this.electionAddress,
 		'action': type,
 		'entity': {
-			'priority': this.priority
+			'priority': this.priority,
+            'state': state
 		}
 	});
 };
@@ -2323,26 +5391,42 @@ ozpIwc.LeaderGroupParticipant.prototype.sendElectionMessage=function(type) {
  * @fire ozpIwc.LeaderGroupParticipant#startElection
  * @fire ozpIwc.LeaderGroupParticipant#becameLeader
  */
-ozpIwc.LeaderGroupParticipant.prototype.startElection=function() {
+ozpIwc.LeaderGroupParticipant.prototype.startElection=function(config) {
+    config = config || {};
+    var state = config.state || {};
+
 	// don't start a new election if we are in one
 	if(this.inElection()) {
 		return;
 	}
 	this.leaderState="election";
 	this.events.trigger("startElection");
+
+    this.victoryDebounce = null;
 	
 	var self=this;
 	// if no one overrules us, declare victory
 	this.electionTimer=window.setTimeout(function() {
 		self.cancelElection();
-		self.leader=self.address;
-		self.leaderPriority=self.priority;
-		self.leaderState="leader";
-		self.sendElectionMessage("victory");	
-		self.events.trigger("becameLeader");
+        self.leaderState = "leader";
+        self.leader=self.address;
+        self.leaderPriority=self.priority;
+        self.events.trigger("becameLeader");
+
+        self.sendElectionMessage("victory");
+
+        // Debouncing before setting state.
+        self.victoryDebounce = window.setTimeout(function(){
+            if (self.leaderState === "leader") {
+                if (self.stateStore && Object.keys(self.stateStore).length > 0) {
+                    self.events.trigger("acquireState", self.stateStore);
+                    self.stateStore = {};
+                }
+            }
+        },100);
 	},this.electionTimeout);
 
-	this.sendElectionMessage("election");
+	this.sendElectionMessage("election", {state: state});
 };
 
 /**
@@ -2351,10 +5435,12 @@ ozpIwc.LeaderGroupParticipant.prototype.startElection=function() {
  * @fire ozpIwc.LeaderGroupParticipant#endElection
  */
 ozpIwc.LeaderGroupParticipant.prototype.cancelElection=function() {
-	if(this.electionTimer) {	
-		window.clearTimeout(this.electionTimer);
-		this.electionTimer=null;
-		this.events.trigger("endElection");
+	if(this.electionTimer) {
+        window.clearTimeout(this.electionTimer);
+        this.electionTimer=null;
+        window.clearTimeout(this.victoryDebounce);
+        this.victoryDebounce=null;
+        this.events.trigger("endElection");
 	}
 };
 
@@ -2364,42 +5450,34 @@ ozpIwc.LeaderGroupParticipant.prototype.cancelElection=function() {
  * @param {ozpIwc.TransportPacket} packet
  * @returns {boolean}
  */
-ozpIwc.LeaderGroupParticipant.prototype.receiveFromRouter=function(packetContext) {
+ozpIwc.LeaderGroupParticipant.prototype.routePacket=function(packetContext) {
 	var packet=packetContext.packet;
 	packetContext.leaderState=this.leaderState;
-	// forward non-election packets to the current state
-	if(packet.dst !== this.electionAddress) {
-		this.forwardToTarget(packetContext);
-	} else {
-		if(packet.src === this.address) {
+    if(packet.src === this.address) {
+        // drop our own packets that found their way here
+        return;
+    }
+    if(packet.dst === this.electionAddress) {
+        if(packet.src === this.address) {
 			// even if we see our own messages, we shouldn't act upon them
 			return;
-		}else if(packet.action === "election") {
+		} else if(packet.action === "election") {
 			this.handleElectionMessage(packet);
 		} else if(packet.action === "victory") {
 			this.handleVictoryMessage(packet);
 		}
-	}
+    } else {
+		this.forwardToTarget(packetContext);
+	}		
 };
-/**
- * Convention based routing.  Routes to a functions in order of
- * <ol>
- *   <li>handle${action}As${leaderState}</li>
- *   <li>handle${action}</li>
- *   <li>defaultHandlerAs${leaderState}</li>
- *   <li>defaultHandler</li>
- * </ol>
- * The variable action is the packet's action and leaderstate is the current leadership state.
- * If there's no packet action, then the handle* functions will not be invoked.
- * @param {ozpIwc.TransportPacketContext} packetContext
- */
+
 ozpIwc.LeaderGroupParticipant.prototype.forwardToTarget=function(packetContext) {
 	if(this.leaderState === "election" || this.leaderState === "connecting") {
 		this.electionQueue.push(packetContext);
 		return;
 	}
 	packetContext.leaderState=this.leaderState;
-	this.events.trigger("receive",packetContext);
+	this.events.trigger("receiveApiPacket",packetContext);
 };
 	
 	
@@ -2410,7 +5488,10 @@ ozpIwc.LeaderGroupParticipant.prototype.forwardToTarget=function(packetContext) 
  * @returns {undefined}
  */
 ozpIwc.LeaderGroupParticipant.prototype.handleElectionMessage=function(electionMessage) {
-
+    //If a state was received, store it case participant becomes the leader
+    if(Object.keys(electionMessage.entity.state).length > 0){
+        this.stateStore = electionMessage.entity.state;
+    }
 	// is the new election lower priority than us?
 	if(this.priorityLessThan(electionMessage.entity.priority,this.priority)) {
 		// Quell the rebellion!
@@ -2437,6 +5518,7 @@ ozpIwc.LeaderGroupParticipant.prototype.handleVictoryMessage=function(victoryMes
 		this.cancelElection();
 		this.leaderState="member";
 		this.events.trigger("newLeader");
+        this.stateStore = {};
 	}
 };
 
@@ -2449,16 +5531,28 @@ ozpIwc.LeaderGroupParticipant.prototype.heartbeatStatus=function() {
 };
 var ozpIwc=ozpIwc || {};
 
+
+
+
 /**
  * @class
  * @extends ozpIwc.Participant
  * @param {string} name
  */
 ozpIwc.MulticastParticipant=ozpIwc.util.extend(ozpIwc.Participant,function(name) {
-	ozpIwc.Participant.apply(this,arguments);
 	this.name=name;
 	this.participantType="multicast";
+
+    ozpIwc.Participant.apply(this,arguments);
 	this.members=[];
+    
+    this.namesResource="/multicast/"+this.name;
+    
+    this.heartBeatContentType="application/ozpIwc-multicast-address-v1+json";
+    this.heartBeatStatus.members=[];
+    this.on("connectedToRouter",function() {
+        this.namesResource="/multicast/" + this.name;
+    },this);
 });
 
 /**
@@ -2466,8 +5560,12 @@ ozpIwc.MulticastParticipant=ozpIwc.util.extend(ozpIwc.Participant,function(name)
  * @param {ozpIwc.TransportPacket} packet
  * @returns {Boolean}
  */
-ozpIwc.MulticastParticipant.prototype.receiveFromRouter=function(packet) {
-	this.members.forEach(function(m) { m.receiveFromRouter(packet);});
+ozpIwc.MulticastParticipant.prototype.receiveFromRouterImpl=function(packet) {
+	this.members.forEach(function(m) {
+        // as we send to each member, update the context to make it believe that it's the only recipient
+        packet.dstParticipant=m;
+        m.receiveFromRouter(packet);
+    });
 	return false;
 };
 
@@ -2477,12 +5575,7 @@ ozpIwc.MulticastParticipant.prototype.receiveFromRouter=function(packet) {
  */
 ozpIwc.MulticastParticipant.prototype.addMember=function(participant) {
 	this.members.push(participant);
-};
-
-ozpIwc.MulticastParticipant.prototype.heartbeatStatus=function() {
-	var status= ozpIwc.Participant.prototype.heartbeatStatus.apply(this,arguments);
-	status.members=this.members.map(function(m) { return m.address;});
-	return status;
+    this.heartBeatStatus.members.push(participant.address);
 };
 /** @namespace */
 var ozpIwc=ozpIwc || {};
@@ -2499,18 +5592,36 @@ ozpIwc.PostMessageParticipant=ozpIwc.util.extend(ozpIwc.Participant,function(con
 	ozpIwc.Participant.apply(this,arguments);
 	this.origin=this.name=config.origin;
 	this.sourceWindow=config.sourceWindow;
-	this.credentials=config.credentials;
+    this.credentials=config.credentials;
 	this.participantType="postMessageProxy";
-	this.securityAttributes.origin=this.origin;
+    this.securityAttributes.origin=this.origin;
+    this.on("connectedToRouter",function() {
+        this.securityAttributes.sendAs=this.address;
+        this.securityAttributes.receiveAs=this.address;
+    },this);
+    
+    this.heartBeatStatus.origin=this.origin;
 });
 
 /**
+ * @override
  * Receives a packet on behalf of this participant and forwards it via PostMessage.
  * @param {ozpIwc.TransportPacketContext} packetContext
  */
-ozpIwc.PostMessageParticipant.prototype.receiveFromRouter=function(packetContext) {
-	this.sendToRecipient(packetContext.packet);
-	return true;
+ozpIwc.PostMessageParticipant.prototype.receiveFromRouterImpl=function(packetContext) {
+    var self = this;
+    return ozpIwc.authorization.isPermitted({
+        'subject': this.securityAttributes,
+        'object':  {
+            receiveAs: packetContext.packet.dst
+        }
+    })
+        .success(function(){
+            self.sendToRecipient(packetContext.packet);
+        })
+        .failure(function(){
+            ozpIwc.metrics.counter("transport.packets.forbidden").inc();
+        });
 };
 
 /**
@@ -2577,6 +5688,30 @@ ozpIwc.PostMessageParticipant.prototype.forwardFromPostMessage=function(packet,e
 	}
 };
 
+/**
+ * Sends a packet to this participants router.  Calls fixPacket
+ * before doing so.
+ * @override
+ * @param {ozpIwc.TransportPacket} packet
+ * @returns {ozpIwc.TransportPacket}
+*/
+ozpIwc.PostMessageParticipant.prototype.send=function(packet) {
+    packet=this.fixPacket(packet);
+    var self = this;
+    return ozpIwc.authorization.isPermitted({
+        'subject': this.securityAttributes,
+        'object': {
+            sendAs: packet.src
+        }
+    })
+        .success(function(){
+            self.router.send(packet,this);
+        })
+        .failure(function(){
+            ozpIwc.metrics.counter("transport.packets.forbidden").inc();
+        });
+};
+
 
 /**
  * @class
@@ -2593,6 +5728,21 @@ ozpIwc.PostMessageParticipantListener=function(config) {
 	window.addEventListener("message", function(event) {
 		self.receiveFromPostMessage(event);
 	}, false);
+
+    ozpIwc.metrics.gauge('transport.postMessageListener.participants').set(function() {
+        return self.getParticipantCount();
+    });
+};
+
+/**
+ * gets the count of known participants
+ * @returns {number} the number of known participants
+ */
+ozpIwc.PostMessageParticipantListener.prototype.getParticipantCount=function() {
+    if (!this.participants) {
+        return 0;
+    }
+    return this.participants.length;
 };
 
 /**
@@ -2621,9 +5771,13 @@ ozpIwc.PostMessageParticipantListener.prototype.receiveFromPostMessage=function(
 	var packet=event.data;
 
 	if(typeof(event.data)==="string") {
-		packet=JSON.parse(event.data);
+		try {
+            packet=JSON.parse(event.data);
+        } catch(e) {
+            // assume that it's some other library using the bus and let it go
+            return;
+        }
 	}
-
 	// if this is a window who hasn't talked to us before, sign them up
 	if(!participant) {
 		participant=new ozpIwc.PostMessageParticipant({
@@ -2638,239 +5792,62 @@ ozpIwc.PostMessageParticipantListener.prototype.receiveFromPostMessage=function(
 };
 
 /**
- * The Common API Base implements the API Common Conventions.  It is intended to be subclassed by
- * the specific API implementations.
  * @class
  */
-ozpIwc.CommonApiBase = function(config) {
-	config = config || {};
-	this.participant=config.participant;
-	
-	this.participant.on("receive",ozpIwc.CommonApiBase.prototype.routePacket,this);
-	
-	this.data={};
-};
-/**
- * Creates a new value for the given packet's request.  Subclasses must override this
- * function to return the proper value based upon the packet's resource, content type, or
- * other parameters.
- * 
- * @abstract
- * @param {ozpIwc.TransportPacket} packet
- * @returns {ozpIwc.CommonApiValue} an object implementing the commonApiValue interfaces
- */
-ozpIwc.CommonApiBase.prototype.makeValue=function(packet) {
-	throw new Error("Subclasses of CommonApiBase must implement the makeValue(packet) function.");
-};
+ozpIwc.RouterWatchdog = ozpIwc.util.extend(ozpIwc.InternalParticipant, function(config) {
+    ozpIwc.InternalParticipant.apply(this, arguments);
 
-/**
- * Determines whether the action implied by the packet is permitted to occur on
- * node in question.
- * @todo the refactoring of security to allow action-level permissions
- * @todo make the packetContext have the srcSubject inside of it
- * @param {ozpIwc.CommonApiValue} node
- * @param {ozpIwc.TransportPacketContext} packetContext
- * @returns {ozpIwc.AsyncAction}
- */
-ozpIwc.CommonApiBase.prototype.isPermitted=function(node,packetContext) {
-	var subject=packetContext.srcSubject || {
-        'rawAddress':packetContext.packet.src
+    this.participantType = "routerWatchdog";
+    var self = this;
+    this.on("connected", function() {
+        this.name = this.router.self_id;
+    }, this);
+
+    this.heartbeatFrequency = config.heartbeatFrequency || 10000;
+
+    this.on("connectedToRouter", this.setupWatches, this);
+});
+
+ozpIwc.RouterWatchdog.prototype.setupWatches = function() {
+    this.name = this.router.self_id;
+    var self=this;
+    var heartbeat=function() {
+        self.send({
+            dst: "names.api",
+            action: "set",
+            resource: "/router/" + self.router.self_id,
+            contentType: "application/ozpIwc-router-v1+json",
+            entity: {
+                'address': self.router.self_id,
+                'participants': self.router.getParticipantCount()
+            }
+        });
+
+        for (var k in self.router.participants) {
+            var participant=self.router.participants[k];
+            if(participant instanceof ozpIwc.MulticastParticipant) {
+                self.send({
+                    'dst': "names.api",
+                    'resource': participant.namesResource,
+                    'action' : "set",
+                    'entity' : participant.heartBeatStatus,
+                    'contentType' : participant.heartBeatContentType              
+                });
+            } else {
+                participant.heartbeat();
+            }            
+        }
+
     };
-
-	return ozpIwc.authorization.isPermitted({
-        'subject': subject,
-        'object': node.permissions,
-        'action': {'action':packetContext.action}
-    });
+//    heartbeat();
+    
+    this.timer = window.setInterval(heartbeat, this.heartbeatFrequency);
 };
 
-
-/** 
- * Turn an event into a list of change packets to be sent to the watchers.
- * @param {object} evt
- * @param {object} evt.node - The node being changed.
- */
-ozpIwc.CommonApiBase.prototype.notifyWatchers=function(node,changes) {
-	node.eachWatcher(function(watcher) {
-		// @TODO check that the recipient has permission to both the new and old values
-		var reply={
-			'dst'   : watcher.src,
-		    'replyTo' : watcher.msgId,
-			'action': 'changed',
-			'resource': node.resource,
-			'permissions': node.permissions,
-			'entity': changes
-		};
-        
-		this.participant.send(reply);
-	},this);
+ozpIwc.RouterWatchdog.prototype.shutdown = function() {
+    window.clearInterval(this.timer);
 };
 
-/**
- * For a given packet, return the value if it already exists, otherwise create the value
- * using makeValue()
- * @protected
- * @param {ozpIwc.TransportPacket} packet
- */
-ozpIwc.CommonApiBase.prototype.findOrMakeValue=function(packet) {
-	var node=this.data[packet.resource];
-	
-	if(!node) {
-		node=this.data[packet.resource]=this.makeValue(packet);
-	}
-	return node;
-};
-
-/**
- * 
- * Determines if the given resource exists.
- * @param {string} resource
- * @returns {boolean}
- */
-ozpIwc.CommonApiBase.prototype.hasKey=function(resource) {
-	return resource in this.data;
-};
-
-/**
- * Generates a keyname that does not already exist and starts
- * with a given prefix.
- * @param {String} prefix
- * @returns {String}
- */
-ozpIwc.CommonApiBase.prototype.createKey=function(prefix) {
-	prefix=prefix || "";
-	var key;
-	do {
-		key=prefix + ozpIwc.util.generateId();
-	} while(this.hasKey(key));
-	return key;
-};
-
-/**
- * Accept a packet and do all of the pre/post routing checks.  This include
- * <ul>
- * <li> Pre-routing checks	<ul>
- *		<li> Permission check</li>
- *		<li> ACL Checks (todo)</li>
- *		<li> Precondition checks</li>
- * </ul></li>
- * <li> Post-routing actions <ul>
- *		<li> Reply to requester </li>
- *		<li> If node version changed, notify all watchers </li>
- * </ul></li>
- * @param {ozpIwc.TransportPacketContext} packetContext
- * @returns {undefined}
- */
-ozpIwc.CommonApiBase.prototype.routePacket=function(packetContext) {
-	var packet=packetContext.packet;
-
-	if(packetContext.leaderState !== 'leader')	{
-		// if not leader, just drop it.
-		return;
-	}	
-	var handler;
-	if(packet.action) {
-		handler="handle" + packet.action.charAt(0).toUpperCase() + packet.action.slice(1).toLowerCase();
-	}
-	if(!handler || typeof(this[handler]) !== 'function') {
-		packetContext.replyTo({
-			'action': 'badAction',
-			'entity': packet.action
-		});
-        return;
-	}
-	var node=this.findOrMakeValue(packetContext.packet);
-	this.invokeHandler(node,packetContext,this[handler]);
-	
-};
-ozpIwc.CommonApiBase.prototype.validateResource=function(node,packetContext) {
-	return packetContext.packet.resource;
-};
-
-ozpIwc.CommonApiBase.prototype.validatePreconditions=function(node,packetContext) {
-	return !packetContext.packet.ifTag || packetContext.packet.ifTag===node.version;
-};
-
-/**
- * Invoke the proper handler for the packet after determining that
- * they handler has permission to perform this action.
- * @param {ozpIwc.CommonApiValue} node
- * @param {ozpIwc.TransportPacketContext} packetContext
- * @param {function} handler
- * @returns {undefined}
- */
-ozpIwc.CommonApiBase.prototype.invokeHandler=function(node,packetContext,handler) {
-	this.isPermitted(node,packetContext)
-		.failure(function() {
-			packetContext.replyTo({'action':'noPerm'});				
-		})
-		.success(function() {
-			if(!this.validateResource(node,packetContext)) {
-				packetContext.replyTo({'action': 'badResource'});
-				return;
-			}
-			if(!this.validatePreconditions(node,packetContext)) {
-				packetContext.replyTo({'action': 'noMatch'});
-				return;
-			}
-
-			var snapshot=node.snapshot();
-			handler.call(this,node,packetContext);
-			var changes=node.changesSince(snapshot);
-			
-			if(changes)	{
-				this.notifyWatchers(node,changes);
-			}	
-		},this);	
-};
-
-
-/**
- * @param {ozpIwc.CommonApiValue} node
- * @param {ozpIwc.TransportPacketContext} packetContext
- */
-ozpIwc.CommonApiBase.prototype.handleGet=function(node,packetContext) {
-	packetContext.replyTo(node.toPacket({'action': 'ok'}));
-};
-
-/**
- * @param {ozpIwc.CommonApiValue} node
- * @param {ozpIwc.TransportPacketContext} packetContext
- */
-ozpIwc.CommonApiBase.prototype.handleSet=function(node,packetContext) {
-	node.set(packetContext.packet);
-	packetContext.replyTo({'action':'ok'});
-};
-
-/**
- * @param {ozpIwc.CommonApiValue} node
- * @param {ozpIwc.TransportPacketContext} packetContext
- */
-ozpIwc.CommonApiBase.prototype.handleDelete=function(node,packetContext) {
-	node.deleteData();
-	packetContext.replyTo({'action':'ok'});
-};
-
-/**
- * @param {ozpIwc.CommonApiValue} node
- * @param {ozpIwc.TransportPacketContext} packetContext
- */
-ozpIwc.CommonApiBase.prototype.handleWatch=function(node,packetContext) {
-	node.watch(packetContext.packet);
-	
-	// @TODO: Reply with the entity? Immediately send a change notice to the new watcher?  
-	packetContext.replyTo({'action': 'ok'});
-};
-
-/**
- * @param {ozpIwc.CommonApiValue} node
- * @param {ozpIwc.TransportPacketContext} packetContext
- */
-ozpIwc.CommonApiBase.prototype.handleUnwatch=function(node,packetContext) {
-	node.unwatch(packetContext.packet);
-	
-	packetContext.replyTo({'action':'ok'});
-};
 
 
 /**
@@ -2882,13 +5859,16 @@ ozpIwc.CommonApiBase.prototype.handleUnwatch=function(node,packetContext) {
  */
 ozpIwc.CommonApiValue = function(config) {
 	config = config || {};
-	this.watchers=[];
+	this.watchers= config.watchers || [];
 	this.resource=config.resource;
-    
-  this.entity=config.entity;
+    this.allowedContentTypes=config.allowedContentTypes;
+    this.entity=config.entity;
 	this.contentType=config.contentType;
 	this.permissions=config.permissions || {};
 	this.version=config.version || 0;
+    
+    this.persist=true;
+    this.deleted=true;
 };
 
 /**
@@ -2955,6 +5935,7 @@ ozpIwc.CommonApiValue.prototype.deleteData=function() {
 	this.contentType=undefined;
 	this.permissions=[];
 	this.version=0;
+    this.deleted=true;
 };
 
 /**
@@ -2974,13 +5955,18 @@ ozpIwc.CommonApiValue.prototype.toPacket=function(base) {
 };
 
 /**
- * Determines if the contentType is acceptible to this value.  Intended to be
+ * Determines if the contentType is acceptable to this value.  Intended to be
  * overriden by subclasses.
  * @param {string} contentType
  * @returns {Boolean}
  */
 ozpIwc.CommonApiValue.prototype.isValidContentType=function(contentType) {
-	return true;
+    if(this.allowedContentTypes && this.allowedContentTypes.indexOf(contentType) < 0) {
+        throw new ozpIwc.ApiError("badContent",
+                "Bad contentType " + contentType +", expected " + this.allowedContentTypes.join(","));
+     } else {
+        return true;
+    }
 };
 
 /**
@@ -3015,14 +6001,548 @@ ozpIwc.CommonApiValue.prototype.changesSince=function(snapshot) {
 			'oldValue': snapshot.entity
 	};
 };
+
+/**
+ * Returns true if the value of this is impacted by the value of node.
+ * For nodes that base their value off of other nodes, override this function.
+ * @param {type} node 
+ * @returns boolean
+ */
+ozpIwc.CommonApiValue.prototype.isUpdateNeeded=function(node) {
+    return false;
+};
+
+/**
+ * Update this node based upon the changes made to changedNodes.
+ * @param {ozpIwc.CommonApiValue[]} changedNodes - Array of all nodes for which isUpdatedNeeded returned true.
+ * @returns {ozpIwc.CommonApiValue.changes}
+ */
+ozpIwc.CommonApiValue.prototype.updateContent=function(changedNodes) {
+    return null;
+};
+
+ozpIwc.CommonApiValue.prototype.deserialize=function(serverData) {
+};
+
+
+ozpIwc.CommonApiCollectionValue = ozpIwc.util.extend(ozpIwc.CommonApiValue,function(config) {
+	ozpIwc.CommonApiValue.apply(this,arguments);
+    this.persist=false;    
+    this.pattern=config.pattern;
+    this.entity=[];
+});
+
+ozpIwc.CommonApiCollectionValue.prototype.isUpdateNeeded=function(node) {
+    return node.resource.match(this.pattern);
+};
+
+ozpIwc.CommonApiCollectionValue.prototype.updateContent=function(changedNodes) {
+    this.version++;
+    this.entity=changedNodes.map(function(changedNode) { return changedNode.resource; });
+};
+
+ozpIwc.CommonApiCollectionValue.prototype.set=function() {
+    throw new ozpIwc.ApiError("noPermission","This resource cannot be modified.");
+};
+
+ozpIwc.ApiError=ozpIwc.util.extend(Error,function(action,message) {
+    Error.call(this,message);
+    this.name="ApiError";
+    this.errorAction=action;
+    this.message=message;
+});
+/**
+ * The Common API Base implements the API Common Conventions.  It is intended to be subclassed by
+ * the specific API implementations.
+ * @class
+ */
+ozpIwc.CommonApiBase = function(config) {
+	config = config || {};
+	this.participant=config.participant;
+    this.participant.on("unloadState",ozpIwc.CommonApiBase.prototype.unloadState,this);
+    this.participant.on("acquireState",ozpIwc.CommonApiBase.prototype.setState,this);
+	this.participant.on("receiveApiPacket",ozpIwc.CommonApiBase.prototype.routePacket,this);
+
+	this.events = new ozpIwc.Event();
+    this.events.mixinOnOff(this);
+    
+    this.dynamicNodes=[];
+    this.data={};
+};
+
+ozpIwc.CommonApiBase.prototype.findNodeForServerResource=function(serverObject,objectPath,rootPath) {
+    var resource=objectPath.replace(rootPath,'');
+    return this.findOrMakeValue({
+        'resource': resource,
+        'entity': serverObject.entity,
+        'contentType': serverObject.contentType
+    });
+};
+
+ozpIwc.CommonApiBase.prototype.loadFromServer=function(endpointName) {
+    // fetch the base endpoint. it should be a HAL Json object that all of the 
+    // resources and keys in it
+    var endpoint=ozpIwc.endpoint(endpointName);
+    var self=this;
+    endpoint.get("/")
+        .then(function(data) {
+            self.loadLinkedObjectsFromServer(endpoint,data);
+
+            // update all the collection values
+            self.dynamicNodes.forEach(function(resource) {
+                self.updateDynamicNode(self.data[resource]);
+            });        
+    }).catch(function(e) {
+        //console.error("Could not load from api (" + endpointName + "): " + e.message,e);
+    });
+};
+
+ozpIwc.CommonApiBase.prototype.updateResourceFromServer=function(object,path,endpoint) {
+    var node = this.findNodeForServerResource(object,path,endpoint.baseUrl);
+
+    var snapshot=node.snapshot();
+    node.deserialize(node,object);
+
+    this.notifyWatchers(node,node.changesSince(snapshot));
+    this.loadLinkedObjectsFromServer(endpoint,object);
+};
+
+ozpIwc.CommonApiBase.prototype.loadLinkedObjectsFromServer=function(endpoint,data) {
+    // fetch the base endpoint. it should be a HAL Json object that all of the 
+    // resources and keys in it
+    if(!data) {
+        return;
+    }
+    
+    var self=this;
+    if(data._embedded && data._embedded['item']) {
+        for (var i in data._embedded['item']) {
+            var object = data._embedded['item'][i];
+            this.updateResourceFromServer(object,object._links.self.href,endpoint);
+        }
+    }
+    if(data._links && data._links['item']) {
+        data._links['item'].forEach(function(object) {
+            var href=object.href;
+            endpoint.get(href).then(function(objectResource){
+                self.updateResourceFromServer(objectResource,href,endpoint);
+            }).catch(function(error) {
+                console.error("unable to load " + object.href + " because: ",error);
+            });
+        });
+    }
+};
+
+    
+/**
+ * Creates a new value for the given packet's request.  Subclasses must override this
+ * function to return the proper value based upon the packet's resource, content type, or
+ * other parameters.
+ * 
+ * @abstract
+ * @param {ozpIwc.TransportPacket} packet
+ * @returns {ozpIwc.CommonApiValue} an object implementing the commonApiValue interfaces
+ */
+ozpIwc.CommonApiBase.prototype.makeValue=function(/*packet*/) {
+	throw new Error("Subclasses of CommonApiBase must implement the makeValue(packet) function.");
+};
+
+/**
+ * Determines whether the action implied by the packet is permitted to occur on
+ * node in question.
+ * @todo the refactoring of security to allow action-level permissions
+ * @todo make the packetContext have the srcSubject inside of it
+ * @param {ozpIwc.CommonApiValue} node
+ * @param {ozpIwc.TransportPacketContext} packetContext
+ * @returns {ozpIwc.AsyncAction}
+ */
+ozpIwc.CommonApiBase.prototype.isPermitted=function(node,packetContext) {
+	var subject=packetContext.srcSubject || {
+        'rawAddress':packetContext.packet.src
+    };
+
+	return ozpIwc.authorization.isPermitted({
+        'subject': subject,
+        'object': node.permissions,
+        'action': {'action':packetContext.action}
+    });
+};
+
+
+/** 
+ * Turn an event into a list of change packets to be sent to the watchers.
+ * @param {object} evt
+ * @param {object} evt.node - The node being changed.
+ */
+ozpIwc.CommonApiBase.prototype.notifyWatchers=function(node,changes) {
+    if(!changes) {
+        return;
+    }
+    this.events.trigger("changedNode",node,changes);
+	node.eachWatcher(function(watcher) {
+		// @TODO check that the recipient has permission to both the new and old values
+		var reply={
+			'dst'   : watcher.src,
+            'src'   : this.participant.name,
+		    'replyTo' : watcher.msgId,
+			'response': 'changed',
+			'resource': node.resource,
+			'permissions': node.permissions,
+			'entity': changes
+		};
+        
+		this.participant.send(reply);
+	},this);
+};
+
+/**
+ * For a given packet, return the value if it already exists, otherwise create the value
+ * using makeValue()
+ * @protected
+ * @param {ozpIwc.TransportPacket} packet
+ */
+ozpIwc.CommonApiBase.prototype.findOrMakeValue=function(packet) {
+    if(packet.resource === null || packet.resource === undefined) {
+        // return a throw-away value
+        return new ozpIwc.CommonApiValue();
+    }
+	var node=this.data[packet.resource];
+
+	if(!node) {
+		node=this.data[packet.resource]=this.makeValue(packet);
+	}
+	return node;
+};
+
+/**
+ * 
+ * Determines if the given resource exists.
+ * @param {string} resource
+ * @returns {boolean}
+ */
+ozpIwc.CommonApiBase.prototype.hasKey=function(resource) {
+	return resource in this.data;
+};
+
+/**
+ * Generates a keyname that does not already exist and starts
+ * with a given prefix.
+ * @param {String} prefix
+ * @returns {String}
+ */
+ozpIwc.CommonApiBase.prototype.createKey=function(prefix) {
+	prefix=prefix || "";
+	var key;
+	do {
+		key=prefix + ozpIwc.util.generateId();
+	} while(this.hasKey(key));
+	return key;
+};
+
+/**
+* Route a packet to the appropriate handler.  The routing path is based upon
+ * the action and whether a resource is defined. If the handler does not exist, it is routed 
+ * to defaultHandler(node,packetContext)
+ * 
+ * Has Resource: handleAction(node,packetContext)
+ *
+ * No resource: rootHandleAction(node,packetContext)
+ * 
+ * Where "Action" is replaced with the packet's action, lowercase with first letter capitalized
+ * (e.g. "doSomething" invokes "handleDosomething")
+ * Note that node will usually be null for the rootHandlerAction calls.
+ * <ul>
+ * <li> Pre-routing checks	<ul>
+ *		<li> Permission check</li>
+ *		<li> ACL Checks (todo)</li>
+ *		<li> Precondition checks</li>
+ * </ul></li>
+ * <li> Post-routing actions <ul>
+ *		<li> Reply to requester </li>
+ *		<li> If node version changed, notify all watchers </li>
+ * </ul></li>
+ * @param {ozpIwc.TransportPacketContext} packetContext
+ * @returns {undefined}
+ */
+ozpIwc.CommonApiBase.prototype.routePacket=function(packetContext) {
+	var packet=packetContext.packet;
+    this.events.trigger("receive",packetContext);
+    var self=this;
+    var errorWrap=function(f) {
+        try {
+            f.apply(self);
+        } catch(e) {
+            if(!e.errorAction) {
+                console.log("Unexpected error:",e);
+            }
+            packetContext.replyTo({
+                'response': e.errorAction || "unknownError",
+                'entity': e.message
+            });
+            return;
+        }
+    };
+	if(packetContext.leaderState !== 'leader')	{
+		// if not leader, just drop it.
+		return;
+	}
+    
+    if(packet.response && !packet.action) {
+        console.log(this.participant.name + " dropping response packet ",packet);
+        // if it's a response packet that didn't wire an explicit handler, drop the sucker
+        return;
+    }
+    var node;
+    
+    errorWrap(function() {
+        var handler=this.findHandler(packetContext);
+        this.validateResource(node,packetContext);
+        node=this.findOrMakeValue(packetContext.packet);
+
+        this.isPermitted(node,packetContext)
+            .success(function() {
+                errorWrap(function() {
+                    this.validatePreconditions(node,packetContext);
+                    var snapshot=node.snapshot();
+                    handler.call(this,node,packetContext);
+                    this.notifyWatchers(node,node.changesSince(snapshot));
+
+                    // update all the collection values
+                    this.dynamicNodes.forEach(function(resource) {
+                        this.updateDynamicNode(this.data[resource]);
+                    },this);
+                });
+            },this)
+            .failure(function() {
+                packetContext.replyTo({'response':'noPerm'});				
+            });
+    });
+};
+
+ozpIwc.CommonApiBase.prototype.findHandler=function(packetContext) {
+    var action=packetContext.packet.action;
+    var resource=packetContext.packet.resource;
+    
+    var handler;
+
+    if(resource===null || resource===undefined) {
+        handler="rootHandle";
+    } else {
+        handler="handle";
+    }
+    
+	if(action) {
+		handler+=action.charAt(0).toUpperCase() + action.slice(1).toLowerCase();
+	} else {
+        handler="defaultHandler";
+    }
+    
+	if(!handler || typeof(this[handler]) !== 'function') {
+       handler="defaultHandler";
+	}
+    return this[handler];
+};
+
+
+
+
+ozpIwc.CommonApiBase.prototype.validateResource=function(/* node,packetContext */) {
+	return true;
+};
+
+ozpIwc.CommonApiBase.prototype.validatePreconditions=function(node,packetContext) {
+	if(packetContext.packet.ifTag && packetContext.packet.ifTag!==node.version) {
+        throw new ozpIwc.ApiError('noMatch',"Latest version is " + node.version);
+    }
+};
+
+ozpIwc.CommonApiBase.prototype.validateContentType=function(node,packetContext) {
+    return true;
+};
+
+ozpIwc.CommonApiBase.prototype.updateDynamicNode=function(node) {
+    if(!node) {
+        return;
+    }
+    var ofInterest=[];
+
+    for(var k in this.data) {
+        if(node.isUpdateNeeded(this.data[k])){
+            ofInterest.push(this.data[k]);
+        }                        
+    }
+
+    if(ofInterest) {
+        var snapshot=node.snapshot();
+        node.updateContent(ofInterest);
+        this.notifyWatchers(node,node.changesSince(snapshot));
+    }
+};
+
+ozpIwc.CommonApiBase.prototype.addDynamicNode=function(node) {
+    this.data[node.resource]=node;
+    this.dynamicNodes.push(node.resource);
+    this.updateDynamicNode(node);
+};
+
+ozpIwc.CommonApiBase.prototype.defaultHandler=function(node,packetContext) {
+    packetContext.replyTo({
+        'response': 'badAction',
+        'entity': {
+            'action': packetContext.packet.action,
+            'originalRequest' : packetContext.packet
+        }
+    });
+};
+
+/**
+ * @param {ozpIwc.CommonApiValue} node
+ * @param {ozpIwc.TransportPacketContext} packetContext
+ */
+ozpIwc.CommonApiBase.prototype.handleGet=function(node,packetContext) {
+	packetContext.replyTo(node.toPacket({'response': 'ok'}));
+};
+
+/**
+ * @param {ozpIwc.CommonApiValue} node
+ * @param {ozpIwc.TransportPacketContext} packetContext
+ */
+ozpIwc.CommonApiBase.prototype.handleSet=function(node,packetContext) {
+	node.set(packetContext.packet);
+	packetContext.replyTo({'response':'ok'});
+};
+
+/**
+ * @param {ozpIwc.CommonApiValue} node
+ * @param {ozpIwc.TransportPacketContext} packetContext
+ */
+ozpIwc.CommonApiBase.prototype.handleDelete=function(node,packetContext) {
+	node.deleteData();
+	packetContext.replyTo({'response':'ok'});
+};
+
+/**
+ * @param {ozpIwc.CommonApiValue} node
+ * @param {ozpIwc.TransportPacketContext} packetContext
+ */
+ozpIwc.CommonApiBase.prototype.handleWatch=function(node,packetContext) {
+	node.watch(packetContext.packet);
+	
+	// @TODO: Reply with the entity? Immediately send a change notice to the new watcher?  
+	packetContext.replyTo({'response': 'ok'});
+};
+
+/**
+ * @param {ozpIwc.CommonApiValue} node
+ * @param {ozpIwc.TransportPacketContext} packetContext
+ */
+ozpIwc.CommonApiBase.prototype.handleUnwatch=function(node,packetContext) {
+	node.unwatch(packetContext.packet);
+	
+	packetContext.replyTo({'response':'ok'});
+};
+
+/**
+ * Called when the leader participant fires its beforeUnload state. Releases the Api's data property
+ * to be consumed by all, then used by the new leader.
+ */
+ozpIwc.CommonApiBase.prototype.unloadState = function(){
+    this.participant.startElection({state:this.data});
+    this.data = {};
+};
+
+/**
+ * Called when the leader participant looses its leadership. This occurs when a new participant joins with a higher
+ * priority
+ */
+ozpIwc.CommonApiBase.prototype.transferState = function(){
+    this.participant.sendElectionMessage("prevLeader", {
+        state:this.data,
+        prevLeader: this.participant.address
+    });
+    this.data = {};
+};
+
+/**
+ * Sets the APIs data property. Removes current values, then constructs each API value anew.
+ * @param state
+ */
+ozpIwc.CommonApiBase.prototype.setState = function(state) {
+    this.data = {};
+    for (var key in state) {
+        this.findOrMakeValue(state[key]);
+    }
+};
+
+ /** @param {ozpIwc.CommonApiValue} node
+ * @param {ozpIwc.TransportPacketContext} packetContext
+ */
+ozpIwc.CommonApiBase.prototype.rootHandleList=function(node,packetContext) {
+    packetContext.replyTo({
+        'response':'ok',
+        'entity': Object.keys(this.data)
+    });
+};
+
+
 var ozpIwc=ozpIwc || {};
 
-ozpIwc.DataApi = ozpIwc.util.extend(ozpIwc.CommonApiBase,function() {
+ozpIwc.Endpoint=function(endpointRegistry) {
+    this.endpointRegistry=endpointRegistry;
+};
+
+ozpIwc.Endpoint.prototype.get=function(resource) {
+    var self=this;
+
+    return this.endpointRegistry.loadPromise.then(function() {
+        if(resource.indexOf(self.baseUrl)!==0) {
+            resource=self.baseUrl + resource;
+        }
+        return ozpIwc.util.ajax({
+            href:  resource,
+            method: 'GET'
+        });
+    });
+};
+
+ozpIwc.EndpointRegistry=function(config) {
+    config=config || {};
+    var apiRoot=config.apiRoot || 'api';
+    this.endPoints={};
+    var self=this;
+    this.loadPromise=ozpIwc.util.ajax({
+        href: apiRoot,
+        method: 'GET'
+    }).then(function(data) {
+        for (var ep in data._links) {
+            if (ep !== 'self') {
+                self.endpoint(ep).baseUrl=data._links[ep].href;
+            }
+        }
+    });
+};
+
+ozpIwc.EndpointRegistry.prototype.endpoint=function(name) {
+    var endpoint=this.endPoints[name];
+    if(!endpoint) {
+        endpoint=this.endPoints[name]=new ozpIwc.Endpoint(this);
+    }
+    return endpoint;
+};
+
+ozpIwc.initEndpoints=function(apiRoot) {
+    var registry=new ozpIwc.EndpointRegistry({'apiRoot':apiRoot});
+    ozpIwc.endpoint=function(name) {
+        return registry.endpoint(name);
+    };
+};
+ozpIwc.DataApi = ozpIwc.util.extend(ozpIwc.CommonApiBase,function(config) {
 	ozpIwc.CommonApiBase.apply(this,arguments);
+    this.loadFromServer("data");
 });
 
 ozpIwc.DataApi.prototype.makeValue = function(packet){
-    return new ozpIwc.DataApiValue({resource: packet.resource});
+    return new ozpIwc.DataApiValue(packet);
 };
 
 ozpIwc.DataApi.prototype.createChild=function(node,packetContext) {
@@ -3036,7 +6556,7 @@ ozpIwc.DataApi.prototype.createChild=function(node,packetContext) {
 
 ozpIwc.DataApi.prototype.handleList=function(node,packetContext) {
 	packetContext.replyTo({
-        'action': 'ok',
+        'response': 'ok',
         'entity': node.listChildren()
     });
 };
@@ -3051,7 +6571,7 @@ ozpIwc.DataApi.prototype.handleAddchild=function(node,packetContext) {
 	node.addChild(childNode.resource);
 	
 	packetContext.replyTo({
-        'action':'ok',
+        'response':'ok',
         'entity' : {
             'resource': childNode.resource
         }
@@ -3066,9 +6586,10 @@ ozpIwc.DataApi.prototype.handleRemovechild=function(node,packetContext) {
     node.removeChild(packetContext.packet.entity.resource);
 	// delegate to the handleGet call
 	packetContext.replyTo({
-        'action':'ok'
+        'response':'ok'
     });
 };
+
 
 ozpIwc.DataApiValue = ozpIwc.util.extend(ozpIwc.CommonApiValue,function(config) {
 	ozpIwc.CommonApiValue.apply(this,arguments);
@@ -3133,23 +6654,493 @@ ozpIwc.DataApiValue.prototype.changesSince=function(snapshot) {
         changes.addedChildren=this.children.filter(function(f) {
             return this.indexOf(f) < 0;
         },snapshot.links.children);
-	};
+	}
     return changes;
 };
-var ozpIwc=ozpIwc || {};
 
-ozpIwc.IntentsApi = ozpIwc.util.extend(ozpIwc.CommonApiBase,function() {
-	ozpIwc.CommonApiBase.apply(this,arguments);
+
+ozpIwc.DataApiValue.prototype.deserialize=function(serverData) {
+    this.entity=serverData.entity;
+    this.contentType=serverData.contentType || this.contentType;
+	this.permissions=serverData.permissions || this.permissions;
+	this.version=serverData.version || this.version;
+};
+
+/**
+ * The Intents API. Subclasses The Common Api Base.
+ * @class
+ * @params config {Object}
+ * @params config.href {String} - URI of the server side Data storage to load the Intents Api with
+ * @params config.loadServerData {Boolean} - Flag to load server side data.
+ * @params config.loadServerDataEmbedded {Boolean} - Flag to load embedded version of server side data.
+ *                                                  Takes precedence over config.loadServerData
+ */
+ozpIwc.IntentsApi = ozpIwc.util.extend(ozpIwc.CommonApiBase, function (config) {
+    ozpIwc.CommonApiBase.apply(this, arguments);
+    this.loadFromServer("intents");
+});
+
+/**
+ * Takes the resource of the given packet and creates an empty value in the IntentsApi. Chaining of creation is
+ * accounted for (A handler requires a definition, which requires a capability).
+ * @param {object} packet
+ * @returns {IntentsApiHandlerValue|IntentsAPiDefinitionValue|IntentsApiCapabilityValue}
+ */
+ozpIwc.IntentsApi.prototype.makeValue = function (packet) {
+    // resource of form /majorType/minorType/action?/handler?
+    var path=packet.resource.split(/\//);
+    path.shift(); // shift off the empty element before the first slash
+    var self=this;
+    var createType=function(resource) {
+        var node=new ozpIwc.IntentsApiTypeValue({
+            resource: resource,
+            intentType: path[0] + "/" + path[1]                
+        });
+        self.addDynamicNode(node);
+        return node;
+    };
+    var createDefinition=function(resource) {
+        var type="/" +path[0]+"/" + path[1];
+        if(!self.data[type]) {
+            self.data[type]=createType(type);
+        }
+        var node=new ozpIwc.IntentsApiDefinitionValue({
+            resource: resource,
+            intentType: path[0]+"/" + path[1] + "/" + path[2],
+            intentAction: path[2]
+        });
+        self.addDynamicNode(node);
+        return node;
+    };
+    var createHandler=function(resource) {
+        var definition="/" +path[0]+"/" + path[1] + "/" + path[2];
+        if(!self.data[definition]) {
+            self.data[definition]=createDefinition(definition);
+        }
+        
+        return new ozpIwc.IntentsApiHandlerValue({
+            resource: resource,
+            intentType: path[0] + "/" + path[1],
+            intentAction: path[2]
+        });
+    };
+    
+    switch (path.length) {
+        case 2:
+            return createType(packet.resource);
+        case 3:
+
+            return createDefinition(packet.resource);
+        case 4:
+            return createHandler(packet.resource);
+        default:
+            throw new ozpIwc.ApiError("badResource","Invalid resource: " + packet.resource)
+    }
+};
+
+/**
+ * Creates and registers a handler to the given definition resource path.
+ * @param {object} node - the handler value to register, or the definition value the handler will register to
+ * (handler will receive a generated key if definition value is provided).
+ * @param {ozpIwc.TransportPacketContext} packetContext - the packet received by the router.
+ */
+ozpIwc.IntentsApi.prototype.handleRegister = function (node, packetContext) {
+	var key=this.createKey(node.resource+"/"); //+packetContext.packet.src;
+
+	// save the new child
+	var childNode=this.findOrMakeValue({'resource':key});
+	childNode.set(packetContext.packet);
+	
+    packetContext.replyTo({
+        'response':'ok',
+        'entity' : {
+            'resource': childNode.resource
+        }
+    });
+};
+
+
+/**
+ * Invokes the appropriate handler for the intent from one of the following methods:
+ *  <li> user preference specifies which handler to use. </li>
+ *  <li> by prompting the user to select which handler to use. </li>
+ *  <li> by receiving a handler resource instead of a definition resource </li>
+ *  @todo <li> user preference specifies which handler to use. </li>
+ *  @todo <li> by prompting the user to select which handler to use. </li>
+ * @param {object} node - the definition or handler value used to invoke the intent.
+ * @param {ozpIwc.TransportPacketContext} packetContext - the packet received by the router.
+ */
+ozpIwc.IntentsApi.prototype.handleInvoke = function (node, packetContext) {
+    if(typeof(node.getHandlers) !== "function") {
+        throw new ozpIwc.ApiError("badResource","Resource is not an invokable intent");
+    }
+    
+    var handlerNodes=node.getHandlers(packetContext);
+    
+    if(handlerNodes.length === 1) {
+        this.invokeIntentHandler(handlerNodes[0],packetContext);
+    } else {
+        this.chooseIntentHandler(handlerNodes,packetContext);
+    }
+};
+
+
+
+ozpIwc.IntentsApi.prototype.invokeIntentHandler = function (node, packetContext) {
+    // check to see if there's an invokeIntent package
+    var packet=ozpIwc.util.clone(node.entity.invokeIntent);
+    
+    // assign the entity and contentType from the packet Context
+    packet.entity=ozpIwc.util.clone(packetContext.packet.entity);
+    packet.contentType=packetContext.packet.contentType;
+    packet.permissions=packetContext.packet.permissions;
+    
+
+    this.participant.send(packet,function(response) {
+        var blacklist=['src','dst','msgId','replyTo'];
+        var packet={};
+        for(var k in response) {
+            if(blacklist.indexOf(k) === -1) {
+                packet[k]=response[k];
+            }
+        }
+        packetContext.replyTo(packet);
+    });
+};
+
+ozpIwc.IntentsApi.prototype.chooseIntentHandler = function (nodeList, packetContext) {
+    throw new ozpIwc.ApiError("noImplementation","Selecting an intent is not yet implemented");
+};
+
+
+/**
+ * The capability value for an intent. adheres to the ozp-intents-type-capabilities-v1+json content type.
+ * @class
+ * @param {object} config
+ *@param {object} config.entity
+ * @param {string} config.entity.definitions - the list of definitions in this intent capability.
+ */
+ozpIwc.IntentsApiDefinitionValue = ozpIwc.util.extend(ozpIwc.CommonApiValue, function (config) {
+    config=config || {};
+    config.allowedContentTypes=["application/ozpIwc-intents-definition-v1+json"];
+    config.contentType="application/ozpIwc-intents-definition-v1+json";
+    ozpIwc.CommonApiValue.call(this, config);
+    this.pattern=new RegExp(ozpIwc.util.escapeRegex(this.resource)+"/[^/]*");
+    this.handlers=[];
+    this.entity={
+        type: config.intentType,
+        action: config.intentAction,        
+        handlers: []
+    };
+});
+
+ozpIwc.IntentsApiDefinitionValue.prototype.isUpdateNeeded=function(node) {
+    return this.pattern.test(node.resource);
+};
+
+ozpIwc.IntentsApiDefinitionValue.prototype.updateContent=function(changedNodes) {
+    this.version++;
+    this.handlers=changedNodes;
+    this.entity.handlers=changedNodes.map(function(changedNode) { 
+        return changedNode.resource; 
+    });
+};
+
+ozpIwc.IntentsApiDefinitionValue.prototype.getHandlers=function(packetContext) {
+    return [this.handlers];
+};
+/**
+ * The capability value for an intent. adheres to the ozp-intents-type-capabilities-v1+json content type.
+ * @class
+ * @param {object} config
+ *@param {object} config.entity
+ * @param {string} config.entity.definitions - the list of definitions in this intent capability.
+ */
+ozpIwc.IntentsApiHandlerValue = ozpIwc.util.extend(ozpIwc.CommonApiValue, function (config) {
+    config=config || {};
+    config.allowedContentTypes=["application/ozpIwc-intents-handler-v1+json"];
+    config.contentType="application/ozpIwc-intents-handler-v1+json";
+    ozpIwc.CommonApiValue.apply(this, arguments);
+    this.entity={
+        type: config.intentType,
+        action: config.intentAction
+    };
+});
+
+ozpIwc.IntentsApiHandlerValue.prototype.getHandlers=function(packetContext) {
+    return [this];
+};
+
+ozpIwc.IntentsApiHandlerValue.prototype.set=function(packet) {
+    ozpIwc.CommonApiValue.prototype.set.apply(this,arguments);
+    this.entity.invokeIntent = this.entity.invokeIntent  || {};
+    this.entity.invokeIntent.dst = this.entity.invokeIntent.dst || packet.src;
+    this.entity.invokeIntent.resource = this.entity.invokeIntent.resource || "/intents" + packet.resource;
+    this.entity.invokeIntent.action = this.entity.invokeIntent.action || "invoke";
+};
+/**
+ * The capability value for an intent. adheres to the ozp-intents-type-capabilities-v1+json content type.
+ * @class
+ * @param {object} config
+ *@param {object} config.entity
+ * @param {string} config.entity.definitions - the list of definitions in this intent capability.
+ */
+ozpIwc.IntentsApiTypeValue = ozpIwc.util.extend(ozpIwc.CommonApiValue, function (config) {
+    config=config || {};
+    config.allowedContentTypes=["application/ozpIwc-intents-contentType-v1+json"];
+    config.contentType="application/ozpIwc-intents-contentType-v1+json";
+
+    ozpIwc.CommonApiValue.apply(this, arguments);
+    this.pattern=new RegExp(ozpIwc.util.escapeRegex(this.resource)+"/[^/]*");
+    this.entity={
+        type: config.intentType,
+        actions: []
+    };
+});
+
+ozpIwc.IntentsApiTypeValue.prototype.isUpdateNeeded=function(node) {
+    return this.pattern.test(node.resource);
+};
+
+ozpIwc.IntentsApiTypeValue.prototype.updateContent=function(changedNodes) {
+    this.version++;
+    this.entity.actions=changedNodes.map(function(changedNode) { 
+        return changedNode.resource; 
+    });
+};
+ozpIwc.NamesApi = ozpIwc.util.extend(ozpIwc.CommonApiBase, function() {
+    ozpIwc.CommonApiBase.apply(this, arguments);
+
+    // map the alias "/me" to "/address/{packet.src}" upon receiving the packet
+    this.on("receive", function (packetContext) {
+        var packet = packetContext.packet;
+        if (packet.resource) {
+            packet.resource = packet.resource.replace(/$\/me^/, packetContext.packet.src);
+        }
+    });
+
+    this.addDynamicNode(new ozpIwc.CommonApiCollectionValue({
+        resource: "/address",
+        pattern: /^\/address\/.*$/,
+        contentType: "application/ozpIwc-address-v1+json"
+    }));
+    this.addDynamicNode(new ozpIwc.CommonApiCollectionValue({
+        resource: "/multicast",
+        pattern: /^\/multicast\/.*$/,
+        contentType: "application/ozpIwc-multicast-address-v1+json"
+    }));
+    this.addDynamicNode(new ozpIwc.CommonApiCollectionValue({
+        resource: "/router",
+        pattern: /^\/router\/.*$/,
+        contentType: "application/ozpIwc-router-v1+json"
+    }));
+    this.addDynamicNode(new ozpIwc.CommonApiCollectionValue({
+        resource: "/api",
+        pattern: /^\/api\/.*$/,
+        contentType: "application/ozpIwc-api-descriptor-v1+json"
+    }));
+    //temporary injector code. Remove when api loader is implemented
+    var packet = {
+        resource: '/api/data.api',
+        entity: {'actions': ['get', 'set', 'delete', 'watch', 'unwatch', 'addChild', 'removeChild']},
+        contentType: 'application/ozpIwc-api-descriptor-v1+json'
+    }
+    var node=this.findOrMakeValue(packet);
+    node.set(packet);
+    packet = {
+        resource: '/api/intents.api',
+        entity: {'actions': ['get','set','delete','watch','unwatch','register','unregister','invoke']},
+        contentType: 'application/ozpIwc-api-descriptor-v1+json'
+    }
+    node=this.findOrMakeValue(packet);
+    node.set(packet);
+    packet = {
+        resource: '/api/names.api',
+        entity: {'actions': ['get','set','delete','watch','unwatch']},
+        contentType: 'application/ozpIwc-api-descriptor-v1+json'
+    }
+    node=this.findOrMakeValue(packet);
+    node.set(packet);
+    packet = {
+        resource: '/api/system.api',
+        entity: { 'actions': ['get','set','delete','watch','unwatch']},
+        contentType: 'application/ozpIwc-api-descriptor-v1+json'
+    }
+    node=this.findOrMakeValue(packet);
+    node.set(packet);
+});
+
+ozpIwc.NamesApi.prototype.validateResource=function(node,packetContext) {
+    if(packetContext.packet.resource && !packetContext.packet.resource.match(/^\/(api|address|multicast|router|me)/)){
+        throw new ozpIwc.ApiError('badResource',"Invalide resource for name.api: " + packetContext.packet.resource);
+    }
+};
+
+ozpIwc.NamesApi.prototype.makeValue = function(packet) {
+    
+    var path=packet.resource.split("/");
+    var config={
+        resource: packet.resource,
+        contentType: packet.contentType
+    };
+    
+    // only handle the root elements for now...
+    switch(path[1]) {
+        case "api": config.allowedContentTypes=["application/ozpIwc-api-descriptor-v1+json"]; break;
+        case "address": config.allowedContentTypes=["application/ozpIwc-address-v1+json"]; break;
+        case "multicast": config.allowedContentTypes=["application/ozpIwc-multicast-address-v1+json"]; break;
+        case "router": config.allowedContentTypes=["application/ozpIwc-router-v1+json"]; break;
+
+        default:
+            throw new ozpIwc.ApiError("badResource","Not a valid path of names.api: " + path[1] + " in " + packet.resource);
+    }
+    return new ozpIwc.NamesApiValue(config);            
+};
+
+ozpIwc.NamesApiValue = ozpIwc.util.extend(ozpIwc.CommonApiValue,function(config) {
+    if(!config || !config.allowedContentTypes) {
+        throw new Error("NamesAPIValue must be configured with allowedContentTypes.");
+    }
+	ozpIwc.CommonApiValue.apply(this,arguments);
 });
 
 var ozpIwc=ozpIwc || {};
 
-ozpIwc.NamesApi = ozpIwc.util.extend(ozpIwc.CommonApiBase,function() {
-	ozpIwc.CommonApiBase.apply(this,arguments);
+ozpIwc.SystemApi = ozpIwc.util.extend(ozpIwc.CommonApiBase,function(config) {
+    ozpIwc.CommonApiBase.apply(this,arguments);
+    
+    this.addDynamicNode(new ozpIwc.CommonApiCollectionValue({
+        resource: "/application",
+        pattern: /^\/application\/.*$/,
+        contentType: "application/ozpIwc-application-list-v1+json"
+    }));
+    
+    this.on("changedNode",this.updateIntents,this);
+       
+    this.loadFromServer("applications");
+    
+    
+    // @todo populate user and system endpoints
+    this.data["/user"]=new ozpIwc.CommonApiValue({
+        resource: "/user",
+        contentType: "application/ozpIwc-user-v1+json",
+        entity: {
+            "name": "DataFaked BySystemApi",
+            "userName": "fixmefixmefixme"
+        }
+    });
+    this.data["/system"]=new ozpIwc.CommonApiValue({
+        resource: "/system",
+        contentType: "application/ozpIwc-system-info-v1+json",
+        entity: {
+            "version": "1.0",
+            "name": "Fake Data from SystemAPI FIXME"
+        }
+    });    
 });
 
-var ozpIwc=ozpIwc || {};
 
-ozpIwc.SystemApi = ozpIwc.util.extend(ozpIwc.CommonApiBase,function() {
-	ozpIwc.CommonApiBase.apply(this,arguments);
+ozpIwc.SystemApi.prototype.updateIntents=function(node,changes) {
+    if(!node.getIntentsRegistrations) {
+        return;
+    }
+    var intents=node.getIntentsRegistrations();
+    if(!intents) {
+        return;
+    }
+    intents.forEach(function(i) {
+        this.participant.send({
+            'dst' : "intents.api",
+            'src' : "system.api",
+            'action': "set",
+            'resource': "/"+i.type+"/"+i.action+"/system.api"+node.resource.replace(/\//g,'.'),
+            'contentType': "application/ozpIwc-intents-handler-v1+json",
+            'entity': {
+                'type': i.type,
+                'action': i.action,
+                'icon': i.icon,
+                'label': i.label,
+                '_links': node.entity['_links'],
+                'invokeIntent': {
+                    'action' : 'launch',
+                    'resource' : node.resource
+                }
+            }
+        });
+    },this);
+    
+};
+
+ozpIwc.SystemApi.prototype.findNodeForServerResource=function(serverObject,objectPath,rootPath) {
+    var resource="/application" + objectPath.replace(rootPath,'');
+    return this.findOrMakeValue({
+        'resource': resource,
+        'entity': serverObject,
+        'contentType': "ozpIwc-application-definition-v1+json"
+    });
+};
+
+ozpIwc.SystemApi.prototype.makeValue = function(packet){
+    if(packet.resource.indexOf("/mailbox") === 0) {
+        return new ozpIwc.SystemApiMailboxValue({
+            resource: packet.resource, 
+            entity: packet.entity, 
+            contentType: packet.contentType
+        });
+    }
+        
+    return new ozpIwc.SystemApiApplicationValue({
+        resource: packet.resource, 
+        entity: packet.entity, 
+        contentType: packet.contentType, 
+        systemApi: this
+    });
+};
+
+ozpIwc.SystemApi.prototype.handleSet = function() {
+    throw new ozpIwc.ApiError("badAction", "Cannot modify the system API");
+};
+
+ozpIwc.SystemApi.prototype.handleDelete = function() {
+    throw new ozpIwc.ApiError("badAction", "Cannot modify the system API");
+};
+
+ozpIwc.SystemApi.prototype.handleLaunch = function(node,packetContext) {
+    var key=this.createKey("/mailbox/");
+
+	// save the new child
+	var mailboxNode=this.findOrMakeValue({'resource':key});
+	mailboxNode.set(packetContext.packet);
+    
+    this.launchApplication(node,mailboxNode);
+    packetContext.replyTo({'action': "ok"});
+};
+
+ozpIwc.SystemApi.prototype.launchApplication=function(node,mailboxNode) {
+    var launchParams=[
+        "ozpIwc.peer="+encodeURIComponent(ozpIwc.BUS_ROOT),
+        "ozpIwc.mailbox="+encodeURIComponent(mailboxNode.resource)
+    ];
+    
+    window.open(node.entity['_links'].describes.href,launchParams.join("&"));    
+};
+ozpIwc.SystemApiApplicationValue = ozpIwc.util.extend(ozpIwc.CommonApiValue,function(config) {
+    ozpIwc.CommonApiValue.apply(this,arguments);
+    this.systemApi=config.systemApi;
 });
+
+
+ozpIwc.SystemApiApplicationValue.prototype.deserialize=function(serverData) {
+    this.entity=serverData.entity;
+    this.contentType=serverData.contentType || this.contentType;
+	this.permissions=serverData.permissions || this.permissions;
+	this.version=serverData.version || ++this.version;
+};
+
+ozpIwc.SystemApiApplicationValue.prototype.getIntentsRegistrations=function() {
+    return this.entity.intents;
+};
+ozpIwc.SystemApiMailboxValue = ozpIwc.util.extend(ozpIwc.CommonApiValue,function(config) {
+    ozpIwc.CommonApiValue.apply(this,arguments);
+});
+//# sourceMappingURL=ozpIwc-bus.js.map

@@ -12,14 +12,45 @@ module.exports = function(grunt) {
 					debug: true
 				}
 			}
-		}
-
+		},
+    copy: {
+      mockapi: {
+        files: [
+          {
+            src: ['api/**'],
+            dest: './',
+            cwd: 'bower_components/ozp-data-schemas/mock',
+            expand: true,
+            rename: function(dest, src) {
+              return dest + src.replace(/index\.json$/, "index.html");
+            }
+          }
+        ]
+      },
+      iwc: {
+        files: [
+          {
+            src: ['**'],
+            dest: './iwc',
+            expand: true,
+            cwd: 'bower_components/ozp-iwc/dist'
+          }
+        ]
+      }
+  },
+  clean: {
+    dist: ['api', 'iwc']
+    }
   });
 
 	grunt.loadNpmTasks('grunt-contrib-watch');
 	grunt.loadNpmTasks('grunt-contrib-connect');
+  grunt.loadNpmTasks('grunt-contrib-clean');
+  grunt.loadNpmTasks('grunt-contrib-copy');
 	
   // Default task(s).
   grunt.registerTask('default', ['connect']);
+
+  grunt.registerTask('build', ['clean:dist', 'copy:mockapi', 'copy:iwc']);
 
 };
