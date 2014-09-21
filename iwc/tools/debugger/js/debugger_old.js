@@ -209,7 +209,7 @@ function logPacket(msg) {
 	$("#messages").append( 
 			'<tr class="summary">'+
 				'<td class="dateString '+ logColumnsShown.dateString +'">'+dateString+'</td>'+
-				'<td class="srcPeer '+ logColumnsShown.srcPeer +'">'+packet.src_peer+'</td>'+
+				'<td class="srcPeer '+ logColumnsShown.srcPeer +'">'+packet.srcPeer+'</td>'+
 				'<td class="sequence '+ logColumnsShown.sequence +'">'+packet.sequence+'</td>'+
 				'<td class="dst '+ logColumnsShown.dst +'">'+packet.data.dst+'</td>'+
 				'<td class="src '+ logColumnsShown.src +'">'+packet.data.src+'</td>'+

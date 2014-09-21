@@ -68,7 +68,7 @@
                     </tr></thead><tbody>
                     <tr ng-repeat-start="packet in packets | filter:viewFilter | limitTo:-maxShown" ng-click="isExpanded = !isExpanded">
                         <td class="dateString">{{packet.data.time | date:'yyyy-MM-dd HH:mm:ss.sss'}}</td>
-                        <td class="srcPeer">{{packet.src_peer}}</td>
+                        <td class="srcPeer">{{packet.srcPeer}}</td>
                         <td class="sequence">{{packet.sequence}}</td>
                         <td class="dst">{{packet.data.dst}}</td>
                         <td class="src">{{packet.data.src}}</td>

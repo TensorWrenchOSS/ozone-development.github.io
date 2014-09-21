@@ -2,18 +2,35 @@
 var ozpIwc=ozpIwc || {};
 
 /**
-	* @class
-	*/
+ * Common classes used between both the Client and the Bus.
+ * @module common
+ */
+
+/**
+ * An Event emmitter/receiver class.
+ * @class Event
+ * @namespace ozpIwc
+ */
 ozpIwc.Event=function() {
+    /**
+     * A key value store of events.
+     * @property events
+     * @type Object
+     * @default {}
+     */
 	this.events={};
 };
 
 /**
  * Registers a handler for the the event.
- * @param {string} event The name of the event to trigger on
- * @param {function} callback Function to be invoked
- * @param {object} [self] Used as the this pointer when callback is invoked.
- * @returns {object} A handle that can be used to unregister the callback via [off()]{@link ozpIwc.Event#off}
+ *
+ * @method on
+ * @param {String} event The name of the event to trigger on.
+ * @param {Function} callback Function to be invoked.
+ * @param {Object} [self] Used as the this pointer when callback is invoked.
+ *
+ * @returns {Object} A handle that can be used to unregister the callback via
+ * {{#crossLink "ozpIwc.Event/off:method"}}{{/crossLink}}
  */
 ozpIwc.Event.prototype.on=function(event,callback,self) {
 	var wrapped=callback;
@@ -30,8 +47,10 @@ ozpIwc.Event.prototype.on=function(event,callback,self) {
 
 /**
  * Unregisters an event handler previously registered.
- * @param {type} event
- * @param {type} callback
+ *
+ * @method off
+ * @param {String} event
+ * @param {Function} callback
  */
 ozpIwc.Event.prototype.off=function(event,callback) {
 	this.events[event]=(this.events[event]||[]).filter( function(h) {
@@ -41,9 +60,12 @@ ozpIwc.Event.prototype.off=function(event,callback) {
 
 /**
  * Fires an event that will be received by all handlers.
- * @param {string} eventName  - Name of the event
- * @param {object} event - Event object to pass to the handers.
- * @returns {object} The event after all handlers have processed it
+ *
+ * @method
+ * @param {String} eventName Name of the event.
+ * @param {Object} event Event object to pass to the handers.
+ *
+ * @returns {Object} The event after all handlers have processed it.
  */
 ozpIwc.Event.prototype.trigger=function(eventName,event) {
 	event = event || new ozpIwc.CancelableEvent();
@@ -57,8 +79,11 @@ ozpIwc.Event.prototype.trigger=function(eventName,event) {
 
 
 /**
- * Adds an on() and off() function to the target that delegate to this object
- * @param {object} target Target to receive the on/off functions
+ * Adds an {{#crossLink "ozpIwc.Event/off:method"}}on(){{/crossLink}} and
+ * {{#crossLink "ozpIwc.Event/off:method"}}off(){{/crossLink}} function to the target that delegate to this object.
+ *
+ * @method mixinOnOff
+ * @param {Object} target Target to receive the on/off functions
  */
 ozpIwc.Event.prototype.mixinOnOff=function(target) {
 	var self=this;
@@ -70,8 +95,10 @@ ozpIwc.Event.prototype.mixinOnOff=function(target) {
  * Convenient base for events that can be canceled.  Provides and manages
  * the properties canceled and cancelReason, as well as the member function
  * cancel().
- * @class
- * @param {object} data - Data that will be copied into the event
+ *
+ * @class CancelableEvent
+ * @namespace ozpIwc
+ * @param {Object} data Data that will be copied into the event
  */
 ozpIwc.CancelableEvent=function(data) {
 	data = data || {};
@@ -84,7 +111,9 @@ ozpIwc.CancelableEvent=function(data) {
 
 /**
  * Marks the event as canceled.
- * @param {type} reason - A text description of why the event was canceled.
+ * @method cancel
+ * @param {String} reason A text description of why the event was canceled.
+ *
  * @returns {ozpIwc.CancelableEvent} Reference to self
  */
 ozpIwc.CancelableEvent.prototype.cancel=function(reason) {
@@ -2000,13 +2029,22 @@ if (parseInt(ws + '08') !== 8 || parseInt(ws + '0x16') !== 22) {
 !function(){var a,b,c,d;!function(){var e={},f={};a=function(a,b,c){e[a]={deps:b,callback:c}},d=c=b=function(a){function c(b){if("."!==b.charAt(0))return b;for(var c=b.split("/"),d=a.split("/").slice(0,-1),e=0,f=c.length;f>e;e++){var g=c[e];if(".."===g)d.pop();else{if("."===g)continue;d.push(g)}}return d.join("/")}if(d._eak_seen=e,f[a])return f[a];if(f[a]={},!e[a])throw new Error("Could not find module "+a);for(var g,h=e[a],i=h.deps,j=h.callback,k=[],l=0,m=i.length;m>l;l++)"exports"===i[l]?k.push(g={}):k.push(b(c(i[l])));var n=j.apply(this,k);return f[a]=g||n}}(),a("promise/all",["./utils","exports"],function(a,b){"use strict";function c(a){var b=this;if(!d(a))throw new TypeError("You must pass an array to all.");return new b(function(b,c){function d(a){return function(b){f(a,b)}}function f(a,c){h[a]=c,0===--i&&b(h)}var g,h=[],i=a.length;0===i&&b([]);for(var j=0;j<a.length;j++)g=a[j],g&&e(g.then)?g.then(d(j),c):f(j,g)})}var d=a.isArray,e=a.isFunction;b.all=c}),a("promise/asap",["exports"],function(a){"use strict";function b(){return function(){process.nextTick(e)}}function c(){var a=0,b=new i(e),c=document.createTextNode("");return b.observe(c,{characterData:!0}),function(){c.data=a=++a%2}}function d(){return function(){j.setTimeout(e,1)}}function e(){for(var a=0;a<k.length;a++){var b=k[a],c=b[0],d=b[1];c(d)}k=[]}function f(a,b){var c=k.push([a,b]);1===c&&g()}var g,h="undefined"!=typeof window?window:{},i=h.MutationObserver||h.WebKitMutationObserver,j="undefined"!=typeof global?global:void 0===this?window:this,k=[];g="undefined"!=typeof process&&"[object process]"==={}.toString.call(process)?b():i?c():d(),a.asap=f}),a("promise/config",["exports"],function(a){"use strict";function b(a,b){return 2!==arguments.length?c[a]:(c[a]=b,void 0)}var c={instrument:!1};a.config=c,a.configure=b}),a("promise/polyfill",["./promise","./utils","exports"],function(a,b,c){"use strict";function d(){var a;a="undefined"!=typeof global?global:"undefined"!=typeof window&&window.document?window:self;var b="Promise"in a&&"resolve"in a.Promise&&"reject"in a.Promise&&"all"in a.Promise&&"race"in a.Promise&&function(){var b;return new a.Promise(function(a){b=a}),f(b)}();b||(a.Promise=e)}var e=a.Promise,f=b.isFunction;c.polyfill=d}),a("promise/promise",["./config","./utils","./all","./race","./resolve","./reject","./asap","exports"],function(a,b,c,d,e,f,g,h){"use strict";function i(a){if(!v(a))throw new TypeError("You must pass a resolver function as the first argument to the promise constructor");if(!(this instanceof i))throw new TypeError("Failed to construct 'Promise': Please use the 'new' operator, this object constructor cannot be called as a function.");this._subscribers=[],j(a,this)}function j(a,b){function c(a){o(b,a)}function d(a){q(b,a)}try{a(c,d)}catch(e){d(e)}}function k(a,b,c,d){var e,f,g,h,i=v(c);if(i)try{e=c(d),g=!0}catch(j){h=!0,f=j}else e=d,g=!0;n(b,e)||(i&&g?o(b,e):h?q(b,f):a===D?o(b,e):a===E&&q(b,e))}function l(a,b,c,d){var e=a._subscribers,f=e.length;e[f]=b,e[f+D]=c,e[f+E]=d}function m(a,b){for(var c,d,e=a._subscribers,f=a._detail,g=0;g<e.length;g+=3)c=e[g],d=e[g+b],k(b,c,d,f);a._subscribers=null}function n(a,b){var c,d=null;try{if(a===b)throw new TypeError("A promises callback cannot return that same promise.");if(u(b)&&(d=b.then,v(d)))return d.call(b,function(d){return c?!0:(c=!0,b!==d?o(a,d):p(a,d),void 0)},function(b){return c?!0:(c=!0,q(a,b),void 0)}),!0}catch(e){return c?!0:(q(a,e),!0)}return!1}function o(a,b){a===b?p(a,b):n(a,b)||p(a,b)}function p(a,b){a._state===B&&(a._state=C,a._detail=b,t.async(r,a))}function q(a,b){a._state===B&&(a._state=C,a._detail=b,t.async(s,a))}function r(a){m(a,a._state=D)}function s(a){m(a,a._state=E)}var t=a.config,u=(a.configure,b.objectOrFunction),v=b.isFunction,w=(b.now,c.all),x=d.race,y=e.resolve,z=f.reject,A=g.asap;t.async=A;var B=void 0,C=0,D=1,E=2;i.prototype={constructor:i,_state:void 0,_detail:void 0,_subscribers:void 0,then:function(a,b){var c=this,d=new this.constructor(function(){});if(this._state){var e=arguments;t.async(function(){k(c._state,d,e[c._state-1],c._detail)})}else l(this,d,a,b);return d},"catch":function(a){return this.then(null,a)}},i.all=w,i.race=x,i.resolve=y,i.reject=z,h.Promise=i}),a("promise/race",["./utils","exports"],function(a,b){"use strict";function c(a){var b=this;if(!d(a))throw new TypeError("You must pass an array to race.");return new b(function(b,c){for(var d,e=0;e<a.length;e++)d=a[e],d&&"function"==typeof d.then?d.then(b,c):b(d)})}var d=a.isArray;b.race=c}),a("promise/reject",["exports"],function(a){"use strict";function b(a){var b=this;return new b(function(b,c){c(a)})}a.reject=b}),a("promise/resolve",["exports"],function(a){"use strict";function b(a){if(a&&"object"==typeof a&&a.constructor===this)return a;var b=this;return new b(function(b){b(a)})}a.resolve=b}),a("promise/utils",["exports"],function(a){"use strict";function b(a){return c(a)||"object"==typeof a&&null!==a}function c(a){return"function"==typeof a}function d(a){return"[object Array]"===Object.prototype.toString.call(a)}var e=Date.now||function(){return(new Date).getTime()};a.objectOrFunction=b,a.isFunction=c,a.isArray=d,a.now=e}),b("promise/polyfill").polyfill()}();
 /** @namespace */
 var ozpIwc=ozpIwc || {};
+/**
+ * @submodule common
+ */
 
-/** @namespace */
+/**
+ * @class util
+ * @namespace ozpIwc
+ * @static
+ */
 ozpIwc.util=ozpIwc.util || {};
 
 /**
  * Used to get the current epoch time.  Tests overrides this
  * to allow a fast-forward on time-based actions.
+ *
+ * @method now
  * @returns {Number}
  */
 ozpIwc.util.now=function() {
@@ -2015,15 +2053,18 @@ ozpIwc.util.now=function() {
 
 /**
  * Create a class with the given parent in it's prototype chain.
- * @param {function} baseClass - the class being derived from
- * @param {function} newConstructor - the new base class
- * @returns {Function} newConstructor with an augmented prototype
+ *
+ * @method extend
+ * @param {Function} baseClass The class being derived from.
+ * @param {Function} newConstructor The new base class.
+ *
+ * @returns {Function} New Constructor with an augmented prototype.
  */
 ozpIwc.util.extend=function(baseClass,newConstructor) {
     if(!baseClass || !baseClass.prototype) {
         console.error("Cannot create a new class for ",newConstructor," due to invalid baseclass:",baseClass);
         throw new Error("Cannot create a new class due to invalid baseClass.  Dependency not loaded first?");
-    };
+    }
     newConstructor.prototype = Object.create(baseClass.prototype);
     newConstructor.prototype.constructor = newConstructor;
     return newConstructor;
@@ -2031,8 +2072,10 @@ ozpIwc.util.extend=function(baseClass,newConstructor) {
 
 /**
  * Detect browser support for structured clones.
- * @returns {boolean} - true if structured clones are supported,
- * false otherwise
+ *
+ * @method structuredCloneSupport
+ *
+ * @returns {Boolean} True if structured clones are supported, false otherwise.
  */
 ozpIwc.util.structuredCloneSupport=function() {
     if (ozpIwc.util.structuredCloneSupport.cache !== undefined) {
@@ -2061,8 +2104,10 @@ ozpIwc.util.structuredCloneSupport.cache=undefined;
 /**
  * Does a deep clone of a serializable object.  Note that this will not
  * clone unserializable objects like DOM elements, Date, RegExp, etc.
- * @param {type} value - value to be cloned.
- * @returns {object} - a deep copy of the object
+ *
+ * @method clone
+ * @param {Array|Object} value The value to be cloned.
+ * @returns {Array|Object}  a deep copy of the object
  */
 ozpIwc.util.clone=function(value) {
 	if(Array.isArray(value) || typeof(value) === 'object') {
@@ -2077,714 +2122,49 @@ ozpIwc.util.clone=function(value) {
 };
 
 
-
+/**
+ * A regex method to parse query parameters.
+ *
+ * @method parseQueryParams
+ * @param {String} query
+ *
+ */
 ozpIwc.util.parseQueryParams=function(query) {
     query = query || window.location.search;
     var params={};
 	var regex=/\??([^&=]+)=?([^&]*)/g;
 	var match;
-	while(match=regex.exec(query)) {
+	while((match=regex.exec(query)) !== null) {
 		params[match[1]]=decodeURIComponent(match[2]);
 	}
     return params;
 };
 
+/**
+ * Determines the origin of a given url
+ * @method determineOrigin
+ * @param url
+ * @returns {String}
+ */
 ozpIwc.util.determineOrigin=function(url) {
     var a=document.createElement("a");
     a.href = url;
     var origin=a.protocol + "//" + a.hostname;
-    if(a.port)
+    if(a.port) {
         origin+= ":" + a.port;
+    }
     return origin;
 };
 
+/**
+ * Escapes regular expression characters in a string.
+ * @method escapeRegex
+ * @param {String} str
+ * @returns {String}
+ */
 ozpIwc.util.escapeRegex=function(str) {
     return str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 };
-(function() {
-var define, requireModule, require, requirejs;
-
-(function() {
-  var registry = {}, seen = {};
-
-  define = function(name, deps, callback) {
-    registry[name] = { deps: deps, callback: callback };
-  };
-
-  requirejs = require = requireModule = function(name) {
-  requirejs._eak_seen = registry;
-
-    if (seen[name]) { return seen[name]; }
-    seen[name] = {};
-
-    if (!registry[name]) {
-      throw new Error("Could not find module " + name);
-    }
-
-    var mod = registry[name],
-        deps = mod.deps,
-        callback = mod.callback,
-        reified = [],
-        exports;
-
-    for (var i=0, l=deps.length; i<l; i++) {
-      if (deps[i] === 'exports') {
-        reified.push(exports = {});
-      } else {
-        reified.push(requireModule(resolve(deps[i])));
-      }
-    }
-
-    var value = callback.apply(this, reified);
-    return seen[name] = exports || value;
-
-    function resolve(child) {
-      if (child.charAt(0) !== '.') { return child; }
-      var parts = child.split("/");
-      var parentBase = name.split("/").slice(0, -1);
-
-      for (var i=0, l=parts.length; i<l; i++) {
-        var part = parts[i];
-
-        if (part === '..') { parentBase.pop(); }
-        else if (part === '.') { continue; }
-        else { parentBase.push(part); }
-      }
-
-      return parentBase.join("/");
-    }
-  };
-})();
-
-define("promise/all", 
-  ["./utils","exports"],
-  function(__dependency1__, __exports__) {
-    "use strict";
-    /* global toString */
-
-    var isArray = __dependency1__.isArray;
-    var isFunction = __dependency1__.isFunction;
-
-    /**
-      Returns a promise that is fulfilled when all the given promises have been
-      fulfilled, or rejected if any of them become rejected. The return promise
-      is fulfilled with an array that gives all the values in the order they were
-      passed in the `promises` array argument.
-
-      Example:
-
-      ```javascript
-      var promise1 = RSVP.resolve(1);
-      var promise2 = RSVP.resolve(2);
-      var promise3 = RSVP.resolve(3);
-      var promises = [ promise1, promise2, promise3 ];
-
-      RSVP.all(promises).then(function(array){
-        // The array here would be [ 1, 2, 3 ];
-      });
-      ```
-
-      If any of the `promises` given to `RSVP.all` are rejected, the first promise
-      that is rejected will be given as an argument to the returned promises's
-      rejection handler. For example:
-
-      Example:
-
-      ```javascript
-      var promise1 = RSVP.resolve(1);
-      var promise2 = RSVP.reject(new Error("2"));
-      var promise3 = RSVP.reject(new Error("3"));
-      var promises = [ promise1, promise2, promise3 ];
-
-      RSVP.all(promises).then(function(array){
-        // Code here never runs because there are rejected promises!
-      }, function(error) {
-        // error.message === "2"
-      });
-      ```
-
-      @method all
-      @for RSVP
-      @param {Array} promises
-      @param {String} label
-      @return {Promise} promise that is fulfilled when all `promises` have been
-      fulfilled, or rejected if any of them become rejected.
-    */
-    function all(promises) {
-      /*jshint validthis:true */
-      var Promise = this;
-
-      if (!isArray(promises)) {
-        throw new TypeError('You must pass an array to all.');
-      }
-
-      return new Promise(function(resolve, reject) {
-        var results = [], remaining = promises.length,
-        promise;
-
-        if (remaining === 0) {
-          resolve([]);
-        }
-
-        function resolver(index) {
-          return function(value) {
-            resolveAll(index, value);
-          };
-        }
-
-        function resolveAll(index, value) {
-          results[index] = value;
-          if (--remaining === 0) {
-            resolve(results);
-          }
-        }
-
-        for (var i = 0; i < promises.length; i++) {
-          promise = promises[i];
-
-          if (promise && isFunction(promise.then)) {
-            promise.then(resolver(i), reject);
-          } else {
-            resolveAll(i, promise);
-          }
-        }
-      });
-    }
-
-    __exports__.all = all;
-  });
-define("promise/asap", 
-  ["exports"],
-  function(__exports__) {
-    "use strict";
-    var browserGlobal = (typeof window !== 'undefined') ? window : {};
-    var BrowserMutationObserver = browserGlobal.MutationObserver || browserGlobal.WebKitMutationObserver;
-    var local = (typeof global !== 'undefined') ? global : (this === undefined? window:this);
-
-    // node
-    function useNextTick() {
-      return function() {
-        process.nextTick(flush);
-      };
-    }
-
-    function useMutationObserver() {
-      var iterations = 0;
-      var observer = new BrowserMutationObserver(flush);
-      var node = document.createTextNode('');
-      observer.observe(node, { characterData: true });
-
-      return function() {
-        node.data = (iterations = ++iterations % 2);
-      };
-    }
-
-    function useSetTimeout() {
-      return function() {
-        local.setTimeout(flush, 1);
-      };
-    }
-
-    var queue = [];
-    function flush() {
-      for (var i = 0; i < queue.length; i++) {
-        var tuple = queue[i];
-        var callback = tuple[0], arg = tuple[1];
-        callback(arg);
-      }
-      queue = [];
-    }
-
-    var scheduleFlush;
-
-    // Decide what async method to use to triggering processing of queued callbacks:
-    if (typeof process !== 'undefined' && {}.toString.call(process) === '[object process]') {
-      scheduleFlush = useNextTick();
-    } else if (BrowserMutationObserver) {
-      scheduleFlush = useMutationObserver();
-    } else {
-      scheduleFlush = useSetTimeout();
-    }
-
-    function asap(callback, arg) {
-      var length = queue.push([callback, arg]);
-      if (length === 1) {
-        // If length is 1, that means that we need to schedule an async flush.
-        // If additional callbacks are queued before the queue is flushed, they
-        // will be processed by this flush that we are scheduling.
-        scheduleFlush();
-      }
-    }
-
-    __exports__.asap = asap;
-  });
-define("promise/config", 
-  ["exports"],
-  function(__exports__) {
-    "use strict";
-    var config = {
-      instrument: false
-    };
-
-    function configure(name, value) {
-      if (arguments.length === 2) {
-        config[name] = value;
-      } else {
-        return config[name];
-      }
-    }
-
-    __exports__.config = config;
-    __exports__.configure = configure;
-  });
-define("promise/polyfill", 
-  ["./promise","./utils","exports"],
-  function(__dependency1__, __dependency2__, __exports__) {
-    "use strict";
-    /*global self*/
-    var RSVPPromise = __dependency1__.Promise;
-    var isFunction = __dependency2__.isFunction;
-
-    function polyfill() {
-      var local;
-
-      if (typeof global !== 'undefined') {
-        local = global;
-      } else if (typeof window !== 'undefined' && window.document) {
-        local = window;
-      } else {
-        local = self;
-      }
-
-      var es6PromiseSupport = 
-        "Promise" in local &&
-        // Some of these methods are missing from
-        // Firefox/Chrome experimental implementations
-        "resolve" in local.Promise &&
-        "reject" in local.Promise &&
-        "all" in local.Promise &&
-        "race" in local.Promise &&
-        // Older version of the spec had a resolver object
-        // as the arg rather than a function
-        (function() {
-          var resolve;
-          new local.Promise(function(r) { resolve = r; });
-          return isFunction(resolve);
-        }());
-
-      if (!es6PromiseSupport) {
-        local.Promise = RSVPPromise;
-      }
-    }
-
-    __exports__.polyfill = polyfill;
-  });
-define("promise/promise", 
-  ["./config","./utils","./all","./race","./resolve","./reject","./asap","exports"],
-  function(__dependency1__, __dependency2__, __dependency3__, __dependency4__, __dependency5__, __dependency6__, __dependency7__, __exports__) {
-    "use strict";
-    var config = __dependency1__.config;
-    var configure = __dependency1__.configure;
-    var objectOrFunction = __dependency2__.objectOrFunction;
-    var isFunction = __dependency2__.isFunction;
-    var now = __dependency2__.now;
-    var all = __dependency3__.all;
-    var race = __dependency4__.race;
-    var staticResolve = __dependency5__.resolve;
-    var staticReject = __dependency6__.reject;
-    var asap = __dependency7__.asap;
-
-    var counter = 0;
-
-    config.async = asap; // default async is asap;
-
-    function Promise(resolver) {
-      if (!isFunction(resolver)) {
-        throw new TypeError('You must pass a resolver function as the first argument to the promise constructor');
-      }
-
-      if (!(this instanceof Promise)) {
-        throw new TypeError("Failed to construct 'Promise': Please use the 'new' operator, this object constructor cannot be called as a function.");
-      }
-
-      this._subscribers = [];
-
-      invokeResolver(resolver, this);
-    }
-
-    function invokeResolver(resolver, promise) {
-      function resolvePromise(value) {
-        resolve(promise, value);
-      }
-
-      function rejectPromise(reason) {
-        reject(promise, reason);
-      }
-
-      try {
-        resolver(resolvePromise, rejectPromise);
-      } catch(e) {
-        rejectPromise(e);
-      }
-    }
-
-    function invokeCallback(settled, promise, callback, detail) {
-      var hasCallback = isFunction(callback),
-          value, error, succeeded, failed;
-
-      if (hasCallback) {
-        try {
-          value = callback(detail);
-          succeeded = true;
-        } catch(e) {
-          failed = true;
-          error = e;
-        }
-      } else {
-        value = detail;
-        succeeded = true;
-      }
-
-      if (handleThenable(promise, value)) {
-        return;
-      } else if (hasCallback && succeeded) {
-        resolve(promise, value);
-      } else if (failed) {
-        reject(promise, error);
-      } else if (settled === FULFILLED) {
-        resolve(promise, value);
-      } else if (settled === REJECTED) {
-        reject(promise, value);
-      }
-    }
-
-    var PENDING   = void 0;
-    var SEALED    = 0;
-    var FULFILLED = 1;
-    var REJECTED  = 2;
-
-    function subscribe(parent, child, onFulfillment, onRejection) {
-      var subscribers = parent._subscribers;
-      var length = subscribers.length;
-
-      subscribers[length] = child;
-      subscribers[length + FULFILLED] = onFulfillment;
-      subscribers[length + REJECTED]  = onRejection;
-    }
-
-    function publish(promise, settled) {
-      var child, callback, subscribers = promise._subscribers, detail = promise._detail;
-
-      for (var i = 0; i < subscribers.length; i += 3) {
-        child = subscribers[i];
-        callback = subscribers[i + settled];
-
-        invokeCallback(settled, child, callback, detail);
-      }
-
-      promise._subscribers = null;
-    }
-
-    Promise.prototype = {
-      constructor: Promise,
-
-      _state: undefined,
-      _detail: undefined,
-      _subscribers: undefined,
-
-      then: function(onFulfillment, onRejection) {
-        var promise = this;
-
-        var thenPromise = new this.constructor(function() {});
-
-        if (this._state) {
-          var callbacks = arguments;
-          config.async(function invokePromiseCallback() {
-            invokeCallback(promise._state, thenPromise, callbacks[promise._state - 1], promise._detail);
-          });
-        } else {
-          subscribe(this, thenPromise, onFulfillment, onRejection);
-        }
-
-        return thenPromise;
-      },
-
-      'catch': function(onRejection) {
-        return this.then(null, onRejection);
-      }
-    };
-
-    Promise.all = all;
-    Promise.race = race;
-    Promise.resolve = staticResolve;
-    Promise.reject = staticReject;
-
-    function handleThenable(promise, value) {
-      var then = null,
-      resolved;
-
-      try {
-        if (promise === value) {
-          throw new TypeError("A promises callback cannot return that same promise.");
-        }
-
-        if (objectOrFunction(value)) {
-          then = value.then;
-
-          if (isFunction(then)) {
-            then.call(value, function(val) {
-              if (resolved) { return true; }
-              resolved = true;
-
-              if (value !== val) {
-                resolve(promise, val);
-              } else {
-                fulfill(promise, val);
-              }
-            }, function(val) {
-              if (resolved) { return true; }
-              resolved = true;
-
-              reject(promise, val);
-            });
-
-            return true;
-          }
-        }
-      } catch (error) {
-        if (resolved) { return true; }
-        reject(promise, error);
-        return true;
-      }
-
-      return false;
-    }
-
-    function resolve(promise, value) {
-      if (promise === value) {
-        fulfill(promise, value);
-      } else if (!handleThenable(promise, value)) {
-        fulfill(promise, value);
-      }
-    }
-
-    function fulfill(promise, value) {
-      if (promise._state !== PENDING) { return; }
-      promise._state = SEALED;
-      promise._detail = value;
-
-      config.async(publishFulfillment, promise);
-    }
-
-    function reject(promise, reason) {
-      if (promise._state !== PENDING) { return; }
-      promise._state = SEALED;
-      promise._detail = reason;
-
-      config.async(publishRejection, promise);
-    }
-
-    function publishFulfillment(promise) {
-      publish(promise, promise._state = FULFILLED);
-    }
-
-    function publishRejection(promise) {
-      publish(promise, promise._state = REJECTED);
-    }
-
-    __exports__.Promise = Promise;
-  });
-define("promise/race", 
-  ["./utils","exports"],
-  function(__dependency1__, __exports__) {
-    "use strict";
-    /* global toString */
-    var isArray = __dependency1__.isArray;
-
-    /**
-      `RSVP.race` allows you to watch a series of promises and act as soon as the
-      first promise given to the `promises` argument fulfills or rejects.
-
-      Example:
-
-      ```javascript
-      var promise1 = new RSVP.Promise(function(resolve, reject){
-        setTimeout(function(){
-          resolve("promise 1");
-        }, 200);
-      });
-
-      var promise2 = new RSVP.Promise(function(resolve, reject){
-        setTimeout(function(){
-          resolve("promise 2");
-        }, 100);
-      });
-
-      RSVP.race([promise1, promise2]).then(function(result){
-        // result === "promise 2" because it was resolved before promise1
-        // was resolved.
-      });
-      ```
-
-      `RSVP.race` is deterministic in that only the state of the first completed
-      promise matters. For example, even if other promises given to the `promises`
-      array argument are resolved, but the first completed promise has become
-      rejected before the other promises became fulfilled, the returned promise
-      will become rejected:
-
-      ```javascript
-      var promise1 = new RSVP.Promise(function(resolve, reject){
-        setTimeout(function(){
-          resolve("promise 1");
-        }, 200);
-      });
-
-      var promise2 = new RSVP.Promise(function(resolve, reject){
-        setTimeout(function(){
-          reject(new Error("promise 2"));
-        }, 100);
-      });
-
-      RSVP.race([promise1, promise2]).then(function(result){
-        // Code here never runs because there are rejected promises!
-      }, function(reason){
-        // reason.message === "promise2" because promise 2 became rejected before
-        // promise 1 became fulfilled
-      });
-      ```
-
-      @method race
-      @for RSVP
-      @param {Array} promises array of promises to observe
-      @param {String} label optional string for describing the promise returned.
-      Useful for tooling.
-      @return {Promise} a promise that becomes fulfilled with the value the first
-      completed promises is resolved with if the first completed promise was
-      fulfilled, or rejected with the reason that the first completed promise
-      was rejected with.
-    */
-    function race(promises) {
-      /*jshint validthis:true */
-      var Promise = this;
-
-      if (!isArray(promises)) {
-        throw new TypeError('You must pass an array to race.');
-      }
-      return new Promise(function(resolve, reject) {
-        var results = [], promise;
-
-        for (var i = 0; i < promises.length; i++) {
-          promise = promises[i];
-
-          if (promise && typeof promise.then === 'function') {
-            promise.then(resolve, reject);
-          } else {
-            resolve(promise);
-          }
-        }
-      });
-    }
-
-    __exports__.race = race;
-  });
-define("promise/reject", 
-  ["exports"],
-  function(__exports__) {
-    "use strict";
-    /**
-      `RSVP.reject` returns a promise that will become rejected with the passed
-      `reason`. `RSVP.reject` is essentially shorthand for the following:
-
-      ```javascript
-      var promise = new RSVP.Promise(function(resolve, reject){
-        reject(new Error('WHOOPS'));
-      });
-
-      promise.then(function(value){
-        // Code here doesn't run because the promise is rejected!
-      }, function(reason){
-        // reason.message === 'WHOOPS'
-      });
-      ```
-
-      Instead of writing the above, your code now simply becomes the following:
-
-      ```javascript
-      var promise = RSVP.reject(new Error('WHOOPS'));
-
-      promise.then(function(value){
-        // Code here doesn't run because the promise is rejected!
-      }, function(reason){
-        // reason.message === 'WHOOPS'
-      });
-      ```
-
-      @method reject
-      @for RSVP
-      @param {Any} reason value that the returned promise will be rejected with.
-      @param {String} label optional string for identifying the returned promise.
-      Useful for tooling.
-      @return {Promise} a promise that will become rejected with the given
-      `reason`.
-    */
-    function reject(reason) {
-      /*jshint validthis:true */
-      var Promise = this;
-
-      return new Promise(function (resolve, reject) {
-        reject(reason);
-      });
-    }
-
-    __exports__.reject = reject;
-  });
-define("promise/resolve", 
-  ["exports"],
-  function(__exports__) {
-    "use strict";
-    function resolve(value) {
-      /*jshint validthis:true */
-      if (value && typeof value === 'object' && value.constructor === this) {
-        return value;
-      }
-
-      var Promise = this;
-
-      return new Promise(function(resolve) {
-        resolve(value);
-      });
-    }
-
-    __exports__.resolve = resolve;
-  });
-define("promise/utils", 
-  ["exports"],
-  function(__exports__) {
-    "use strict";
-    function objectOrFunction(x) {
-      return isFunction(x) || (typeof x === "object" && x !== null);
-    }
-
-    function isFunction(x) {
-      return typeof x === "function";
-    }
-
-    function isArray(x) {
-      return Object.prototype.toString.call(x) === "[object Array]";
-    }
-
-    // Date.now is not available in browsers < IE9
-    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/now#Compatibility
-    var now = Date.now || function() { return new Date().getTime(); };
-
-
-    __exports__.objectOrFunction = objectOrFunction;
-    __exports__.isFunction = isFunction;
-    __exports__.isArray = isArray;
-    __exports__.now = now;
-  });
-requireModule('promise/polyfill').polyfill();
-}());
 /*
  * The MIT License (MIT) Copyright (c) 2012 Mike Ihbe
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
@@ -2805,26 +2185,69 @@ requireModule('promise/polyfill').polyfill();
  * Original code owned by Mike Ihbe.  Modifications licensed under same terms.
  */
 var ozpIwc=ozpIwc || {};
+/**
+ * @submodule metrics.statistics
+ */
+
+/**
+ *
+ * @class metricStats
+ * @namespace ozpIwc
+ */
 ozpIwc.metricsStats=ozpIwc.metricsStats || {};
 
+/**
+ * @property DEFAULT_POOL_SIZE
+ * @type {Number}
+ * @default 1028
+ */
 ozpIwc.metricsStats.DEFAULT_POOL_SIZE=1028;
 
+/**
+ * @Class Sample
+ * @namespace ozpIwc.metricsStats
+ * @constructor
+ */
 ozpIwc.metricsStats.Sample = function(){
+    /**
+     * @property values
+     * @type Array
+     */
 	this.clear();
 };
 
+/**
+ * Appends the value.
+ * @method update
+ * @param {Number} val
+ */
 ozpIwc.metricsStats.Sample.prototype.update = function(val){ 
 	this.values.push(val); 
 };
 
+/**
+ * Clears the values.
+ * @method clear
+ */
 ozpIwc.metricsStats.Sample.prototype.clear = function(){ 
 	this.values = []; 
 	this.count = 0; 
 };
+
+/**
+ * Returns the number of the values.
+ * @method size
+ * @returns {Number}
+ */
 ozpIwc.metricsStats.Sample.prototype.size = function(){ 
 	return this.values.length;
 };
 
+/**
+ * Returns the array of values.
+ * @method getValues
+ * @returns {Array}
+ */
 ozpIwc.metricsStats.Sample.prototype.getValues = function(){ 
 	return this.values; 
 };
@@ -2832,7 +2255,7 @@ ozpIwc.metricsStats.Sample.prototype.getValues = function(){
 
 /**
  *  Take a uniform sample of size size for all values
- *  @class
+ *  @class UniformSample
  *  @param {Number} [size=ozpIwc.metricsStats.DEFAULT_POOL_SIZE] - The size of the sample pool.
  */
 ozpIwc.metricsStats.UniformSample=ozpIwc.util.extend(ozpIwc.metricsStats.Sample,function(size) {
@@ -2856,14 +2279,28 @@ ozpIwc.metricsStats.UniformSample.prototype.update = function(val) {
 // licensed under CCv3.0: http://creativecommons.org/licenses/by/3.0/
 
 var ozpIwc=ozpIwc || {};
+
+/**
+ * Statistics classes for the ozpIwc Metrics
+ * @module metrics
+ * @submodule metrics.statistics
+ */
+/**
+ * metricStats namespace
+ * @class metricStats
+ * @namespace ozpIwc
+ * @static
+ */
 ozpIwc.metricsStats=ozpIwc.metricsStats || {};
 /**
  * This acts as a ordered binary heap for any serializeable JS object or collection of such objects 
  * <p>Borrowed from https://github.com/mikejihbe/metrics. Originally from from http://eloquentjavascript.net/appendix2.html
  * <p>Licenced under CCv3.0
- * @class
- * @param {type} scoreFunction
- * @returns {BinaryHeap}
+ *
+ * @class BinaryHeap
+ * @namespace ozpIwc.metricStats
+ * @param {Function} scoreFunction
+ * @returns {ozpiwc.metricStats.BinaryHeap}
  */
 ozpIwc.metricsStats.BinaryHeap = function BinaryHeap(scoreFunction){
   this.content = [];
@@ -2909,16 +2346,18 @@ ozpIwc.metricsStats.BinaryHeap.prototype = {
     // To remove a value, we must search through the array to find
     // it.
     for (var i = 0; i < len; i++) {
-      if (this.content[i] == node) {
+      if (this.content[i] === node) {
         // When it is found, the process seen in 'pop' is repeated
         // to fill up the hole.
         var end = this.content.pop();
-        if (i != len - 1) {
+        if (i !== len - 1) {
           this.content[i] = end;
-          if (this.scoreFunction(end) < this.scoreFunction(node))
-            this.bubbleUp(i);
-          else
-            this.sinkDown(i);
+          if (this.scoreFunction(end) < this.scoreFunction(node)) {
+              this.bubbleUp(i);
+          }
+          else {
+              this.sinkDown(i);
+          }
         }
         return true;
       }
@@ -2964,25 +2403,28 @@ ozpIwc.metricsStats.BinaryHeap.prototype = {
       // This is used to store the new position of the element,
       // if any.
       var swap = null;
+      var child1Score = null;
       // If the first child exists (is inside the array)...
       if (child1N < length) {
         // Look it up and compute its score.
-        var child1 = this.content[child1N],
-            child1Score = this.scoreFunction(child1);
+        var child1 = this.content[child1N];
+        child1Score = this.scoreFunction(child1);
         // If the score is less than our element's, we need to swap.
-        if (child1Score < elemScore)
-          swap = child1N;
+        if (child1Score < elemScore) {
+            swap = child1N;
+        }
       }
       // Do the same checks for the other child.
       if (child2N < length) {
         var child2 = this.content[child2N],
             child2Score = this.scoreFunction(child2);
-        if (child2Score < (swap == null ? elemScore : child1Score))
-          swap = child2N;
+        if (child2Score < (swap === null ? elemScore : child1Score)) {
+            swap = child2N;
+        }
       }
 
       // If the element needs to be moved, swap it, and continue.
-      if (swap != null) {
+      if (swap !== null) {
         this.content[n] = this.content[swap];
         this.content[swap] = element;
         n = swap;
@@ -3018,14 +2460,37 @@ ozpIwc.metricsStats.BinaryHeap.prototype = {
 var ozpIwc=ozpIwc || {};
 ozpIwc.metricsStats=ozpIwc.metricsStats || {};
 
+/**
+ * @submodule metrics.statistics
+ */
+
 //  Take an exponentially decaying sample of size size of all values
+/**
+ *
+ * @class metricStats
+ * @namespace ozpIwc
+ */
+
+/**
+ * @property DEFAULT_RESCALE_THRESHOLD
+ * @type {Number}
+ * @default 3600000
+ */
 ozpIwc.metricsStats.DEFAULT_RESCALE_THRESHOLD = 60 * 60 * 1000; // 1 hour in milliseconds
+
+/**
+ * @property DEFAULT_DECAY_ALPHA
+ * @type {Number}
+ * @default 0.015
+ */
 ozpIwc.metricsStats.DEFAULT_DECAY_ALPHA=0.015;
+
 /**
  * This acts as a ordered binary heap for any serializeable JS object or collection of such objects 
  * <p>Borrowed from https://github.com/mikejihbe/metrics. 
- * @class 
-	*/
+ * @class ExponentiallyDecayingSample
+ * @namespace ozpIwc.metricStats
+ */
 ozpIwc.metricsStats.ExponentiallyDecayingSample=ozpIwc.util.extend(ozpIwc.metricsStats.Sample,function(size, alpha) {
 	ozpIwc.metricsStats.Sample.apply(this);
   this.limit = size || ozpIwc.metricsStats.DEFAULT_POOL_SIZE;
@@ -3034,32 +2499,55 @@ ozpIwc.metricsStats.ExponentiallyDecayingSample=ozpIwc.util.extend(ozpIwc.metric
 });
 
 // This is a relatively expensive operation
+/**
+ * @method getValues
+ * @returns {Array}
+ */
 ozpIwc.metricsStats.ExponentiallyDecayingSample.prototype.getValues = function() {
   var values = [];
   var heap = this.values.clone();
 	var elt;
-  while(elt = heap.pop()) {
+  while((elt = heap.pop()) !== undefined) {
     values.push(elt.val);
   }
   return values;
 };
 
+/**
+ * @method size
+ * @returns {Number}
+ */
 ozpIwc.metricsStats.ExponentiallyDecayingSample.prototype.size = function() {
   return this.values.size();
 };
 
+/**
+ * @method newHeap
+ * @returns {ozpIwc.metricsStats.BinaryHeap}
+ */
 ozpIwc.metricsStats.ExponentiallyDecayingSample.prototype.newHeap = function() {
   return new ozpIwc.metricsStats.BinaryHeap(function(obj){return obj.priority;});
 };
 
+/**
+ * @method now
+ * @returns {Number}
+ */
 ozpIwc.metricsStats.ExponentiallyDecayingSample.prototype.now = function() {
   return ozpIwc.util.now();
 };
 
+/**
+ * @method tick
+ * @returns {Number}
+ */
 ozpIwc.metricsStats.ExponentiallyDecayingSample.prototype.tick = function() {
   return this.now() / 1000;
 };
 
+/**
+ * @method clear
+ */
 ozpIwc.metricsStats.ExponentiallyDecayingSample.prototype.clear = function() {
   this.values = this.newHeap();
   this.count = 0;
@@ -3067,18 +2555,21 @@ ozpIwc.metricsStats.ExponentiallyDecayingSample.prototype.clear = function() {
   this.nextScaleTime = this.now() + this.rescaleThreshold;
 };
 
-/*
-* timestamp in milliseconds
-*/
+/**
+ * timestamp in milliseconds
+ * @method update
+ * @param {Number} val
+ * @param {Number} timestamp
+ */
 ozpIwc.metricsStats.ExponentiallyDecayingSample.prototype.update = function(val, timestamp) {
   // Convert timestamp to seconds
-  if (timestamp == undefined) {
+  if (timestamp === undefined) {
     timestamp = this.tick();
   } else {
     timestamp = timestamp / 1000;
   }
-  var priority = this.weight(timestamp - this.startTime) / Math.random()
-    , value = {val: val, priority: priority};
+  var priority = this.weight(timestamp - this.startTime) / Math.random();
+  var value = {val: val, priority: priority};
   if (this.count < this.limit) {
     this.count += 1;
     this.values.push(value);
@@ -3095,16 +2586,23 @@ ozpIwc.metricsStats.ExponentiallyDecayingSample.prototype.update = function(val,
   }
 };
 
+/**
+ * @method weight
+ * @param {Number}time
+ * @returns {Number}
+ */
 ozpIwc.metricsStats.ExponentiallyDecayingSample.prototype.weight = function(time) {
   return Math.exp(this.alpha * time);
 };
 
+/**
+ * @method rescale
+ */
 ozpIwc.metricsStats.ExponentiallyDecayingSample.prototype.rescale = function() {
   this.nextScaleTime = this.now() + this.rescaleThreshold;
-  var oldContent = this.values.content
-    , newContent = []
-    , elt
-    , oldStartTime = this.startTime;
+  var oldContent = this.values.content;
+  var newContent = [];
+  var oldStartTime = this.startTime;
   this.startTime = this.tick();
   // Downscale every priority by the same factor. Order is unaffected, which is why we're avoiding the cost of popping.
   for(var i = 0; i < oldContent.length; i++) {
@@ -3134,18 +2632,43 @@ ozpIwc.metricsStats.ExponentiallyDecayingSample.prototype.rescale = function() {
  */
 var ozpIwc=ozpIwc || {};
 ozpIwc.metricsStats=ozpIwc.metricsStats || {};
-
-/*
- *  Exponentially weighted moving average.
- *  Args: 
- *  - alpha:
- *  - interval: time in milliseconds
+/**
+ * @submodule metrics.statistics
  */
 
+/**
+ *
+ * @class metricStats
+ * @namespace ozpIwc
+ */
+
+/**
+ * @property M1_ALPHA
+ * @type {Number}
+ * @default 1 - e^(-5/60)
+ */
 ozpIwc.metricsStats.M1_ALPHA = 1 - Math.exp(-5/60);
+
+/**
+ * @property M5_ALPHA
+ * @type {Number}
+ * @default 1 - e^(-5/60/5)
+ */
 ozpIwc.metricsStats.M5_ALPHA = 1 - Math.exp(-5/60/5);
+
+/**
+ * @property M15_ALPHA
+ * @type {Number}
+ * @default 1 - e^(-5/60/15)
+ */
 ozpIwc.metricsStats.M15_ALPHA = 1 - Math.exp(-5/60/15);
 
+/**
+ *  Exponentially weighted moving average.
+ *  @method ExponentiallyWeightedMovingAverage
+ *  @param {Number} alpha
+ *  @param {Number} interval Time in milliseconds
+ */
 ozpIwc.metricsStats.ExponentiallyWeightedMovingAverage=function(alpha, interval) {
   this.alpha = alpha;
   this.interval = interval || 5000;
@@ -3154,13 +2677,19 @@ ozpIwc.metricsStats.ExponentiallyWeightedMovingAverage=function(alpha, interval)
 	this.lastTick=ozpIwc.util.now();
 };
 
+/**
+ * @method update
+ * @param n
+ */
 ozpIwc.metricsStats.ExponentiallyWeightedMovingAverage.prototype.update = function(n) {
   this.uncounted += (n || 1);
 	this.tick();
 };
 
-/*
- * Update our rate measurements every interval
+/**
+ * Update the rate measurements every interval
+ *
+ * @method tick
  */
 ozpIwc.metricsStats.ExponentiallyWeightedMovingAverage.prototype.tick = function() {
  	var now=ozpIwc.util.now();
@@ -3180,31 +2709,67 @@ ozpIwc.metricsStats.ExponentiallyWeightedMovingAverage.prototype.tick = function
 	}
 };
 
-/*
+/**
  * Return the rate per second
+ *
+ * @returns {Number}
  */
 ozpIwc.metricsStats.ExponentiallyWeightedMovingAverage.prototype.rate = function() {
   return this.currentRate * 1000;
 };
 
 var ozpIwc=ozpIwc || {};
+/**
+ * Metrics capabilities for the IWC.
+ * @module metrics
+ */
 ozpIwc.metricTypes=ozpIwc.metricTypes || {};
 
 /**
- * @typedef {object} ozpIwc.MetricType 
- * @property {function} get - returns the current value of the metric
+ * @Class BaseMetric
+ * @namespace ozpIwc.metricTypes
  */
-
 ozpIwc.metricTypes.BaseMetric=function() {
+    /**
+     * The value of the metric
+     * @property value
+     * @type Number
+     * @default 0
+     */
 	this.value=0;
+
+    /**
+     * The name of the metric
+     * @property name
+     * @type String
+     * @default ""
+     */
     this.name="";
+
+    /**
+     * The unit name of the metric
+     * @property unitName
+     * @type String
+     * @default ""
+     */
     this.unitName="";
 };
 
+/**
+ * Returns the metric value
+ * @method get
+ * @returns {Number}
+ */
 ozpIwc.metricTypes.BaseMetric.prototype.get=function() { 
 	return this.value; 
 };
 
+/**
+ * Sets the unit name if parameter provided. Returns the unit name if no parameter provided.
+ * @method unit
+ * @param {String} val
+ * @returns {ozpIwc.metricTypes.BaseMetric|String}
+ */
 ozpIwc.metricTypes.BaseMetric.prototype.unit=function(val) { 
 	if(val) {
 		this.unitName=val;
@@ -3217,11 +2782,20 @@ ozpIwc.metricTypes.BaseMetric.prototype.unit=function(val) {
 
 
 /**
- * @class
- * @extends ozpIwc.MetricType
+ * Types of metrics available.
+ * @module metrics
+ * @submodule metrics.types
+ */
+
+
+/**
  * A counter running total that can be adjusted up or down.
  * Where a meter is set to a known value at each update, a
  * counter is incremented up or down by a known change.
+ *
+ * @class Counter
+ * @namespace ozpIwc.metricTypes
+ * @extends ozpIwc.metricTypes.BaseMetric
  */
 ozpIwc.metricTypes.Counter=ozpIwc.util.extend(ozpIwc.metricTypes.BaseMetric,function() {
 	ozpIwc.metricTypes.BaseMetric.apply(this,arguments);
@@ -3229,16 +2803,18 @@ ozpIwc.metricTypes.Counter=ozpIwc.util.extend(ozpIwc.metricTypes.BaseMetric,func
 });
 
 /**
- * @param {Number} [delta=1] - Increment by this value
- * @returns {Number} - Value of the counter after increment
+ * @method inc
+ * @param {Number} [delta=1]  Increment by this value
+ * @returns {Number} Value of the counter after increment
  */
 ozpIwc.metricTypes.Counter.prototype.inc=function(delta) { 
 	return this.value+=(delta?delta:1);
 };
 
 /**
- * @param {Number} [delta=1] - Decrement by this value
- * @returns {Number} - Value of the counter after decrement
+ * @method dec
+ * @param {Number} [delta=1]  Decrement by this value
+ * @returns {Number} Value of the counter after decrement
  */
 ozpIwc.metricTypes.Counter.prototype.dec=function(delta) { 
 	return this.value-=(delta?delta:1);
@@ -3246,14 +2822,20 @@ ozpIwc.metricTypes.Counter.prototype.dec=function(delta) {
 
 ozpIwc.metricTypes=ozpIwc.metricTypes || {};
 /**
+ * @submodule metrics.types
+ */
+
+/**
  * @callback ozpIwc.metricTypes.Gauge~gaugeCallback
  * @returns {ozpIwc.metricTypes.MetricsTree} 
  */
 
 /**
- * @class
- * @extends ozpIwc.MetricType
  * A gauge is an externally defined set of metrics returned by a callback function
+ *
+ * @class Gauge
+ * @namespace ozpIwc.metricTypes
+ * @extends ozpIwc.metricTypes.BaseMetric
  * @param {ozpIwc.metricTypes.Gauge~gaugeCallback} metricsCallback
  */
 ozpIwc.metricTypes.Gauge=ozpIwc.util.extend(ozpIwc.metricTypes.BaseMetric,function(metricsCallback) {
@@ -3262,7 +2844,10 @@ ozpIwc.metricTypes.Gauge=ozpIwc.util.extend(ozpIwc.metricTypes.BaseMetric,functi
 });
 /**
  * Set the metrics callback for this gauge.
+ *
+ * @method set
  * @param {ozpIwc.metricTypes.Gauge~gaugeCallback} metricsCallback
+ *
  * @returns {ozpIwc.metricTypes.Gauge} this
  */
 ozpIwc.metricTypes.Gauge.prototype.set=function(metricsCallback) { 
@@ -3271,6 +2856,9 @@ ozpIwc.metricTypes.Gauge.prototype.set=function(metricsCallback) {
 };
 /**
  * Executes the callback and returns a metrics tree.
+ *
+ * @method get
+ *
  * @returns {ozpIwc.metricTypes.MetricsTree}
  */
 ozpIwc.metricTypes.Gauge.prototype.get=function() {
@@ -3281,16 +2869,29 @@ ozpIwc.metricTypes.Gauge.prototype.get=function() {
 };
 
 /**
- * @class
- * @extends ozpIwc.BaseMetric
+ * @submodule metrics.types
+ */
+
+/**
+ * @class Histogram
+ * @namespace ozpIwc.metricTypes
+ * @extends ozpIwc.metricTypes.BaseMetric
  */
 ozpIwc.metricTypes.Histogram=ozpIwc.util.extend(ozpIwc.metricTypes.BaseMetric,function() {
 	ozpIwc.metricTypes.BaseMetric.apply(this,arguments);
+
+    /**
+     * @property sample
+     * @type {ozpIwc.metricsStats.ExponentiallyDecayingSample}
+     */
 	this.sample = new ozpIwc.metricsStats.ExponentiallyDecayingSample();
 	this.clear();
 });
 
 
+/**
+ * @method clear
+ */
 ozpIwc.metricTypes.Histogram.prototype.clear=function() {
 	this.sample.clear();
 	this.min=this.max=null;
@@ -3301,8 +2902,10 @@ ozpIwc.metricTypes.Histogram.prototype.clear=function() {
 };
 
 /**
- * @param {Number} [delta=1] - Increment by this value
- * @returns {Number} - Value of the counter after increment
+ * @method mark
+ * @param {Number} val
+ * @param {Number} timestamp Current time in milliseconds.
+ * @returns {Number} Value of the counter after increment
  */
 ozpIwc.metricTypes.Histogram.prototype.mark=function(val,timestamp) { 
 	timestamp = timestamp || ozpIwc.util.now();
@@ -3321,6 +2924,11 @@ ozpIwc.metricTypes.Histogram.prototype.mark=function(val,timestamp) {
 	return this.count;
 };
 
+/**
+ * @method get
+ * @returns {{percentile10, percentile25, median, percentile75, percentile90, percentile95, percentile99,
+ * percentile999, variance: null, mean: null, stdDev: null, count: *, sum: *, max: *, min: *}}
+ */
 ozpIwc.metricTypes.Histogram.prototype.get=function() { 
 	var values=this.sample.getValues().map(function(v){
 		return parseFloat(v);
@@ -3340,14 +2948,14 @@ ozpIwc.metricTypes.Histogram.prototype.get=function() {
 	};
 
 	return {
-		'percentile_10': percentile(0.10),
-		'percentile_25': percentile(0.25),				
+		'percentile10': percentile(0.10),
+		'percentile25': percentile(0.25),
 		'median': percentile(0.50),				
-		'percentile_75': percentile(0.75),				
-		'percentile_90': percentile(0.90),				
-		'percentile_95': percentile(0.95),				
-		'percentile_99': percentile(0.99),				
-		'percentile_999': percentile(0.999),				
+		'percentile75': percentile(0.75),
+		'percentile90': percentile(0.90),
+		'percentile95': percentile(0.95),
+		'percentile99': percentile(0.99),
+		'percentile999': percentile(0.999),
 		'variance' : this.count < 1 ? null : this.varianceM2 / (this.count -1),
 		'mean' : this.count === 0 ? null : this.varianceMean,
 		'stdDev' : this.count < 1 ? null : Math.sqrt(this.varianceM2 / (this.count -1)),
@@ -3360,19 +2968,46 @@ ozpIwc.metricTypes.Histogram.prototype.get=function() {
 
 
 /**
- * @class
- * @extends ozpIwc.BaseMetric
+ * @submodule metrics.types
+ */
+
+/**
+ * @class Meter
+ * @namespace ozpIwc.metricTypes
+ * @extends ozpIwc.metricTypes.BaseMetric
  */
 ozpIwc.metricTypes.Meter=ozpIwc.util.extend(ozpIwc.metricTypes.BaseMetric,function() {
 	ozpIwc.metricTypes.BaseMetric.apply(this,arguments);
+    /**
+     * @property m1Rate
+     * @type {ozpIwc.metricsStats.ExponentiallyWeightedMovingAverage}
+     */
 	this.m1Rate= new ozpIwc.metricsStats.ExponentiallyWeightedMovingAverage(ozpIwc.metricsStats.M1_ALPHA);
+    /**
+     * @property m5Rate
+     * @type {ozpIwc.metricsStats.ExponentiallyWeightedMovingAverage}
+     */
 	this.m5Rate= new ozpIwc.metricsStats.ExponentiallyWeightedMovingAverage(ozpIwc.metricsStats.M5_ALPHA);
+    /**
+     * @property m15Rate
+     * @type {ozpIwc.metricsStats.ExponentiallyWeightedMovingAverage}
+     */
 	this.m15Rate= new ozpIwc.metricsStats.ExponentiallyWeightedMovingAverage(ozpIwc.metricsStats.M15_ALPHA);
+    /**
+     * @property startTime
+     * @type {Number}
+     */
 	this.startTime=ozpIwc.util.now();
+    /**
+     * @property value
+     * @type {Number}
+     * @default 0
+     */
 	this.value=0;
 });
 
 /**
+ * @method mark
  * @param {Number} [delta=1] - Increment by this value
  * @returns {Number} - Value of the counter after increment
  */
@@ -3386,33 +3021,70 @@ ozpIwc.metricTypes.Meter.prototype.mark=function(delta) {
 	return this.value;
 };
 
-ozpIwc.metricTypes.Meter.prototype.get=function() { 
+/**
+ * @method get
+ * @returns {{rate1m: (Number), rate5m: (Number), rate15m: (Number), rateMean: number, count: (Number)}}
+ */
+ozpIwc.metricTypes.Meter.prototype.get=function() {
 	return {
-		'rate_1m' : this.m1Rate.rate(),
-		'rate_5m' : this.m5Rate.rate(),
-		'rate_15m' : this.m15Rate.rate(),
-		'rate_mean' : this.value / (ozpIwc.util.now() - this.startTime) * 1000,
+		'rate1m' : this.m1Rate.rate(),
+		'rate5m' : this.m5Rate.rate(),
+		'rate15m' : this.m15Rate.rate(),
+		'rateMean' : this.value / (ozpIwc.util.now() - this.startTime) * 1000,
 		'count' : this.value
 	};
 };
 
+/**
+ * @method tick
+ */
 ozpIwc.metricTypes.Meter.prototype.tick=function() { 
 	this.m1Rate.tick();
 	this.m5Rate.tick();
 	this.m15Rate.tick();
 };
 
+/**
+ * @submodule metrics.types
+ */
+
+/**
+ * @class Timer
+ * @namespace ozpIwc
+ * @extends ozpIwc.metricTypes.BaseMetric
+ * @type {Function}
+ */
 ozpIwc.metricTypes.Timer=ozpIwc.util.extend(ozpIwc.metricTypes.BaseMetric,function() {
 	ozpIwc.metricTypes.BaseMetric.apply(this,arguments);
+    /**
+     * @property meter
+     * @type {ozpIwc.metricTypes.Meter}
+     */
 	this.meter=new ozpIwc.metricTypes.Meter();
+
+    /**
+     * @property histogram
+     * @type {ozpIwc.metricTypes.Histogram}
+     */
 	this.histogram=new ozpIwc.metricTypes.Histogram();
 });
 
+/**
+ * @method mark
+ * @param {Number} val
+ * @param {Number} timestamp Current time in milliseconds.
+ */
 ozpIwc.metricTypes.Timer.prototype.mark=function(val,time) {
 	this.meter.mark();
 	this.histogram.mark(val,time);
 };
 
+/**
+ * Starts the timer
+ *
+ * @method start
+ * @returns {Function}
+ */
 ozpIwc.metricTypes.Timer.prototype.start=function() {
 	var self=this;
 	var startTime=ozpIwc.util.now();
@@ -3422,6 +3094,12 @@ ozpIwc.metricTypes.Timer.prototype.start=function() {
 	};
 };
 
+/**
+ * Times the length of a function call.
+ *
+ * @method time
+ * @param {Function}callback
+ */
 ozpIwc.metricTypes.Timer.prototype.time=function(callback) {
 	var startTime=ozpIwc.util.now();
 	try {
@@ -3432,6 +3110,12 @@ ozpIwc.metricTypes.Timer.prototype.time=function(callback) {
 	}
 };
 
+/**
+ * Returns a histogram of the timer metrics.
+ *
+ * @method get
+ * @returns {Object}
+ */
 ozpIwc.metricTypes.Timer.prototype.get=function() {
 	var val=this.histogram.get();
 	var meterMetrics=this.meter.get();
@@ -3441,12 +3125,22 @@ ozpIwc.metricTypes.Timer.prototype.get=function() {
 	return val;
 };
 var ozpIwc=ozpIwc || {};
+/**
+ * Metrics capabilities for the IWC.
+ * @module metrics
+ */
 
 /**
- * @class
  * A repository of metrics
+ * @class MetricsRegistry
+ * @namespace ozpIwc
  */
 ozpIwc.MetricsRegistry=function() {
+    /**
+     * Key value store of metrics
+     * @property metrics
+     * @type Object
+     */
 	this.metrics={};
     var self=this;
     this.gauge('registry.metrics.types').set(function() {
@@ -3456,20 +3150,22 @@ ozpIwc.MetricsRegistry=function() {
 };
 
 /**
- * 
+ * Finds or creates the metric in the registry.
+ * @method findOrCreateMetric
  * @private
- * @param {string} name - Name of the metric
- * @param {function} type - The constructor of the requested type for this metric.
- * @returns {MetricType} - Null if the metric already exists of a different type.  Otherwise a reference to the metric.
+ * @param {String} name Name of the metric.
+ * @param {Function} type The constructor of the requested type for this metric.
+ * @returns {ozpIwc.MetricType} Null if the metric already exists of a different type. Otherwise a reference to
+ * the metric.
  */
-ozpIwc.MetricsRegistry.prototype.findOrCreateMetric=function(name,type) {
+ozpIwc.MetricsRegistry.prototype.findOrCreateMetric=function(name,Type) {
 	var m= this.metrics[name];
     if(!m) {
-        m = this.metrics[name] = new type();
+        m = this.metrics[name] = new Type();
         m.name=name;
         return m;
     }
-	if(m instanceof type){
+	if(m instanceof Type){
 			return m;
 	} else {
 			return null;
@@ -3478,9 +3174,10 @@ ozpIwc.MetricsRegistry.prototype.findOrCreateMetric=function(name,type) {
 
 /**
  * Joins the arguments together into a name.
+ * @method makeName
  * @private
- * @param {string[]} args - Array or the argument-like "arguments" value.
- * @returns {string}
+ * @param {String[]} args Array or the argument-like "arguments" value.
+ * @returns {String} the name.
  */
 ozpIwc.MetricsRegistry.prototype.makeName=function(args) {
 	// slice is necessary because "arguments" isn't a real array, and it's what
@@ -3489,7 +3186,11 @@ ozpIwc.MetricsRegistry.prototype.makeName=function(args) {
 };
 
 /**
- * @param {...string} name - components of the name
+ * Returns the counter instance(s) for the given name(s). If it does not exist it will be created.
+ *
+ * @method counter
+ * @param {String} name Components of the name.
+ *
  * @returns {ozpIwc.metricTypes.Counter}
  */
 ozpIwc.MetricsRegistry.prototype.counter=function(name) {
@@ -3497,7 +3198,11 @@ ozpIwc.MetricsRegistry.prototype.counter=function(name) {
 };
 
 /**
- * @param {...string} name - components of the name
+ * Returns the meter instance(s) for the given name(s). If it does not exist it will be created.
+ *
+ * @method meter
+ * @param {String} name Components of the name.
+ *
  * @returns {ozpIwc.metricTypes.Meter}
  */
 ozpIwc.MetricsRegistry.prototype.meter=function(name) {
@@ -3505,7 +3210,10 @@ ozpIwc.MetricsRegistry.prototype.meter=function(name) {
 };
 
 /**
- * @param {...string} name - components of the name
+ * Returns the gauge instance(s) for the given name(s). If it does not exist it will be created.
+ *
+ * @method gauge
+ * @param {String} name Components of the name.
  * @returns {ozpIwc.metricTypes.Gauge}
  */
 ozpIwc.MetricsRegistry.prototype.gauge=function(name) {
@@ -3513,24 +3221,37 @@ ozpIwc.MetricsRegistry.prototype.gauge=function(name) {
 };
 
 /**
- * @param {...string} name - components of the name
- * @returns {ozpIwc.metricTypes.Gauge}
+ * Returns the histogram instance(s) for the given name(s). If it does not exist it will be created.
+ *
+ * @method histogram
+ * @param {String} name Components of the name.
+ *
+ * @returns {ozpIwc.metricTypes.Histogram}
  */
 ozpIwc.MetricsRegistry.prototype.histogram=function(name) {
 	return this.findOrCreateMetric(this.makeName(arguments),ozpIwc.metricTypes.Histogram);
 };
 
 /**
- * @param {...string} name - components of the name
- * @returns {ozpIwc.metricTypes.Gauge}
+ * Returns the timer instance(s) for the given name(s). If it does not exist it will be created.
+ *
+ * @method timer
+ * @param {String} name Components of the name.
+ *
+ * @returns {ozpIwc.metricTypes.Timer}
  */
 ozpIwc.MetricsRegistry.prototype.timer=function(name) {
 	return this.findOrCreateMetric(this.makeName(arguments),ozpIwc.metricTypes.Timer);
 };
 
 /**
- * @param {...string} name - components of the name
- * @returns {ozpIwc.metricTypes.Gauge}
+ * Registers a metric to the metric registry
+ *
+ * @method register
+ * @param {String} name Components of the name.
+ * @param {ozpIwc.MetricType} metric
+ *
+ * @returns {ozpIwc.MetricType} The metric passed in.
  */
 ozpIwc.MetricsRegistry.prototype.register=function(name,metric) {
 	this.metrics[this.makeName(name)]=metric;
@@ -3539,8 +3260,10 @@ ozpIwc.MetricsRegistry.prototype.register=function(name,metric) {
 };
 
 /**
- * 
- * @returns {unresolved}
+ * Converts the metric registry to JSON.
+ *
+ * @method toJson
+ * @returns {Object} JSON converted registry.
  */
 ozpIwc.MetricsRegistry.prototype.toJson=function() {
 	var rv={};
@@ -3556,6 +3279,11 @@ ozpIwc.MetricsRegistry.prototype.toJson=function() {
 	return rv;
 };
 
+/**
+ * Returns an array of all metrics in the registry
+ * @method allMetrics
+ * @returns {ozpIwc.MetricType[]}
+ */
 ozpIwc.MetricsRegistry.prototype.allMetrics=function() {
     var rv=[];
     for(var k in this.metrics) {
