@@ -2325,6 +2325,12 @@ ozpIwc.Client=function(config) {
      */
     this.preconnectionQueue=[];
 
+    /**
+     *
+     * @type Object
+     */
+    this.watchMsgMap = {};
+
     if(this.autoPeer) {
         this.connect();
     }
@@ -2359,9 +2365,15 @@ ozpIwc.Client.prototype.readLaunchParams=function(rawString) {
  * @param {ozpIwc.TransportPacket} packet
  */
 ozpIwc.Client.prototype.receive=function(packet) {
+
     if(packet.replyTo && this.replyCallbacks[packet.replyTo]) {
         if (!this.replyCallbacks[packet.replyTo](packet)) {
             this.cancelCallback(packet.replyTo);
+
+            if(this.watchMsgMap[packet.replyTo].action === "watch") {
+                this.api(this.watchMsgMap[packet.replyTo].dst).unwatch(this.watchMsgMap[packet.replyTo].resource);
+                delete this.watchMsgMap[packet.replyTo];
+            }
         }
     } else {
         /**
@@ -2414,6 +2426,10 @@ ozpIwc.Client.prototype.send=function(fields,callback,preexistingPromise) {
     this.peer.postMessage(data,'*');
     this.sentBytes+=data.length;
     this.sentPackets++;
+
+    if(packet.action === "watch") {
+        this.watchMsgMap[id] = packet;
+    }
     return packet;
 };
 
