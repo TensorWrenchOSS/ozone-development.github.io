@@ -3318,7 +3318,7 @@ ozpIwc.util=ozpIwc.util || {};
  * @param {Object} config
  * @param {String} config.method
  * @param {String} config.href
- * 
+ *
  * @returns {Promise}
  */
 ozpIwc.util.ajax = function (config) {
@@ -7259,6 +7259,24 @@ ozpIwc.CommonApiBase.prototype.loadFromEndpoint=function(endpointName) {
  * @param {ozpIwc.Endpoint} endpoint the endpoint of the HAL data.
  */
 ozpIwc.CommonApiBase.prototype.updateResourceFromServer=function(object,path,endpoint) {
+    //Workaround for objects not wrapped in an outer object inside an entity property
+    //BEGIN TEMP CODE
+    if (!object.entity) {
+        object = {
+            entity: object
+        };
+    }
+    if (!object.contentType) {
+        object.contentType = 'application/json';
+    };
+    //also fix resource string for intents
+    if (path.indexOf('intent') >= 0) {
+        path = '/' + object.entity.type + '/' + object.entity.action;
+        if (object.entity.handler) {
+            path+= '/' + + object.entity.handler;
+        }
+    }
+    //END TEMP CODE
     var node = this.findNodeForServerResource(object,path,endpoint.baseUrl);
 
     var snapshot=node.snapshot();
@@ -7896,8 +7914,8 @@ ozpIwc.Endpoint.prototype.get=function(resource) {
     var self=this;
 
     return this.endpointRegistry.loadPromise.then(function() {
-        if(resource.indexOf(self.baseUrl)!==0) {
-            resource=self.baseUrl + (resource === '/' ? '' : resource);
+        if (resource === '/') {
+            resource = self.baseUrl;
         }
         return ozpIwc.util.ajax({
             href:  resource,
@@ -7980,7 +7998,7 @@ ozpIwc.initEndpoints=function(apiRoot) {
  */
 ozpIwc.DataApi = ozpIwc.util.extend(ozpIwc.CommonApiBase,function(config) {
 	ozpIwc.CommonApiBase.apply(this,arguments);
-    
+
 });
 
 /**
@@ -7989,7 +8007,7 @@ ozpIwc.DataApi = ozpIwc.util.extend(ozpIwc.CommonApiBase,function(config) {
  * @method loadFromServer
  */
 ozpIwc.DataApi.prototype.loadFromServer=function() {
-    this.loadFromEndpoint("data");
+    this.loadFromEndpoint("https://www.owfgoss.org/ng/dev/mp/api/data");
 };
 
 /**
@@ -8069,7 +8087,7 @@ ozpIwc.DataApi.prototype.handleAddchild=function(node,packetContext) {
 	var childNode=this.createChild(node,packetContext);
 
 	node.addChild(childNode.resource);
-	
+
 	packetContext.replyTo({
         'response':'ok',
         'entity' : {
