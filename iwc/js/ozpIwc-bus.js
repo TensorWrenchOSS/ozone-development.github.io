@@ -3340,7 +3340,7 @@ ozpIwc.util.ajax = function (config) {
             reject(this);
         };
 
-        if(config.method === "POST") {
+        if((config.method === "POST") || (config.method === "PUT")) {
             request.send(config.data);
         }
         else {
@@ -6862,7 +6862,7 @@ ozpIwc.CommonApiValue = function(config) {
 	this.permissions=config.permissions || {};
 	this.version=config.version || 0;
     
-    this.persist=true;
+    this.persist=false;
     this.deleted=true;
 };
 
@@ -7293,7 +7293,7 @@ ozpIwc.CommonApiBase.prototype.loadFromEndpoint=function(endpointName) {
 
     // fetch the base endpoint. it should be a HAL Json object that all of the
     // resources and keys in it
-    var endpoint=ozpIwc.endpoint(endpointName);
+    var endpoint=new ozpIwc.Endpoint(endpointName);
     var resolveLoad, rejectLoad;
 
     var p = new Promise(function(resolve,reject){
@@ -7975,16 +7975,21 @@ ozpIwc.CommonApiBase.prototype.leaderSync = function () {
     },0);
 };
 
+ozpIwc.CommonApiBase.prototype.persistNodes=function() {
+	// throw not implemented error
+	throw new ozpIwc.ApiError("noImplementation","Base class persistence call not implemented.  Use DataApi to persist nodes.");
+};
+
 var ozpIwc=ozpIwc || {};
 
 /**
  * @class Endpoint
  * @namespace ozpIwc
- * @param endpointRegistry
+ * @param endpointRegistry Endpoint name
  * @constructor
  */
 ozpIwc.Endpoint=function(endpointRegistry) {
-    this.endpointRegistry=endpointRegistry;
+	this.endpointRegistry=endpointRegistry;
 };
 
 /**
@@ -8002,6 +8007,21 @@ ozpIwc.Endpoint.prototype.get=function(resource) {
         return ozpIwc.util.ajax({
             href:  resource,
             method: 'GET'
+        });
+    });
+};
+
+ozpIwc.Endpoint.prototype.put=function(resource, data) {
+    var self=this;
+
+    return this.endpointRegistry.loadPromise.then(function() {
+        if(resource.indexOf(self.baseUrl)!==0) {
+            resource=self.baseUrl + resource;
+        }
+        return ozpIwc.util.ajax({
+            href:  resource,
+            method: 'PUT',
+			data: data
         });
     });
 };
@@ -8065,6 +8085,19 @@ ozpIwc.initEndpoints=function(apiRoot) {
         return registry.endpoint(name);
     };
 };
+
+ozpIwc.Endpoint.prototype.saveNodes=function(nodes) {
+	// PUT each node individually
+	// Currently, send to a fixed api point
+	// Soon, switch to using the node.self endpoint and remove fixed resource
+	var resource = "/data";
+	for (node in nodes) {
+		var nodejson = JSON.stringify(nodes[node]);
+		put((nodes[node].self || resource), nodejson);
+	}
+};
+
+
 /**
  * @submodule bus.api.Type
  */
@@ -8086,7 +8119,7 @@ ozpIwc.initEndpoints=function(apiRoot) {
  */
 ozpIwc.DataApi = ozpIwc.util.extend(ozpIwc.CommonApiBase,function(config) {
 	ozpIwc.CommonApiBase.apply(this,arguments);
-
+	this.endpointUrl="https://www.owfgoss.org/ng/dev/mp/api/data";
 });
 
 /**
@@ -8095,7 +8128,7 @@ ozpIwc.DataApi = ozpIwc.util.extend(ozpIwc.CommonApiBase,function(config) {
  * @method loadFromServer
  */
 ozpIwc.DataApi.prototype.loadFromServer=function() {
-    return this.loadFromEndpoint("https://www.owfgoss.org/ng/dev/mp/api/data");
+    return this.loadFromEndpoint(this.endpointUrl);
 };
 
 /**
@@ -8207,6 +8240,27 @@ ozpIwc.DataApi.prototype.handleRemovechild=function(node,packetContext) {
 };
 
 /**
+ * 	Collect list of nodes to persist, send to server, reset persist flag.
+ * 	Currently sends every dirty node with a separate ajax call.
+ */
+ozpIwc.DataApi.prototype.persistNodes=function() {
+	// collect list of nodes to persist, send to server, reset persist flag
+	var nodes=[];
+	for (node in this.data) {
+		if ((this.data[node].dirty === true) &&
+			(this.data[node].persist === true)) {
+			nodes[nodes.length]=this.data[node].serialize();
+			this.data[node].dirty = false;
+		}
+	}
+	// send list of objects to endpoint ajax call
+	if (nodes) {
+		var endpointref= ozpIwc.EndpointRegistry.endpoint(this.endpointUrl);
+		endpointref.saveNodes(nodes);
+	}
+};
+
+/**
  * @submodule bus.api.Value
  */
 
@@ -8222,6 +8276,8 @@ ozpIwc.DataApiValue = ozpIwc.util.extend(ozpIwc.CommonApiValue,function(config) 
 	ozpIwc.CommonApiValue.apply(this,arguments);
     config = config || {};
 	this.children=config.children || [];
+	this.persist=config.persist || true;
+	this.dirty=config.dirty || true;
 });
 
 /**
@@ -8234,6 +8290,7 @@ ozpIwc.DataApiValue.prototype.addChild=function(child) {
         this.children.push(child);
     	this.version++;
     }
+	this.dirty= true;
 };
 
 /**
@@ -8243,7 +8300,8 @@ ozpIwc.DataApiValue.prototype.addChild=function(child) {
  * @param {String} child - name of the child record of this
  */
 ozpIwc.DataApiValue.prototype.removeChild=function(child) {
-    var originalLen=this.children.length;
+	this.dirty= true;
+	var originalLen=this.children.length;
     this.children=this.children.filter(function(c) {
         return c !== child;
     });
@@ -8303,7 +8361,19 @@ ozpIwc.DataApiValue.prototype.deserialize=function(serverData) {
     this.contentType=serverData.contentType || this.contentType;
 	this.permissions=serverData.permissions || this.permissions;
 	this.version=serverData.version || this.version;
+	this.self=serverData.version || this.self;
 };
+
+ozpIwc.DataApiValue.prototype.serialize=function() {
+	var serverData = {};
+	serverData.entity=this.entity;
+	serverData.contentType=this.contentType;
+	serverData.permissions=this.permissions;
+	serverData.version=this.version;
+	serverData.self=this.self;
+	return serverData;
+};
+
 
 /**
  * @submodule bus.api.Type
