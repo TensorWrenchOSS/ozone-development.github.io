@@ -7682,12 +7682,24 @@ ozpIwc.CommonApiBase.prototype.loadLinkedObjectsFromServer=function(endpoint,dat
 
     if(data._embedded && data._embedded.item) {
         noEmbedded = false;
-        branchesFound += data._embedded.item.length;
+        var itemLength;
+        if (Object.prototype.toString.call(data._embedded.item) === '[object Array]' ) {
+            itemLength=data._embedded.item.length
+        } else {
+            itemLength=1;
+        }
+        branchesFound+=itemLength;
     }
 
     if(data._links && data._links.item) {
         noLinks = false;
-        branchesFound += data._links.item.length;
+        var itemLength;
+        if (Object.prototype.toString.call(data._links.item) === '[object Array]' ) {
+            itemLength=data._links.item.length
+        } else {
+            itemLength=1;
+        }
+        branchesFound+=itemLength;
     }
 
     if(noEmbedded && noLinks) {
@@ -7702,22 +7714,36 @@ ozpIwc.CommonApiBase.prototype.loadLinkedObjectsFromServer=function(endpoint,dat
         //TODO should we parse objects from _links and _embedded not wrapped in an item object?
 
         if(data._embedded && data._embedded.item) {
-            for (var i in data._embedded.item) {
-                var object = data._embedded.item[i];
-                this.updateResourceFromServer(object,object._links.self.href,endpoint,res);
+            if( Object.prototype.toString.call(data._embedded.item) === '[object Array]' ) {
+                for (var i in data._embedded.item) {
+                    var object = data._embedded.item[i];
+                    this.updateResourceFromServer(object, object._links.self.href, endpoint, res);
+                }
+            } else {
+                var object = data._embedded.item;
+                this.updateResourceFromServer(object, object._links.self.href, endpoint, res);
             }
         }
 
         if(data._links && data._links.item) {
 
-            data._links.item.forEach(function(object) {
-                var href=object.href;
-                endpoint.get(href).then(function(objectResource){
-                    self.updateResourceFromServer(objectResource,href,endpoint, res);
-                }).catch(function(error) {
-                    console.error("unable to load " + object.href + " because: ",error);
+            if( Object.prototype.toString.call(data._links.item) === '[object Array]' ) {
+                data._links.item.forEach(function (object) {
+                    var href = object.href;
+                    endpoint.get(href).then(function (objectResource) {
+                        self.updateResourceFromServer(objectResource, href, endpoint, res);
+                    }).catch(function (error) {
+                        console.error("unable to load " + object.href + " because: ", error);
+                    });
                 });
-            });
+            } else {
+                var href = data._links.item.href;
+                endpoint.get(href).then(function (objectResource) {
+                    self.updateResourceFromServer(objectResource, href, endpoint, res);
+                }).catch(function (error) {
+                    console.error("unable to load " + object.href + " because: ", error);
+                });
+            }
         }
     }
 };

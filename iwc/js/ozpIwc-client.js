@@ -2355,13 +2355,13 @@ ozpIwc.Client=function(config) {
             'actions': ["get","set","delete","watch","unwatch","list","addChild","removeChild"]
         },
         "system.api" : { 'address': 'system.api',
-            'actions': ["get","set","delete","watch","unwatch","launch"]
+            'actions': ["get","set","delete","watch","unwatch","list","launch"]
         },
         "names.api" : { 'address': 'names.api',
-            'actions': ["get","set","delete","watch","unwatch"]
+            'actions': ["get","set","delete","watch","unwatch","list"]
         }, 
         "intents.api" : { 'address': 'intents.api',
-            'actions': ["get","set","delete","watch","unwatch","register","invoke"]
+            'actions': ["get","set","delete","watch","unwatch","list","register","invoke"]
         }
     };
 
