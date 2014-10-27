@@ -7560,7 +7560,7 @@ ozpIwc.CommonApiBase.prototype.findNodeForServerResource=function(object,objectP
             break;
         case 'applications':
             if (object.name) {
-                resource += object.name;
+                resource += 'application/' + object.name;
             }
             break;
         case 'system':
@@ -7681,6 +7681,7 @@ ozpIwc.CommonApiBase.prototype.loadLinkedObjectsFromServer=function(endpoint,dat
     var branchesFound = 0;
 
     if(data._embedded && data._embedded.item) {
+        data._embedded.item = Array.isArray(data._embedded.item) ? data._embedded.item : [data._embedded.item];
         noEmbedded = false;
         var itemLength;
         if (Object.prototype.toString.call(data._embedded.item) === '[object Array]' ) {
@@ -7692,6 +7693,7 @@ ozpIwc.CommonApiBase.prototype.loadLinkedObjectsFromServer=function(endpoint,dat
     }
 
     if(data._links && data._links.item) {
+        data._links.item = Array.isArray(data._links.item) ? data._links.item : [data._links.item];
         noLinks = false;
         var itemLength;
         if (Object.prototype.toString.call(data._links.item) === '[object Array]' ) {
