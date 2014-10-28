@@ -2204,6 +2204,27 @@ ozpIwc.util.escapeRegex=function(str) {
     return str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 };
 
+/**
+ * 
+ * @method parseOzpUrl
+ * @param {type} url
+ * @returns {ozpIwc.TransportPacket}
+ */
+ozpIwc.util.parseOzpUrl=function(url) {
+    var m = /^(?:(?:web\+ozp|ozp):\/\/)?([0-9a-zA-Z](?:[-.\w])*)(\/[^?#]*)(\?[^#]*)?(#.*)?$/.exec(decodeURIComponent(url));
+    if (m) {
+        // an action of "get" is implied
+        var packet = {
+            'dst': m[1],
+            'resource': m[2],
+            'action': "get"
+        };
+        // TODO: parse the query params into fields
+
+        return packet;
+    }
+    return null;
+};
 
 /**
  * Returns true if the specified packet meets the criteria of an IWC Packet.

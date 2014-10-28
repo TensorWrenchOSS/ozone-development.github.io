@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Choose an Intent</title>
+    <script type="text/javascript">
+        ozpIwc= {
+            runApis:false,
+            acceptPostMessageParticipants:false
+        };
+// Not used by the Intents Chooser
+        //ozpIwc.apiRootUrl = "api";
+    </script>
+    <script type="text/javascript" src="js/ozpIwc-bus.js"></script>
+    <script type="text/javascript" src="js/defaultWiring.js"></script>
+    <style>
+        .icon {
+            height: 32px;
+            width: 32px;
+            display: block;
+        }
+        button {
+            text-align: center;
+        }
+        </style>
+  </head>
+  <body>
+      <div id="handlerList"></div>
+      <div id="cancelButton"></div>
+
+      <script type="text/javascript">
+        var client=new ozpIwc.InternalParticipant({'name':"intentsChooser"});
+        ozpIwc.defaultRouter.registerParticipant(client);
+
+        function failure(msg) {
+            document.getElementById("handlerList").textContent=msg;
+        }
+
+        function handleSelection(handler,intentInvocation){
+            client.send({
+                dst: "intents.api",
+                action: "set",
+                contentType: intentInvocation.contentType,
+                resource: intentInvocation.resource,
+                entity: {
+                    resource: handler.resource,
+                    reason: "user",
+                    state: "choosing"
+                }
+            },function(reply,done) {
+                console.log(reply);
+                if(reply.response === "ok"){
+                    done();
+                    window.close();
+                }
+            });
+        }
+
+        function showHandlers(handlers,intentInvocation) {
+            handlers.forEach(function(h) {
+                var handler = h;
+                var button=document.createElement("button");
+                var icon=document.createElement("img");
+                icon.setAttribute("src",handler.entity.icon);
+                icon.setAttribute("alt",handler.entity.label);
+                icon.setAttribute("class","icon");
+                button.appendChild(icon);
+                button.appendChild(document.createTextNode(handler.entity.label));
+                button.addEventListener("click",function(evt) {
+                    evt.preventDefault();
+                    console.log("Executing ", handler);
+                    handleSelection(handler,intentInvocation);
+                });
+                document.getElementById("handlerList").appendChild(button);
+            });
+        }
+
+        function showCancel(intentInvocation){
+            var button=document.createElement("button");
+            button.appendChild(document.createTextNode("Cancel"));
+            button.addEventListener("click",function(evt) {
+                evt.preventDefault();
+                client.send({
+                    dst: "intents.api",
+                    action: "set",
+                    contentType: intentInvocation.contentType,
+                    resource: intentInvocation.resource,
+                    entity: {
+                        reason: "user",
+                        entity: "User canceled the selection.",
+                        state: "fail"
+                    }
+                },function(reply,done) {
+                    console.log(reply);
+                    if(reply.response === "ok"){
+                        done();
+                        window.close();
+                    }
+                });
+            });
+            document.getElementById("handlerList").appendChild(button);
+        }
+
+        var m=/ozpIwc.intentSelection=([^&#]+)/.exec(window.name);
+
+        if(!m) {
+            failure("This page is intended to be launch only by the Ozone Platform intents API.");
+        }
+        var loc=ozpIwc.util.parseOzpUrl(m[1]);
+
+        client.send(loc,function(reply,done) {
+            if(reply.response!=="ok") {
+                failure();
+                done();
+                return;
+            }
+            showHandlers(reply.entity.handlerChoices,reply);
+            showCancel(reply);
+            done();
+        });
+        
+    </script>
+  </body>
+</html>
