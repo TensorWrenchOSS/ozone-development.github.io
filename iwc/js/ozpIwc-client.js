@@ -2647,13 +2647,14 @@ ozpIwc.Client.prototype.connect=function() {
             // fetch the mailbox
             var packet=ozpIwc.util.parseOzpUrl(self.launchParams.mailbox);
             return new Promise(function(resolve,reject) {
-                self.send(packet,function(response) {
+                self.send(packet,function(response,done) {
                     if(response.response==='ok') {
                         for(var k in response.entity) {
                             self.launchParams[k]=response.entity[k];
                         }
                     }
                     resolve();
+                    done();
                 });
             });
         }).then(function() {

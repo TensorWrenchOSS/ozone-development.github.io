@@ -53,22 +53,24 @@ debuggerModule.controller("apiDisplayController",["$scope","iwcClient",function(
             'dst': scope.api.address,
             'action': "get",
             'resource': key.resource
-        },function(response) {
+        },function(response,done) {
             for(i in response) {
                 key[i]=response[i];
             }
             key.isLoaded=true;
+            done();
         });
         client.send({
             'dst': scope.api.address,
             'action': "list",
             'resource': key.resource
-        },function(response) {
+        },function(response,done) {
             if(response.response==="ok") {
                 key.children=response.entity;
             }else {
                 key.children="Not Supported: " + response.response;
             }
+            done();
         });
     };
     scope.refresh=function() {

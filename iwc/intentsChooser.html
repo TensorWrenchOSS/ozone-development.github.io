@@ -49,9 +49,9 @@
             },function(reply,done) {
                 console.log(reply);
                 if(reply.response === "ok"){
-                    done();
                     window.close();
                 }
+                done();
             });
         }
 
@@ -85,16 +85,18 @@
                     contentType: intentInvocation.contentType,
                     resource: intentInvocation.resource,
                     entity: {
-                        reason: "user",
-                        entity: "User canceled the selection.",
+                        reply:{
+                            'contentType': intentInvocation.contentType,
+                            entity: "User canceled the selection."
+                        },
                         state: "fail"
                     }
                 },function(reply,done) {
                     console.log(reply);
                     if(reply.response === "ok"){
-                        done();
                         window.close();
                     }
+                    done();
                 });
             });
             document.getElementById("handlerList").appendChild(button);
