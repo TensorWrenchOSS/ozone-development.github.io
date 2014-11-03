@@ -9163,7 +9163,7 @@ ozpIwc.IntentsApi.prototype.makeValue = function (packet) {
         }
         var node=new ozpIwc.IntentsApiDefinitionValue({
             resource: resource,
-            intentType: path[0]+"/" + path[1] + "/" + path[2],
+            intentType: path[0]+"/" + path[1],
             intentAction: path[2]
         });
         self.addDynamicNode(node);
@@ -9343,13 +9343,9 @@ ozpIwc.IntentsApi.prototype.handleDelete=function(node,packetContext) {
 ozpIwc.IntentsApi.prototype.invokeIntentHandler = function (handlerNode, packetContext,inFlightIntent) {
     inFlightIntent = inFlightIntent || {};
 
-    var packet = {
-        dst: handlerNode.entity.invokeIntent.dst,
-        replyTo: handlerNode.entity.invokeIntent.replyTo,
-        entity: {
-            inFlightIntent: inFlightIntent.resource
-        }
-    };
+    var packet = handlerNode.entity.invokeIntent;
+    packet.entity = packet.entity || {};
+    packet.entity.inFlightIntent = inFlightIntent.resource;
 
     var self = this;
     this.participant.send(packet,function(response,done) {
@@ -10045,6 +10041,8 @@ ozpIwc.SystemApi.prototype.updateIntents=function(node,changes) {
         return;
     }
     intents.forEach(function(i) {
+        var icon = i.icon || (node.entity && node.entity.icons && node.entity.icons.small) ? node.entity.icons.small : '';
+        var label = i.label || node.entity.name;
         this.participant.send({
             'dst' : "intents.api",
             'src' : "system.api",
@@ -10054,8 +10052,8 @@ ozpIwc.SystemApi.prototype.updateIntents=function(node,changes) {
             'entity': {
                 'type': i.type,
                 'action': i.action,
-                'icon': i.icon,
-                'label': i.label,
+                'icon': icon,
+                'label': label,
                 '_links': node.entity._links,
                 'invokeIntent': {
                     'action' : 'invoke',
@@ -10082,13 +10080,37 @@ ozpIwc.SystemApi.prototype.makeValue = function(packet){
             contentType: packet.contentType
         });
     }
+    var launchDefinition = "/system"+packet.resource;
+    packet.entity.launchDefinition = packet.entity.launchDefinition || launchDefinition;
 
-    return new ozpIwc.SystemApiApplicationValue({
+    var app =  new ozpIwc.SystemApiApplicationValue({
         resource: packet.resource,
         entity: packet.entity,
         contentType: packet.contentType,
         systemApi: this
     });
+
+    this.participant.send({
+        dst: "intents.api",
+        action: "register",
+        contentType: "application/ozpIwc-intents-handler-v1+json",
+        resource:launchDefinition,
+        entity: {
+            icon:  (packet.entity.icons && packet.entity.icons.small)  ? packet.entity.icons.small : "" ,
+            label: packet.entity.name || "",
+            contentType: "application/json",
+            invokeIntent:{
+                dst: "system.api",
+                action: "invoke",
+                resource: packet.resource
+            }
+        }
+    },function(response,done){
+        app.entity.launchResource = response.entity.resource;
+        done();
+    });
+
+    return app;
 };
 
 /**
@@ -10114,13 +10136,14 @@ ozpIwc.SystemApi.prototype.handleDelete = function() {
  * @method handleLaunch
  */
 ozpIwc.SystemApi.prototype.handleLaunch = function(node,packetContext) {
-    var key=this.createKey("/mailbox/");
 
-    // save the new child
-    var mailboxNode=this.findOrMakeValue({'resource':key});
-    mailboxNode.set(packetContext.packet);
-
-    this.launchApplication(node,mailboxNode);
+    this.participant.send({
+        dst: "intents.api",
+        contentType: "application/ozpIwc-intents-handler-v1+json",
+        action: "invoke",
+        resource: node.entity.launchResource,
+        entity: packetContext.packet.entity
+    });
     packetContext.replyTo({'action': "ok"});
 };
 
@@ -10130,18 +10153,13 @@ ozpIwc.SystemApi.prototype.handleLaunch = function(node,packetContext) {
  * @method handleInvoke
  */
 ozpIwc.SystemApi.prototype.handleInvoke = function(node,packetContext) {
-    var key=this.createKey("/mailbox/");
+    if(packetContext.packet.entity && packetContext.packet.entity.inFlightIntent){
+        this.launchApplication(node,packetContext.packet.entity.inFlightIntent);
+        packetContext.replyTo({'action': "ok"});
+    } else{
+        packetContext.replyTo({'action': "badResource"});
+    }
 
-    // save the new child
-    var mailboxNode=this.findOrMakeValue({'resource':key});
-    mailboxNode.set({
-        contentType: "application/ozpiwc-intent-invocation+json",
-        permissions: packetContext.permissions,
-        entity: packetContext.packet
-    });
-
-    this.launchApplication(node,mailboxNode);
-    packetContext.replyTo({'action': "ok"});
 };
 
 /**
@@ -10151,10 +10169,10 @@ ozpIwc.SystemApi.prototype.handleInvoke = function(node,packetContext) {
  * @param {ozpIwc.SystemApiApplicationValue} node
  * @param {ozpIwc.SystemApiMailboxValue} mailboxNode
  */
-ozpIwc.SystemApi.prototype.launchApplication=function(node,mailboxNode) {
+ozpIwc.SystemApi.prototype.launchApplication=function(node,intentResource) {
     var launchParams=[
             "ozpIwc.peer="+encodeURIComponent(ozpIwc.BUS_ROOT),
-            "ozpIwc.mailbox="+encodeURIComponent(mailboxNode.resource)
+            "ozpIwc.inFlightIntent="+encodeURIComponent(intentResource)
     ];
 
     ozpIwc.util.openWindow(node.entity._links.describes.href,launchParams.join("&"));

@@ -2402,10 +2402,19 @@ ozpIwc.Client=function(config) {
     this.preconnectionQueue=[];
 
     /**
-     *
+     * @property watchMsgMap
      * @type Object
+     * @defualt {}
      */
     this.watchMsgMap = {};
+
+
+    /**
+     * @property launchedIntents
+     * @type Array
+     * @defualt []
+     */
+    this.launchedIntents = [];
 
     if(this.autoPeer) {
         this.connect();
@@ -2426,7 +2435,13 @@ ozpIwc.Client.prototype.readLaunchParams=function(rawString) {
     var re=/ozpIwc.(\w+)=([^&#]+)/g;
     var m;
     while((m=re.exec(rawString)) !== null) {
-        this.launchParams[m[1]]=JSON.parse(decodeURIComponent(m[2]));
+        var params = decodeURIComponent(m[2]);
+        try{
+            params = JSON.parse(params);
+        } catch(e){
+            // ignore the errors and just pass through the string
+        }
+        this.launchParams[m[1]]=params;
     }
 };
 /**
@@ -2640,14 +2655,19 @@ ozpIwc.Client.prototype.connect=function() {
             });
             self.preconnectionQueue=null;
             
-            if(!self.launchParams.mailbox) {
+            if(!self.launchParams.inFlightIntent) {
                 return;
             }
             
-            // fetch the mailbox
-            var packet=ozpIwc.util.parseOzpUrl(self.launchParams.mailbox);
+            // fetch the inFlightIntent
+            var packet= {
+                dst: "intents.api",
+                resource: self.launchParams.inFlightIntent,
+                action: "get"
+            };
             return new Promise(function(resolve,reject) {
                 self.send(packet,function(response,done) {
+                    self.launchedIntents.push(response);
                     if(response.response==='ok') {
                         for(var k in response.entity) {
                             self.launchParams[k]=response.entity[k];
@@ -2717,41 +2737,44 @@ ozpIwc.Client.prototype.createIframePeer=function() {
         return wrapper;
     };
 
-    var intentInvocationHandling = function(client,resource,entity,callback) {
-        client.send({
-            dst: "intents.api",
-            action: "get",
-            resource: entity.inFlightIntent
-        },function(response,done){
-            response.entity.handler = {
-                address : client.address,
-                resource: resource
-            };
-            response.entity.state = "running";
-
-
+    var intentInvocationHandling = function(client,resource,intentResource,callback) {
+        return new Promise(function(resolve,reject) {
             client.send({
                 dst: "intents.api",
-                contentType: response.contentType,
-                action: "set",
-                resource: entity.inFlightIntent,
-                entity: response.entity
-            }, function(reply,done){
-                //Now run the intent
-                response.entity.reply.entity =  callback(response.entity) || {};
-                // then respond to the inflight resource
-                response.entity.state = "complete";
-                response.entity.reply.contentType = response.entity.intent.type;
+                action: "get",
+                resource: intentResource
+            }, function (response, done) {
+                response.entity.handler = {
+                    address: client.address,
+                    resource: resource
+                };
+                response.entity.state = "running";
+
+
                 client.send({
                     dst: "intents.api",
                     contentType: response.contentType,
                     action: "set",
-                    resource: entity.inFlightIntent,
+                    resource: intentResource,
                     entity: response.entity
+                }, function (reply, done) {
+                    //Now run the intent
+                    response.entity.reply.entity = callback(response.entity) || {};
+                    // then respond to the inflight resource
+                    response.entity.state = "complete";
+                    response.entity.reply.contentType = response.entity.intent.type;
+                    client.send({
+                        dst: "intents.api",
+                        contentType: response.contentType,
+                        action: "set",
+                        resource: intentResource,
+                        entity: response.entity
+                    });
+                    done();
+                    resolve(response);
                 });
                 done();
             });
-            done();
         });
     };
 
@@ -2800,12 +2823,21 @@ ozpIwc.Client.prototype.createIframePeer=function() {
                     }
                     else if (otherCallback) {
                         if(reply.entity && reply.entity.inFlightIntent) {
-                            intentInvocationHandling(client,resource,reply.entity,otherCallback,callbackDone);
+                            intentInvocationHandling(client,resource,reply.entity.inFlightIntent,otherCallback,callbackDone);
                         } else {
                             otherCallback(reply, callbackDone);
                         }
                     }
                 });
+                if(dst === "intents.api" && action === "register"){
+                    for(var i in client.launchedIntents){
+                        var loadedResource = '/' + client.launchedIntents[i].entity.intent.type + '/' + client.launchedIntents[i].entity.intent.action;
+                        if(resource === loadedResource){
+                            intentInvocationHandling(client,resource,client.launchedIntents[i].resource,otherCallback);
+                            delete client.launchedIntents[i];
+                        }
+                    }
+                }
             });
         };
     };
