@@ -5186,9 +5186,9 @@ ozpIwc.Participant=function() {
      * Content type for the Participant's heartbeat status packets.
      * @property heartBeatContentType
      * @type String
-     * @default "application/ozpIwc-address-v1+json"
+     * @default "application/vnd.ozp-iwc-address-v1+json"
      */
-    this.heartBeatContentType="application/ozpIwc-address-v1+json";
+    this.heartBeatContentType="application/vnd.ozp-iwc-address-v1+json";
 
     /**
      * The heartbeat status packet of the participant.
@@ -5765,7 +5765,10 @@ ozpIwc.Router=function(config) {
      * @property watchdog
      * @type ozpIwc.RouterWatchdog
      */
-	this.watchdog=new ozpIwc.RouterWatchdog({router: this});
+	this.watchdog=new ozpIwc.RouterWatchdog({
+        router: this,
+        heartbeatFrequency: config.heartbeatFrequency
+    });
 	this.registerParticipant(this.watchdog);
 
     ozpIwc.metrics.gauge('transport.router.participants').set(function() {
@@ -6685,9 +6688,9 @@ ozpIwc.MulticastParticipant=ozpIwc.util.extend(ozpIwc.Participant,function(name)
      * Content type for the Participant's heartbeat status packets.
      * @property heartBeatContentType
      * @type String
-     * @default "application/ozpIwc-multicast-address-v1+json"
+     * @default "application/vnd.ozp-iwc-multicast-address-v1+json"
      */
-    this.heartBeatContentType="application/ozpIwc-multicast-address-v1+json";
+    this.heartBeatContentType="application/vnd.ozp-iwc-multicast-address-v1+json";
 
     /**
      *
@@ -7115,15 +7118,17 @@ ozpIwc.RouterWatchdog.prototype.setupWatches = function() {
             dst: "names.api",
             action: "set",
             resource: "/router/" + self.router.selfId,
-            contentType: "application/ozpIwc-router-v1+json",
+            contentType: "application/vnd.ozp-iwc-router-v1+json",
             entity: {
                 'address': self.router.selfId,
-                'participants': self.router.getParticipantCount()
+                'participants': self.router.getParticipantCount(),
+                'time': ozpIwc.util.now()
             }
         });
 
         for (var k in self.router.participants) {
             var participant=self.router.participants[k];
+            participant.heartBeatStatus.time = ozpIwc.util.now();
             if(participant instanceof ozpIwc.MulticastParticipant) {
                 self.send({
                     'dst': "names.api",
@@ -7407,6 +7412,10 @@ ozpIwc.CommonApiValue.prototype.updateContent=function(changedNodes) {
  * @param {ozpIwc.TransportPacket} serverData
  */
 ozpIwc.CommonApiValue.prototype.deserialize=function(serverData) {
+    this.entity=serverData.entity;
+    this.contentType=serverData.contentType || this.contentType;
+    this.permissions=serverData.permissions || this.permissions;
+    this.version=serverData.version || ++this.version;
 };
 
 /**
@@ -7640,10 +7649,10 @@ ozpIwc.CommonApiBase.prototype.findNodeForServerResource=function(object,objectP
             }
             break;
         case ozpIwc.linkRelPrefix + ':system':
-            resource += 'system' + (object.name ? '/'+object.name : '') +(object.version ? '/'+object.version : '');
+            resource += 'system';
             break;
         case ozpIwc.linkRelPrefix + ':user':
-            resource += 'user' + (object.username ? '/'+object.username : '');
+            resource += 'user';
             break;
         case ozpIwc.linkRelPrefix + ':user-data':
             if (object.key) {
@@ -7729,7 +7738,7 @@ ozpIwc.CommonApiBase.prototype.loadFromEndpoint=function(endpointName, requestHe
 ozpIwc.CommonApiBase.prototype.updateResourceFromServer=function(object,path,endpoint,res) {
     //TODO where should we get content-type?
     if (!object.contentType) {
-        object.contentType = 'application/json';
+        object.contentType = 'application/vnd.ozp-application-v1+json';
     }
     var parseEntity;
     if(typeof object.entity === "string"){
@@ -8329,7 +8338,10 @@ ozpIwc.CommonApiBase.prototype.unloadState = function(){
         // temporarily change the primative to stringify our RegExp
         var tempToJSON = RegExp.prototype.toJSON;
         RegExp.prototype.toJSON = RegExp.prototype.toString;
-        this.participant.sendElectionMessage("election",{state: this.data, previousLeader: this.participant.address});
+        this.participant.sendElectionMessage("election",{state: {
+            data: this.data,
+            dynamicNodes: this.dynamicNodes
+        }, previousLeader: this.participant.address});
 
         RegExp.prototype.toJSON = tempToJSON;
         this.data = {};
@@ -8347,18 +8359,19 @@ ozpIwc.CommonApiBase.prototype.unloadState = function(){
  */
 ozpIwc.CommonApiBase.prototype.setState = function(state) {
     this.data = {};
-    for (var key in state) {
-        var dynIndex = this.dynamicNodes.indexOf(state[key].resource);
+    this.dynamicNodes = state.dynamicNodes;
+    for (var key in state.data) {
+        var dynIndex = this.dynamicNodes.indexOf(state.data[key].resource);
         var node;
         if(dynIndex > -1){
-             node = this.data[state[key].resource] = new ozpIwc.CommonApiCollectionValue({
-                resource: state[key].resource
+             node = this.data[state.data[key].resource] = new ozpIwc.CommonApiCollectionValue({
+                resource: state.data[key].resource
             });
-            node.deserialize(state[key]);
+            node.deserialize(state.data[key]);
             this.updateDynamicNode(node);
         } else {
-            node = this.findOrMakeValue(state[key]);
-            node.deserialize(state[key]);
+            node = this.findOrMakeValue(state.data[key]);
+            node.deserialize(state.data[key]);
         }
     }
     // update all the collection values
@@ -9084,7 +9097,8 @@ ozpIwc.DataApiValue.prototype.changesSince=function(snapshot) {
 ozpIwc.DataApiValue.prototype.deserialize=function(serverData) {
     var clone = ozpIwc.util.clone(serverData);
 
-    this.entity= clone.entity.entity || {};
+    // we need the persistent data to conform with the structure of non persistent data.
+    this.entity= (clone.entity && clone.entity.entity) ?  clone.entity.entity : clone.entity || {};
     this.contentType=clone.contentType || this.contentType;
     this.permissions=clone.permissions || this.permissions;
     this.version=clone.version || this.version;
@@ -9093,19 +9107,19 @@ ozpIwc.DataApiValue.prototype.deserialize=function(serverData) {
      * @property _links
      * @type Object
      */
-    this._links = clone.entity._links || this._links;
+    this._links = (clone.entity && clone.entity._links) ?  clone.entity._links : clone._links || this._links;
 
     /**
      * @property key
      * @type String
      */
-    this.key = clone.entity.key || this.key;
+    this.key = (clone.entity && clone.entity.key) ?  clone.entity.key : clone.key || this.key;
 
     /**
      * @property self
      * @type Object
      */
-    this.self=clone.self || this.self;
+    this.self= (clone.self) ?  clone.self : this.self;
 
 };
 
@@ -9155,7 +9169,7 @@ ozpIwc.IntentsApi = ozpIwc.util.extend(ozpIwc.CommonApiBase, function (config) {
     this.addDynamicNode(new ozpIwc.CommonApiCollectionValue({
         resource: "/ozpIntents/invocations",
         pattern: /^\/ozpIntents\/invocations\/.*$/,
-        contentType: "application/ozpIwc-application-list-v1+json"
+        contentType: "application/vnd.ozp-iwc-intent-invocation-list-v1+json"
     }));
 });
 
@@ -9356,7 +9370,7 @@ ozpIwc.IntentsApi.prototype.handleInvoke = function (node, packetContext) {
  * @param packetContext
  */
 ozpIwc.IntentsApi.prototype.handleSet = function (node, packetContext) {
-    if(packetContext.packet.contentType === "application/vnd.ozp-iwc-intent-in-flight-v1+json"){
+    if(packetContext.packet.contentType === "application/vnd.ozp-iwc-intent-invocation-v1+json"){
 
         var badActionResponse = {
             'response': 'badAction',
@@ -9627,7 +9641,7 @@ ozpIwc.IntentsApi.prototype.handleInFlightComplete = function (node, packetConte
  */
 
 /**
- * The capability value for an intent. adheres to the ozpIwc-intents-type-capabilities-v1+json content type.
+ * The capability value for an intent. adheres to the application/vnd.ozp-iwc-intent-definition-v1+json content type.
  * @class IntentsApiDefinitionValue
  * @namespace ozpIwc
  * @extends ozpIwc.CommonApiValue
@@ -9639,8 +9653,8 @@ ozpIwc.IntentsApi.prototype.handleInFlightComplete = function (node, packetConte
  */
 ozpIwc.IntentsApiDefinitionValue = ozpIwc.util.extend(ozpIwc.CommonApiValue, function (config) {
     config=config || {};
-    config.allowedContentTypes=["application/ozpIwc-intents-definition-v1+json"];
-    config.contentType="application/ozpIwc-intents-definition-v1+json";
+    config.allowedContentTypes=["application/vnd.ozp-iwc-intent-definition-v1+json"];
+    config.contentType="application/vnd.ozp-iwc-intent-definition-v1+json";
     ozpIwc.CommonApiValue.call(this, config);
 
     /**
@@ -9707,8 +9721,8 @@ ozpIwc.IntentsApiDefinitionValue.prototype.getHandlers=function(packetContext) {
  */
 ozpIwc.IntentsApiHandlerValue = ozpIwc.util.extend(ozpIwc.CommonApiValue, function (config) {
     config=config || {};
-    config.allowedContentTypes=["application/ozpIwc-intents-handler-v1+json"];
-    config.contentType="application/ozpIwc-intents-handler-v1+json";
+    config.allowedContentTypes=["application/vnd.ozp-iwc-intent-handler-v1+json"];
+    config.contentType="application/vnd.ozp-iwc-intent-handler-v1+json";
     ozpIwc.CommonApiValue.apply(this, arguments);
     this.entity={
         type: config.intentType,
@@ -9743,18 +9757,6 @@ ozpIwc.IntentsApiHandlerValue.prototype.set=function(packet) {
 };
 
 /**
- * Deserializes a Intents Api handler value from a packet and constructs this Intents Api handler value.
- *
- * @param {ozpIwc.TransportPacket} serverData
- */
-ozpIwc.IntentsApiHandlerValue.prototype.deserialize=function(serverData) {
-    this.entity=serverData.entity;
-    this.contentType=serverData.contentType || this.contentType;
-    this.permissions=serverData.permissions || this.permissions;
-    this.version=serverData.version || this.version;
-};
-
-/**
  * @submodule bus.api.Value
  */
 
@@ -9771,7 +9773,7 @@ ozpIwc.IntentsApiHandlerValue.prototype.deserialize=function(serverData) {
  */
 ozpIwc.IntentsApiInFlightIntent = ozpIwc.util.extend(ozpIwc.CommonApiValue, function (config) {
     config=config || {};
-    config.contentType="application/vnd.ozp-iwc-intent-in-flight-v1+json";
+    config.contentType="application/vnd.ozp-iwc-intent-invocation-v1+json";
     config.allowedContentTypes=[config.contentType];
 
     ozpIwc.CommonApiValue.apply(this, arguments);
@@ -9812,7 +9814,7 @@ ozpIwc.IntentsApiInFlightIntent.prototype.acceptedStates = ["new","choosing","de
  */
 
 /**
- * The capability value for an intent. adheres to the ozpIwc-intents-type-capabilities-v1+json content type.
+ * The capability value for an intent. adheres to the application/vnd.ozp-iwc-intent-type-v1+json content type.
  * @class IntentsApiTypeValue
  * @namespace ozpIwc
  * @extends ozpIwc.CommonApiValue
@@ -9824,8 +9826,8 @@ ozpIwc.IntentsApiInFlightIntent.prototype.acceptedStates = ["new","choosing","de
  */
 ozpIwc.IntentsApiTypeValue = ozpIwc.util.extend(ozpIwc.CommonApiValue, function (config) {
     config=config || {};
-    config.allowedContentTypes=["application/ozpIwc-intents-contentType-v1+json"];
-    config.contentType="application/ozpIwc-intents-contentType-v1+json";
+    config.allowedContentTypes=["application/vnd.ozp-iwc-intent-type-v1+json"];
+    config.contentType="application/vnd.ozp-iwc-intent-type-v1+json";
 
     ozpIwc.CommonApiValue.apply(this, arguments);
 
@@ -9883,9 +9885,24 @@ ozpIwc.IntentsApiTypeValue.prototype.updateContent=function(changedNodes) {
  *
  * @type {Function}
  */
-ozpIwc.NamesApi = ozpIwc.util.extend(ozpIwc.CommonApiBase, function() {
+ozpIwc.NamesApi = ozpIwc.util.extend(ozpIwc.CommonApiBase, function(config) {
     ozpIwc.CommonApiBase.apply(this, arguments);
 
+    /**
+     * How often a heartbeat message should occur.
+     * @property heartbeatFrequency
+     * @type {Number}
+     * @default 10000
+     */
+    this.heartbeatFrequency = config.heartbeatFrequency || 10000;
+
+    /**
+     * The amount of heartbeats to drop an unresponsive participant after
+     * @property heartbeatDropCount
+     * @type {number|*}
+     * @default 3
+     */
+    this.heartbeatDropCount = config.heartbeatDropCount || 3;
     // map the alias "/me" to "/address/{packet.src}" upon receiving the packet
     this.on("receive", function (packetContext) {
         var packet = packetContext.packet;
@@ -9897,54 +9914,75 @@ ozpIwc.NamesApi = ozpIwc.util.extend(ozpIwc.CommonApiBase, function() {
     this.addDynamicNode(new ozpIwc.CommonApiCollectionValue({
         resource: "/address",
         pattern: /^\/address\/.*$/,
-        contentType: "application/ozpIwc-address-v1+json"
+        contentType: "application/vnd.ozp-iwc-address-list-v1+json"
     }));
     this.addDynamicNode(new ozpIwc.CommonApiCollectionValue({
         resource: "/multicast",
         pattern: /^\/multicast\/.*$/,
-        contentType: "application/ozpIwc-multicast-address-v1+json"
+        contentType: "application/vnd.ozp-iwc-multicast-list-v1+json"
     }));
     this.addDynamicNode(new ozpIwc.CommonApiCollectionValue({
         resource: "/router",
         pattern: /^\/router\/.*$/,
-        contentType: "application/ozpIwc-router-v1+json"
+        contentType: "application/vnd.ozp-iwc-router-list-v1+json"
     }));
     this.addDynamicNode(new ozpIwc.CommonApiCollectionValue({
         resource: "/api",
         pattern: /^\/api\/.*$/,
-        contentType: "application/ozpIwc-api-descriptor-v1+json"
+        contentType: "application/vnd.ozp-iwc-api-list-v1+json"
     }));
     //temporary injector code. Remove when api loader is implemented
     var packet = {
         resource: '/api/data.api',
         entity: {'actions': ['get', 'set', 'delete', 'watch', 'unwatch', 'addChild', 'removeChild']},
-        contentType: 'application/ozpIwc-api-descriptor-v1+json'
+        contentType: 'application/vnd.ozp-iwc-api-v1+json'
     };
     var node=this.findOrMakeValue(packet);
     node.set(packet);
     packet = {
         resource: '/api/intents.api',
         entity: {'actions': ['get','set','delete','watch','unwatch','register','unregister','invoke']},
-        contentType: 'application/ozpIwc-api-descriptor-v1+json'
+        contentType: 'application/vnd.ozp-iwc-api-v1+json'
     };
     node=this.findOrMakeValue(packet);
     node.set(packet);
     packet = {
         resource: '/api/names.api',
         entity: {'actions': ['get','set','delete','watch','unwatch']},
-        contentType: 'application/ozpIwc-api-descriptor-v1+json'
+        contentType: 'application/vnd.ozp-iwc-api-v1+json'
     };
     node=this.findOrMakeValue(packet);
     node.set(packet);
     packet = {
         resource: '/api/system.api',
         entity: { 'actions': ['get','set','delete','watch','unwatch']},
-        contentType: 'application/ozpIwc-api-descriptor-v1+json'
+        contentType: 'application/vnd.ozp-iwc-api-v1+json'
     };
     node=this.findOrMakeValue(packet);
     node.set(packet);
+    var self = this;
+    setInterval(function(){
+        self.removeDeadNodes();
+    },this.heartbeatFrequency);
 });
 
+ozpIwc.NamesApi.prototype.removeDeadNodes = function(){
+    for(var key in this.data){
+        var node = this.data[key];
+        if(this.dynamicNodes.indexOf(key) < 0 && node.entity && node.entity.time) {
+            if ((ozpIwc.util.now() - node.entity.time) > this.heartbeatFrequency * this.heartbeatDropCount) {
+                var snapshot = node.snapshot();
+                node.deleteData;
+                this.notifyWatchers(node, node.changesSince(snapshot));
+                delete this.data[key];
+                // update all the collection values
+                this.dynamicNodes.forEach(function(resource) {
+                    this.updateDynamicNode(this.data[resource]);
+                },this);
+            }
+        }
+    }
+};
 /**
  * Checks that the given packet context's resource meets the requirements of the api. Throws exception if fails
  * validation
@@ -9976,10 +10014,10 @@ ozpIwc.NamesApi.prototype.makeValue = function(packet) {
     
     // only handle the root elements for now...
     switch(path[1]) {
-        case "api": config.allowedContentTypes=["application/ozpIwc-api-descriptor-v1+json"]; break;
-        case "address": config.allowedContentTypes=["application/ozpIwc-address-v1+json"]; break;
-        case "multicast": config.allowedContentTypes=["application/ozpIwc-multicast-address-v1+json"]; break;
-        case "router": config.allowedContentTypes=["application/ozpIwc-router-v1+json"]; break;
+        case "api": config.allowedContentTypes=["application/vnd.ozp-iwc-api-v1+json"]; break;
+        case "address": config.allowedContentTypes=["application/vnd.ozp-iwc-address-v1+json"]; break;
+        case "multicast": config.allowedContentTypes=["application/vnd.ozp-iwc-multicast-address-v1+json"]; break;
+        case "router": config.allowedContentTypes=["application/vnd.ozp-iwc-router-v1+json"]; break;
 
         default:
             throw new ozpIwc.ApiError("badResource","Not a valid path of names.api: " + path[1] + " in " + packet.resource);
@@ -10051,7 +10089,7 @@ ozpIwc.SystemApi = ozpIwc.util.extend(ozpIwc.CommonApiBase,function(config) {
     this.addDynamicNode(new ozpIwc.CommonApiCollectionValue({
         resource: "/application",
         pattern: /^\/application\/.*$/,
-        contentType: "application/ozpIwc-application-list-v1+json"
+        contentType: "application/vnd.ozp-iwc-application-list-v1+json"
     }));
 
     this.on("changedNode",this.updateIntents,this);
@@ -10126,7 +10164,7 @@ ozpIwc.SystemApi.prototype.updateIntents=function(node,changes) {
             'src' : "system.api",
             'action': "set",
             'resource': "/"+i.type+"/"+i.action+"/system.api"+node.resource.replace(/\//g,'.'),
-            'contentType': "application/ozpIwc-intents-handler-v1+json",
+            'contentType': "application/vnd.ozp-iwc-intent-handler-v1+json",
             'entity': {
                 'type': i.type,
                 'action': i.action,
@@ -10151,44 +10189,44 @@ ozpIwc.SystemApi.prototype.updateIntents=function(node,changes) {
  * @returns {ozpIwc.SystemApiMailboxValue|ozpIwc.SystemApiApplicationValue}
  */
 ozpIwc.SystemApi.prototype.makeValue = function(packet){
-    if(packet.resource.indexOf("/mailbox") === 0) {
-        return new ozpIwc.SystemApiMailboxValue({
-            resource: packet.resource,
-            entity: packet.entity,
-            contentType: packet.contentType
-        });
+    switch (packet.contentType){
+        case "application/vnd.ozp-application-v1+json":
+            var launchDefinition = "/system"+packet.resource;
+            packet.entity.launchDefinition = packet.entity.launchDefinition || launchDefinition;
+
+            var app =  new ozpIwc.SystemApiApplicationValue({
+                resource: packet.resource,
+                entity: packet.entity,
+                contentType: packet.contentType,
+                systemApi: this
+            });
+
+            this.participant.send({
+                dst: "intents.api",
+                action: "register",
+                contentType: "application/vnd.ozp-iwc-intent-handler-v1+json",
+                resource:launchDefinition,
+                entity: {
+                    icon:  (packet.entity.icons && packet.entity.icons.small)  ? packet.entity.icons.small : "" ,
+                    label: packet.entity.name || "",
+                    contentType: "application/json",
+                    invokeIntent:{
+                        dst: "system.api",
+                        action: "invoke",
+                        resource: packet.resource
+                    }
+                }
+            },function(response,done){
+                app.entity.launchResource = response.entity.resource;
+                done();
+            });
+
+            return app;
+        default:
+            var app = new ozpIwc.CommonApiValue(packet);
+            return app;
     }
-    var launchDefinition = "/system"+packet.resource;
-    packet.entity.launchDefinition = packet.entity.launchDefinition || launchDefinition;
 
-    var app =  new ozpIwc.SystemApiApplicationValue({
-        resource: packet.resource,
-        entity: packet.entity,
-        contentType: packet.contentType,
-        systemApi: this
-    });
-
-    this.participant.send({
-        dst: "intents.api",
-        action: "register",
-        contentType: "application/ozpIwc-intents-handler-v1+json",
-        resource:launchDefinition,
-        entity: {
-            icon:  (packet.entity.icons && packet.entity.icons.small)  ? packet.entity.icons.small : "" ,
-            label: packet.entity.name || "",
-            contentType: "application/json",
-            invokeIntent:{
-                dst: "system.api",
-                action: "invoke",
-                resource: packet.resource
-            }
-        }
-    },function(response,done){
-        app.entity.launchResource = response.entity.resource;
-        done();
-    });
-
-    return app;
 };
 
 /**
@@ -10217,7 +10255,7 @@ ozpIwc.SystemApi.prototype.handleLaunch = function(node,packetContext) {
 
     this.participant.send({
         dst: "intents.api",
-        contentType: "application/ozpIwc-intents-handler-v1+json",
+        contentType: "application/vnd.ozp-iwc-intent-handler-v1+json",
         action: "invoke",
         resource: node.entity.launchResource,
         entity: packetContext.packet.entity
@@ -10282,20 +10320,6 @@ ozpIwc.SystemApiApplicationValue = ozpIwc.util.extend(ozpIwc.CommonApiValue,func
 });
 
 /**
- * Deserializes a packet to set this System Api Application value
- *
- * @method deserialize
- * @param serverData
- */
-ozpIwc.SystemApiApplicationValue.prototype.deserialize=function(serverData) {
-    this.entity=serverData.entity;
-    this.contentType=serverData.contentType || this.contentType;
-	this.permissions=serverData.permissions || this.permissions;
-	this.version=serverData.version || ++this.version;
-};
-
-
-/**
  * Returns the intents registered to this value.
  *
  * @method getIntentsRegistrations
@@ -10304,20 +10328,4 @@ ozpIwc.SystemApiApplicationValue.prototype.deserialize=function(serverData) {
 ozpIwc.SystemApiApplicationValue.prototype.getIntentsRegistrations=function() {
     return this.entity.intents;
 };
-/**
- * @submodule bus.api.Value
- */
-
-/**
- * @class SystemApiMailboxValue
- * @namespace ozpIwc
- * @extends ozpIwc.CommonApiValue
- * @constructor
- *
- * @type {Function}
- * @param {Object} config
- */
-ozpIwc.SystemApiMailboxValue = ozpIwc.util.extend(ozpIwc.CommonApiValue,function(config) {
-    ozpIwc.CommonApiValue.apply(this,arguments);
-});
 //# sourceMappingURL=ozpIwc-bus.js.map

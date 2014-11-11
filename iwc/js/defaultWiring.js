@@ -13,7 +13,12 @@ ozpIwc.defaultLocalStorageLink=new ozpIwc.KeyBroadcastLocalStorageLink({
 
 ozpIwc.authorization=new ozpIwc.BasicAuthorization();
 
-ozpIwc.defaultRouter=new ozpIwc.Router({peer:ozpIwc.defaultPeer});
+ozpIwc.heartBeatFrequency= 10000; // 10 seconds
+ozpIwc.defaultRouter=new ozpIwc.Router({
+    peer:ozpIwc.defaultPeer,
+    heartbeatFrequency: ozpIwc.heartBeatFrequency
+});
+
 
 if(typeof ozpIwc.runApis === "undefined" || ozpIwc.runApis) {
     ozpIwc.defaultLeadershipStates = function(){
@@ -29,7 +34,9 @@ if(typeof ozpIwc.runApis === "undefined" || ozpIwc.runApis) {
 
 
     ozpIwc.namesApi=new ozpIwc.NamesApi({
-        'participant': new ozpIwc.LeaderGroupParticipant({'name': "names.api", 'states':  ozpIwc.defaultLeadershipStates()})
+        'participant': new ozpIwc.LeaderGroupParticipant({'name': "names.api", 'states':  ozpIwc.defaultLeadershipStates()}),
+        'heartbeatDropCount': 3,
+        'heartbeatFrequency': ozpIwc.heartBeatFrequency
     });
     ozpIwc.defaultRouter.registerParticipant(ozpIwc.namesApi.participant);
 
