@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html ng-app="ozpIwc.debugger">
+    <head>
+        <title>OZP IWC Debugger</title>
+        <link rel="stylesheet" type="text/css" href="debugger/css/debugger.css">
+        <link rel="stylesheet" href="debugger/bootstrap-3.1.1/css/bootstrap.min.css">
+
+        <script type="text/javascript">
+            var ozpIwc=ozpIwc || {};
+            ozpIwc.defaultLeaderPriority = 1000;
+            ozpIwc.apiRootUrl="../../api";
+        </script>
+        <script src="js/ozpIwc-bus.js"></script>
+
+        <script src="js/defaultWiring.js"></script>
+
+        <script src="debugger/js/jquery-2.1.0.min.js"></script>
+        <script src="debugger/bootstrap-3.1.1/js/bootstrap.min.js"></script>
+
+        <script src="debugger/js/angular.js"></script>
+        <script src="debugger/js/angular-route.js"></script>
+        <script src="debugger/js/ui-bootstrap-tpls.js"></script>
+
+        <script src="debugger/js/debugger.js"></script>
+    </head>
+    <body ng-controller="debuggerController">
+
+    <tabset>
+        <tab heading="Traffic Snooper" ng-controller="packetLogController">
+            <div class="btn-group">
+                <button class="btn" ng-class="{true:'btn-danger',false:'btn-primary'}[logging]" 
+                     btn-checkbox ng-model="$parent.logging"
+                     tooltip-placement="bottom" tooltip="Start/Stop packet capture.">
+                    Capture({{packets.length}}) 
+                </button>           
+                <button class="btn btn-primary" ng-disabled="$parent.packets.length === 0" 
+                        ng-click="$parent.packets=[]"
+                        tooltip-placement="bottom" tooltip="Clear captured packets.">
+                    Clear
+                </button>
+
+            </div>
+
+            <select ng-model="$parent.maxShown" tooltip-placement="bottom" 
+                    tooltip="Number of packets to display.  Higher numbers may reduce browser performance in high packets/second situations.">
+                <option value="50">50 Packets</option>
+                <option value="100">100 Packets</option>
+                <option value="150">150 Packets</option>
+                <option value="200">200 Packets</option>
+            </select>
+            <input ng-model="$parent.viewFilter" type="text" size="40"
+                   placeholder="filter packets..."
+                   tooltip-placement="bottom" tooltip="Search packets for text.">
+            </input>
+            <table class="hidden-rows">
+                <thead><tr>
+                        <td class="dateString">Time</td>
+                        <td class="srcPeer">Src Peer</td>
+                        <td class="sequence">Sequence</td>
+                        <td class="dst">Destination</td>
+                        <td class="src">Source</td>
+                        <td class="msgId">Message ID</td>
+                        <td class="replyTo">Reply To</td>
+                        <td class="action">Action</td>
+                        <td class="response">Response</td>
+                        <td class="resource">Resource</td>
+                        <td class="contentType">Content Type</td>
+                    </tr></thead><tbody>
+                    <tr ng-repeat-start="packet in packets | filter:viewFilter | limitTo:-maxShown" ng-click="isExpanded = !isExpanded">
+                        <td class="dateString">{{packet.data.time | date:'yyyy-MM-dd HH:mm:ss.sss'}}</td>
+                        <td class="srcPeer">{{packet.srcPeer}}</td>
+                        <td class="sequence">{{packet.sequence}}</td>
+                        <td class="dst">{{packet.data.dst}}</td>
+                        <td class="src">{{packet.data.src}}</td>
+                        <td class="msgId">{{packet.data.msgId}}</td>
+                        <td class="replyTo">{{packet.data.replyTo}}</td>
+                        <td class="action">{{packet.data.action}}</td>
+                        <td class="response">{{packet.data.response}}</td>
+                        <td class="resource">{{packet.data.resource}}</td>
+                        <td class="contentType">{{packet.data.contentType}}</td>
+                    </tr>
+                    <tr ng-repeat-end >
+                        <td colspan="10" ><pre collapse="!isExpanded">{{ packet | json }} </pre></td>
+                    </tr>
+                </tbody></table>
+        </tab>
+        <tab heading="Metrics" ng-controller="metricsController" active="tabActive">
+            <div class="btn-group">
+                 <button class="btn btn-primary" ng-click="refresh()">Refresh</button>  
+                <button class="btn" ng-class="{true:'btn-danger',false:'btn-primary'}[updateActive]" 
+                     btn-checkbox ng-model="$parent.updateActive"
+                     tooltip-placement="bottom" tooltip="Start/Stop continuous metrics updates.">
+                    Update Metrics
+                </button>
+            </div>
+
+            <select ng-model="$parent.updateFrequency" tooltip-placement="bottom" 
+                    tooltip="How often to update the metrics.">
+                <option value="1000">Every second</option>
+                <option value="2000">Every 2 seconds</option>
+                <option value="5000">Every 5 seconds</option>
+                <option value="15000">Every 15 seconds</option>
+            </select>
+            <input ng-model="$parent.viewFilter" type="text" size="40"
+                   placeholder="filter metrics..."
+                   tooltip-placement="bottom" tooltip="Search for metric...">
+            </input>
+            <table>
+                <thead>
+                    <tr>
+                        <td>Metric</td>
+                        <td>Unit</td>
+                        <td>Value</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="metric in metrics | orderBy:'name' | filter:viewFilter">
+                        <td>{{metric.name}}</td>
+                        <td>{{metric.unit}}</td>
+                        <td><pre>{{metric.value | json}}</pre></td>
+                    </tr>
+                </tbody>
+            </table>
+        </tab>
+        <tab heading="{{api.address}}" ng-repeat="api in apis" ng-controller="apiDisplayController">
+            <div class="btn-group">
+                <button class="btn btn-primary" ng-click="refresh()">Refresh</button>
+            </div>
+            Filter: <input ng-model="viewFilter" type="text" style="width:75%"></input>
+            <table class="table-striped">
+                <thead><tr>
+                        <td>Resource</td>
+                        <td>Content Type</td>
+                        <td>Permissions</td>
+                        <td>Entity</td>
+                        <td ng-show="api.hasChildren">Children</td>
+                    </tr></thead>
+                <tbody>
+                    <tr ng-repeat="key in keys | orderBy:'resource' | filter:viewFilter ">
+                        <td>
+
+                            <div class="btn-group btn-group-xs">
+                                <button class="btn"
+                                        ng-class="{true:'btn-danger',false:'btn-primary'}[key.isWatched]" 
+                                        btn-checkbox 
+                                        ng-model="key.isWatched" 
+                                        ng-change="watchKey(key)">
+
+                                    <span class="glyphicon glyphicon-eye-open"></span>
+                                </button>
+                                <button class="btn btn-primary" ng-click="loadKey(key)">
+                                    <span class="glyphicon glyphicon-refresh"></span>
+                                </button>
+
+
+                            </div>
+                            {{key.resource}}
+
+                        </td>
+                        <td>{{key.contentType}}</td>
+                        <td><pre>{{key.permissions | json}}</pre></td>
+                        <td><pre>{{ key.entity | json }}</pre></td>
+                        <td ng-show="api.hasChildren"><pre>{{ key.children | json}}</pre></td>
+                    </tr>
+                </tbody>
+            </table>
+        </tab>
+        <tab heading="Debugger Address: {{client.address}}" disabled="true"></tab>
+    </tabset>
+</body>
+</html>
