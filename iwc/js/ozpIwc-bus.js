@@ -3405,7 +3405,7 @@ ozpIwc.util.ajax = function (config) {
     return new Promise(function(resolve,reject) {
         var request = new XMLHttpRequest();
         request.withCredentials = config.withCredentials;
-        request.open(config.method, config.href, true, config.user, config.password);
+        request.open(config.method, config.href, true);
 //        request.setRequestHeader("Content-Type", "application/json");
         if (Array.isArray(config.headers)) {
             config.headers.forEach(function(header) {
@@ -3439,11 +3439,15 @@ ozpIwc.util.ajax = function (config) {
             reject(this);
         };
 
-        if((config.method === "POST") || (config.method === "PUT")) {
-            request.send(config.data);
-        }
-        else {
-            request.send();
+        try {
+            if ((config.method === "POST") || (config.method === "PUT")) {
+                request.send(config.data);
+            }
+            else {
+                request.send();
+            }
+        } catch (e) {
+            reject(e);
         }
     });
 };
