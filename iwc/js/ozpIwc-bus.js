@@ -3404,16 +3404,18 @@ ozpIwc.util=ozpIwc.util || {};
 ozpIwc.util.ajax = function (config) {
     return new Promise(function(resolve,reject) {
         var request = new XMLHttpRequest();
-        request.withCredentials = config.withCredentials;
-        request.open(config.method, config.href, true, config.user, config.password);
-//        request.setRequestHeader("Content-Type", "application/json");
+        request.open(config.method, config.href, true);
         if (Array.isArray(config.headers)) {
             config.headers.forEach(function(header) {
                 request.setRequestHeader(header.name, header.value);
             });
         }
-        //Setting username and password as params to open() per the API does not work. setting them
-        //explicitly in the Authorization header works (but only for BASIC authentication)
+        /*
+        * Setting username and password as params to open() (and setting request.withCredentials = true)
+        * per the API does not work in FF. setting them explicitly in the Authorization header works
+        * (but only for BASIC authentication as coded here). If the credentials are set in the open command,
+        * FF will fail to make the request, even though the credentials are manually set in the Authorization header
+        * */
         request.setRequestHeader("Authorization", "Basic " + btoa(config.user + ":" + config.password));
 
         request.onload = function () {
@@ -3439,11 +3441,15 @@ ozpIwc.util.ajax = function (config) {
             reject(this);
         };
 
-        if((config.method === "POST") || (config.method === "PUT")) {
-            request.send(config.data);
-        }
-        else {
-            request.send();
+        try {
+            if ((config.method === "POST") || (config.method === "PUT")) {
+                request.send(config.data);
+            }
+            else {
+                request.send();
+            }
+        } catch (e) {
+            reject(e);
         }
     });
 };
@@ -7440,6 +7446,7 @@ ozpIwc.CommonApiValue.prototype.updateContent=function(changedNodes) {
  * @param {ozpIwc.TransportPacket} serverData
  */
 ozpIwc.CommonApiValue.prototype.deserialize=function(serverData) {
+    this.entity = this.entity || {};
     for(var i in serverData.entity){
             this.entity[i] = serverData.entity[i];
     }
@@ -7477,6 +7484,7 @@ ozpIwc.CommonApiCollectionValue = ozpIwc.util.extend(ozpIwc.CommonApiValue,funct
      * @default ''
      */
     this.pattern=config.pattern || '';
+    this.pattern.toJSON = RegExp.prototype.toString;
     this.entity=[];
 });
 
@@ -7522,6 +7530,7 @@ ozpIwc.CommonApiCollectionValue.prototype.deserialize=function(serverData) {
     this.contentType=serverData.contentType || this.contentType;
     this.permissions=serverData.permissions || this.permissions;
     this.pattern = new RegExp(serverData.pattern.replace(/^\/|\/$/g, '')) || this.pattern;
+    this.pattern.toJSON = RegExp.prototype.toString;
     this.persist=serverData.persist || this.persist;
     this.version=serverData.version || this.version;
     this.watchers = serverData.watchers || this.watchers;
@@ -8383,14 +8392,11 @@ ozpIwc.CommonApiBase.prototype.unloadState = function(){
     if(this.participant.activeStates.leader) {
 
         // temporarily change the primative to stringify our RegExp
-        var tempToJSON = RegExp.prototype.toJSON;
-        RegExp.prototype.toJSON = RegExp.prototype.toString;
         this.participant.sendElectionMessage("election",{state: {
             data: this.data,
             dynamicNodes: this.dynamicNodes
         }, previousLeader: this.participant.address});
 
-        RegExp.prototype.toJSON = tempToJSON;
         this.data = {};
     } else {
         this.participant.sendElectionMessage("election");

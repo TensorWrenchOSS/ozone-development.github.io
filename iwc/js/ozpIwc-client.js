@@ -2585,8 +2585,12 @@ ozpIwc.Client.prototype.disconnect=function() {
     this.replyCallbacks={};
     window.removeEventListener("message",this.postMessageHandler,false);
     if(this.iframe) {
-        document.body.removeChild(this.iframe);
-        this.iframe=null;
+        this.iframe.src = "about:blank";
+        var self = this;
+        window.setTimeout(function(){
+            document.body.removeChild(self.iframe);
+            self.iframe = null;
+        },0);
     }
 };
 
