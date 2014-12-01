@@ -3404,7 +3404,13 @@ ozpIwc.util=ozpIwc.util || {};
 ozpIwc.util.ajax = function (config) {
     return new Promise(function(resolve,reject) {
         var request = new XMLHttpRequest();
+<<<<<<< HEAD
         request.open(config.method, config.href, true);
+=======
+        request.withCredentials = config.withCredentials;
+        request.open(config.method, config.href, true);
+//        request.setRequestHeader("Content-Type", "application/json");
+>>>>>>> bfee1baba617b494069dcebcb2656e37f4e020a1
         if (Array.isArray(config.headers)) {
             config.headers.forEach(function(header) {
                 request.setRequestHeader(header.name, header.value);
