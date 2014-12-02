@@ -3,15 +3,14 @@
 <head>
     <title>Choose an Intent</title>
     <script type="text/javascript">
-        ozpIwc= {
-            runApis:false,
-            acceptPostMessageParticipants:false
-        };
-// Not used by the Intents Chooser
-        //ozpIwc.apiRootUrl = "api";
+        var ozpIwc = ozpIwc || {};
+        ozpIwc.apiRootUrl="https://www.owfgoss.org/ng/dev-alpha/mp/api";
+        ozpIwc.marketplaceUsername="testAdmin1";
+        ozpIwc.marketplacePassword="password";
+        ozpIwc.runApis=false;
+        ozpIwc.acceptPostMessageParticipants=false;
     </script>
     <script type="text/javascript" src="js/ozpIwc-bus.js"></script>
-    <script type="text/javascript" src="js/defaultWiring.js"></script>
     <style>
         .icon {
             height: 32px;

@@ -1,23 +1,28 @@
 {
     "_links": {
+        "curies": {
+            "href": "http://ozoneplatform.org/docs/rels/{rel}",
+            "name": "ozp",
+            "templated": true
+        },
         "self": { "href" : "/api" },
-        "data": { "href":"/api/data/v1/exampleUser"},
-        "intents": { "href":"/api/intents/v1"},
-        "applications": { "href":"/api/application/v1"},
-        "user": { "href":"/api/user/v1/exampleUser"},
-        "system": { "href":"/api/system/v1"}
+        "ozp:user-data": { "href":"/api/profile/v1/exampleUser/data"},
+        "ozp:intent": { "href":"/api/profile/v1/exampleUser/intent"},
+        "ozp:application": { "href":"/api/profile/v1/exampleUser/application"},
+        "ozp:user": { "href":"/api/profile/v1/exampleUser"},
+        "ozp:system": { "href":"/api/system/v1"}
     },
     "_embedded": {
-        "user": {
+        "ozp:user": {
             "name": "Jon Doe",
             "userName": "jon.doe",
             "_links" : {
-                "self": { "href":"/api/user/v1/exampleUser"}
+                "self": { "href":"/api/profile/v1/exampleUser"}
             }
         },
-        "system": {
+        "ozp:system": {
             "version": "1.0",
-            "name": "IWC Demo site",
+            "name": "IWC Mock Data",
             "_links" : {
                 "self": { "href":"/api/system/v1"}
             }

@@ -7,6 +7,6 @@
   "private": true,
   "dependencies": {
     "ozp-iwc": "ozone-development/ozp-iwc",
-    "ozp-data-schemas": "ozone-development/ozp-data-schemas"
+    "ozp-data-schemas": "ozone-development/ozp-data-schemas#master"
   }
 }

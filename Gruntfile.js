@@ -1,5 +1,9 @@
 module.exports = function(grunt) {
-
+  var iwcConfigOverides={
+        apiRootUrl:"https://www.owfgoss.org/ng/dev-alpha/mp/api",
+        marketplaceUsername:"testAdmin1",
+        marketplacePassword:"password"
+  };
   // Project configuration.
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
@@ -28,14 +32,28 @@ module.exports = function(grunt) {
         ]
       },
       iwc: {
-        files: [
-          {
-            src: ['**'],
+            src: ['**/*'],
             dest: 'iwc',
             expand: true,
-            cwd: 'bower_components/ozp-iwc/dist'
-          }
-        ]
+            cwd: 'bower_components/ozp-iwc/dist',
+            options: {
+                process: function(content,srcPath) {
+                    if(srcPath.match(/\.html/)) {
+                        console.log("Filtering " + srcPath);
+                        return content.replace(/ozpIwc\.(.*)=.*;/g,function(match,field) {
+                            if(field in iwcConfigOverides) {
+//                                console.log("   Setting " + field + " to " + iwcConfigOverides[field]);
+                                return "ozpIwc."+field+'="'+iwcConfigOverides[field]+'";';
+                            } else {
+//                                console.log("   Ignoring " + match);
+                                return match;
+                            }
+                        });
+                    }
+                    return content;
+                }
+            }
+        
       },
       duplicate_api: {
         files: [

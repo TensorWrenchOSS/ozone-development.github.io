@@ -2,26 +2,20 @@
 <html ng-app="ozpIwc.debugger">
     <head>
         <title>OZP IWC Debugger</title>
-        <link rel="stylesheet" type="text/css" href="debugger/css/debugger.css">
-        <link rel="stylesheet" href="debugger/bootstrap-3.1.1/css/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" href="css/debugger.css">
 
         <script type="text/javascript">
-            var ozpIwc=ozpIwc || {};
+            var ozpIwc = ozpIwc || {};
+            ozpIwc.apiRootUrl="https://www.owfgoss.org/ng/dev-alpha/mp/api";
+            ozpIwc.marketplaceUsername="testAdmin1";
+            ozpIwc.marketplacePassword="password";
+            ozpIwc.runApis=true;
+            ozpIwc.acceptPostMessageParticipants=false;
+            
+            // forces the debugger to be the API leaders
             ozpIwc.defaultLeaderPriority = 1000;
-            ozpIwc.apiRootUrl="../../api";
         </script>
-        <script src="js/ozpIwc-bus.js"></script>
-
-        <script src="js/defaultWiring.js"></script>
-
-        <script src="debugger/js/jquery-2.1.0.min.js"></script>
-        <script src="debugger/bootstrap-3.1.1/js/bootstrap.min.js"></script>
-
-        <script src="debugger/js/angular.js"></script>
-        <script src="debugger/js/angular-route.js"></script>
-        <script src="debugger/js/ui-bootstrap-tpls.js"></script>
-
-        <script src="debugger/js/debugger.js"></script>
+        <script src="js/debugger.js"></script>
     </head>
     <body ng-controller="debuggerController">
 
