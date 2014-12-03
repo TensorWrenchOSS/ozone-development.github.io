@@ -4102,8 +4102,8 @@ ozpIwc.util.ajax = function (config) {
          * */
 
         var protocol = getProtocol(config.href);
-        if (ozpIwc.config.basicAuthUsername && ozpIwc.config.basicAuthPassword && protocol === 'https:') {
-            request.setRequestHeader("Authorization", "Basic " + btoa(ozpIwc.config.basicAuthUsername + ":" + ozpIwc.config.basicAuthPassword));
+        if (ozpIwc.basicAuthUsername && ozpIwc.basicAuthPassword && protocol === 'https:') {
+            request.setRequestHeader("Authorization", "Basic " + btoa(ozpIwc.basicAuthUsername + ":" + ozpIwc.basicAuthPassword));
         }
 
         request.onload = function () {
@@ -9376,12 +9376,10 @@ ozpIwc.Endpoint=function(endpointRegistry) {
  */
 ozpIwc.Endpoint.prototype.get=function(resource, requestHeaders) {
     var self=this;
-
+    resource = resource || '';
     return this.endpointRegistry.loadPromise.then(function() {
-        if (resource === '/') {
+        if (resource === '/' || resource === '' ) {
             resource=self.baseUrl;
-        } else if(resource.indexOf(self.baseUrl)!==0) {
-            resource=self.baseUrl + resource;
         }
         return ozpIwc.util.ajax({
             href:  resource,
@@ -11240,9 +11238,8 @@ ozpIwc.SystemApiApplicationValue.prototype.getIntentsRegistrations=function() {
 var ozpIwc=ozpIwc || {};
 
 ozpIwc.apiRootUrl = ozpIwc.apiRootUrl || "/api";
-ozpIwc.config = ozpIwc.config || {};
-ozpIwc.config.basicAuthUsername= ozpIwc.config.basicAuthUsername || '';
-ozpIwc.config.basicAuthPassword= ozpIwc.config.basicAuthPassword || '';
+ozpIwc.basicAuthUsername= ozpIwc.basicAuthUsername || '';
+ozpIwc.basicAuthPassword= ozpIwc.basicAuthPassword || '';
 ozpIwc.linkRelPrefix = ozpIwc.linkRelPrefix || "ozp";
 ozpIwc.initEndpoints(ozpIwc.apiRootUrl);
 
