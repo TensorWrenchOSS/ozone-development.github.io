@@ -23,7 +23,9 @@
                 "contentType": "application/vnd.ozp-data-object-v1+json",
                 "key": "someResource",
                 "entity": {
-                    "some" : "data"
+                    "entity":{
+                        "some" : "data"
+                    }
                 }
             },
             {
@@ -32,7 +34,9 @@
                 },
                 "contentType": "application/vnd.ozp-data-object-v1+json",
                 "key": "pizza",
-                "entity": "pepperoni"
+                "entity": {
+                    "entity": "pepperoni"
+                }
             },
             {
                 "_links": {
@@ -40,7 +44,9 @@
                 },
                 "contentType": "application/vnd.ozp-data-object-v1+json",
                 "key": "theme",
-                "entity": "dark"
+                "entity": {
+                    "entity": "dark"
+                }
             },
             {
                 "_links": {
@@ -48,8 +54,9 @@
                 },
                 "contentType": "application/vnd.ozp-data-object-v1+json",
                 "key": "parent",
-                "entity": "",
-                "children": ["/parent/1234", "/parent/5678"]
+                "entity": {
+                    "children": ["/parent/1234", "/parent/5678"]
+                }
             },
             {
                 "_links": {
@@ -57,7 +64,9 @@
                 },
                 "contentType": "application/vnd.ozp-data-object-v1+json",
                 "key": "parent/1234",
-                "entity": "I am child 1234 of parent."
+                "entity": {
+                    "entity": "I am child 1234 of parent."
+                }
             },
             {
                 "_links": {
@@ -65,7 +74,9 @@
                 },
                 "contentType": "application/vnd.ozp-data-object-v1+json",
                 "key": "parent/5678",
-                "entity": "I am child 5678 of parent."
+                "entity": {
+                    "entity": "I am child 5678 of parent."
+                }
             }
         ]
     }

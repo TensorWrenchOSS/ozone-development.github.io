@@ -4095,12 +4095,16 @@ ozpIwc.util.ajax = function (config) {
             });
         }
         /*
-        * Setting username and password as params to open() (and setting request.withCredentials = true)
-        * per the API does not work in FF. setting them explicitly in the Authorization header works
-        * (but only for BASIC authentication as coded here). If the credentials are set in the open command,
-        * FF will fail to make the request, even though the credentials are manually set in the Authorization header
-        * */
-        request.setRequestHeader("Authorization", "Basic " + btoa(config.user + ":" + config.password));
+         * Setting username and password as params to open() (and setting request.withCredentials = true)
+         * per the API does not work in FF. setting them explicitly in the Authorization header works
+         * (but only for BASIC authentication as coded here). If the credentials are set in the open command,
+         * FF will fail to make the request, even though the credentials are manually set in the Authorization header
+         * */
+
+        var protocol = getProtocol(config.href);
+        if (ozpIwc.config.basicAuthUsername && ozpIwc.config.basicAuthPassword && protocol === 'https:') {
+            request.setRequestHeader("Authorization", "Basic " + btoa(ozpIwc.config.basicAuthUsername + ":" + ozpIwc.config.basicAuthPassword));
+        }
 
         request.onload = function () {
             try {
@@ -4156,6 +4160,19 @@ ozpIwc.util.ajaxResponseHeaderToJSON = function(header) {
     });
 
     return obj;
+};
+
+/**
+ * Returns the protocol of the URL
+ * @method getProtocol
+ * @param {String} url
+ *
+ * @returns {String}
+ */
+var getProtocol =function (url){
+    var a = document.createElement('a');
+    a.href = url;
+    return a.protocol;
 };
 
 /** @namespace */
@@ -8130,13 +8147,29 @@ ozpIwc.CommonApiValue.prototype.updateContent=function(changedNodes) {
  * @param {ozpIwc.TransportPacket} serverData
  */
 ozpIwc.CommonApiValue.prototype.deserialize=function(serverData) {
-    this.entity = this.entity || {};
-    for(var i in serverData.entity){
-            this.entity[i] = serverData.entity[i];
-    }
-    this.contentType=serverData.contentType || this.contentType;
-    this.permissions=serverData.permissions || this.permissions;
-    this.version=serverData.version || ++this.version;
+    var clone = ozpIwc.util.clone(serverData);
+// we need the persistent data to conform with the structure of non persistent data.
+    this.entity= clone.entity || {};
+    this.contentType=clone.contentType || this.contentType;
+    this.permissions=clone.permissions || this.permissions;
+    this.version=clone.version || this.version;
+    this.watchers = serverData.watchers || this.watchers;
+};
+
+/**
+ * Serializes a Common Api value to a packet.
+ *
+ * @method serialize
+ * @return {ozpIwc.TransportPacket}
+ */
+ozpIwc.CommonApiValue.prototype.serialize=function() {
+    var serverData = {};
+    serverData.entity=this.entity;
+    serverData.contentType=this.contentType;
+    serverData.permissions=this.permissions;
+    serverData.version=this.version;
+    serverData.watchers=this.watchers;
+    return serverData;
 };
 
 /**
@@ -8204,20 +8237,34 @@ ozpIwc.CommonApiCollectionValue.prototype.set=function() {
 };
 
 /**
- * Deserializes a Intents Api handler value from a packet and constructs this Intents Api handler value.
+ * Deserializes a Common Api Collection value from a packet.
  *
  * @method deserialize
  * @param {ozpIwc.TransportPacket} serverData
  */
 ozpIwc.CommonApiCollectionValue.prototype.deserialize=function(serverData) {
-    this.entity=serverData.entity || this.entity;
-    this.contentType=serverData.contentType || this.contentType;
-    this.permissions=serverData.permissions || this.permissions;
-    this.pattern = new RegExp(serverData.pattern.replace(/^\/|\/$/g, '')) || this.pattern;
+    ozpIwc.CommonApiValue.prototype.deserialize.apply(this,arguments);
+    var clone = ozpIwc.util.clone(serverData);
+
+    this.pattern = (typeof clone.pattern == "string") ? new RegExp(clone.pattern.replace(/^\/|\/$/g, '')) : this.pattern;
     this.pattern.toJSON = RegExp.prototype.toString;
-    this.persist=serverData.persist || this.persist;
-    this.version=serverData.version || this.version;
-    this.watchers = serverData.watchers || this.watchers;
+};
+
+/**
+ * Serializes a Common Api Collection value to a packet.
+ *
+ * @method serialize
+ * @return {ozpIwc.TransportPacket}
+*/
+ozpIwc.CommonApiCollectionValue.prototype.serialize=function() {
+    var serverData = {};
+    serverData.entity=this.entity;
+    serverData.pattern=this.pattern;
+    serverData.contentType=this.contentType;
+    serverData.permissions=this.permissions;
+    serverData.version=this.version;
+    serverData.watchers=this.watchers;
+    return serverData;
 };
 
 /**
@@ -8486,13 +8533,24 @@ ozpIwc.CommonApiBase.prototype.updateResourceFromServer=function(object,path,end
         var halLess = ozpIwc.util.clone(object);
         delete halLess._links;
         delete halLess._embedded;
-        node.deserialize({
-            entity: halLess
-        });
+        node.deserialize(this.formatServerData(halLess));
 
         this.notifyWatchers(node, node.changesSince(snapshot));
         this.loadLinkedObjectsFromServer(endpoint, object, res);
     }
+};
+
+/**
+ * A middleware function used to format server data to be deserialized into Api nodes
+ *
+ * @method formatServerData
+ * @param {Object} the data to format.
+ * @returns {{entity: object}}
+ */
+ozpIwc.CommonApiBase.prototype.formatServerData = function(object){
+    return {
+        entity: object
+    };
 };
 
 /**
@@ -8773,7 +8831,8 @@ ozpIwc.CommonApiBase.prototype.routePacket=function(packetContext) {
     }
 
     if(packet.response && !packet.action) {
-        ozpIwc.log.log(this.participant.name + " dropping response packet ",packet);
+        //TODO create a metric for this instead of logging to console
+        //ozpIwc.log.log(this.participant.name + " dropping response packet ",packet);
         // if it's a response packet that didn't wire an explicit handler, drop the sucker
         return;
     }
@@ -9075,9 +9134,12 @@ ozpIwc.CommonApiBase.prototype.handleUnwatch=function(node,packetContext) {
 ozpIwc.CommonApiBase.prototype.unloadState = function(){
     if(this.participant.activeStates.leader) {
 
-        // temporarily change the primative to stringify our RegExp
+        var serializedData = {};
+        for(var  i in this.data){
+            serializedData[i] = this.data[i].serialize();
+        }
         this.participant.sendElectionMessage("election",{state: {
-            data: this.data,
+            data: serializedData,
             dynamicNodes: this.dynamicNodes
         }, previousLeader: this.participant.address});
 
@@ -9098,16 +9160,19 @@ ozpIwc.CommonApiBase.prototype.setState = function(state) {
     this.data = {};
     this.dynamicNodes = state.dynamicNodes;
     for (var key in state.data) {
-        var dynIndex = this.dynamicNodes.indexOf(state.data[key].resource);
+        var dynIndex = this.dynamicNodes.indexOf(key);
         var node;
         if(dynIndex > -1){
-             node = this.data[state.data[key].resource] = new ozpIwc.CommonApiCollectionValue({
-                resource: state.data[key].resource
+             node = this.data[key] = new ozpIwc.CommonApiCollectionValue({
+                resource: key
             });
             node.deserialize(state.data[key]);
             this.updateDynamicNode(node);
         } else {
-            node = this.findOrMakeValue(state.data[key]);
+            node = this.findOrMakeValue({
+                resource: key,
+                contentType: state.data[key].contentType
+            });
             node.deserialize(state.data[key]);
         }
     }
@@ -9314,15 +9379,14 @@ ozpIwc.Endpoint.prototype.get=function(resource, requestHeaders) {
 
     return this.endpointRegistry.loadPromise.then(function() {
         if (resource === '/') {
-            resource = self.baseUrl;
+            resource=self.baseUrl;
+        } else if(resource.indexOf(self.baseUrl)!==0) {
+            resource=self.baseUrl + resource;
         }
         return ozpIwc.util.ajax({
             href:  resource,
             method: 'GET',
-            headers: requestHeaders,
-            withCredentials: true,
-            user: ozpIwc.marketplaceUsername,
-            password: ozpIwc.marketplacePassword
+            headers: requestHeaders
         });
     });
 };
@@ -9352,9 +9416,6 @@ ozpIwc.Endpoint.prototype.put=function(resource, data, requestHeaders) {
             method: 'PUT',
 			data: data,
             headers: requestHeaders,
-            withCredentials: true,
-            user: ozpIwc.marketplaceUsername,
-            password: ozpIwc.marketplacePassword
         });
     });
 };
@@ -9385,10 +9446,7 @@ ozpIwc.Endpoint.prototype.delete=function(resource, data, requestHeaders) {
         return ozpIwc.util.ajax({
             href:  resource,
             method: 'DELETE',
-            headers: requestHeaders,
-            withCredentials: true,
-            user: ozpIwc.marketplaceUsername,
-            password: ozpIwc.marketplacePassword
+            headers: requestHeaders
         });
     });
 };
@@ -9444,12 +9502,12 @@ ozpIwc.EndpointRegistry=function(config) {
      */
     this.loadPromise=ozpIwc.util.ajax({
         href: apiRoot,
-        method: 'GET',
-        withCredentials: true,
-        user: ozpIwc.marketplaceUsername,
-        password: ozpIwc.marketplacePassword
+        method: 'GET'
     }).then(function(data) {
-        var payload = data.response;
+        var payload = data.response || {};
+        payload._links = payload._links || {};
+        payload._embedded = payload._embedded || {};
+
         for (var linkEp in payload._links) {
             if (linkEp !== 'self') {
                 var link = payload._links[linkEp].href;
@@ -9539,6 +9597,16 @@ ozpIwc.DataApi.prototype.makeValue = function(packet){
 };
 
 /**
+ * A middleware function used to format server data to be deserialized into Api nodes
+ *
+ * @method formatServerData
+ * @param object
+ * @returns {{object}}
+ */
+ozpIwc.DataApi.prototype.formatServerData = function(object){
+    return object.entity;
+};
+/**
  * Creates a child node of a given Data Api node. The child's key will be automatically generated based on its
  * parents key.
  *
@@ -9601,6 +9669,9 @@ ozpIwc.DataApi.prototype.handleList=function(node,packetContext) {
  */
 ozpIwc.DataApi.prototype.handleAddchild=function(node,packetContext) {
     var childNode=this.createChild(node,packetContext);
+    if (childNode && childNode.entity && childNode.entity.persist) {
+        this.persistNode(childNode);
+    }
 
     node.addChild(childNode.resource);
 
@@ -9635,6 +9706,11 @@ ozpIwc.DataApi.prototype.handleRemovechild=function(node,packetContext) {
     if (node && packetContext.packet.entity.persist) {
         this.persistNode(node);
     }
+    var childNode=this.findOrMakeValue(packetContext.packet.entity);
+    if (childNode && childNode.entity && childNode.entity.persist) {
+        this.deleteNode(childNode);
+    }
+
     // delegate to the handleGet call
     packetContext.replyTo({
         'response':'ok'
@@ -9664,8 +9740,8 @@ ozpIwc.DataApi.prototype.handleSet=function(node,packetContext) {
  * @method handleDelete
  * @param {ozpIwc.DataApiValue} node
  */
-ozpIwc.DataApi.prototype.handleDelete=function(node) {
-    if (node && node.persist) {
+ozpIwc.DataApi.prototype.handleDelete=function(node,packetContext) {
+    if (node.entity && node.entity.persist) {
         this.deleteNode(node);
     }
     ozpIwc.CommonApiBase.prototype.handleDelete.apply(this,arguments);
@@ -9679,7 +9755,12 @@ ozpIwc.DataApi.prototype.handleDelete=function(node) {
  */
 ozpIwc.DataApi.prototype.persistNode=function(node) {
     var endpointref= ozpIwc.endpoint(this.endpointUrl);
-    endpointref.put(node.resource, JSON.stringify(node.entity));
+    var persistNode = node.serialize();
+
+    //Watchers don't need persistence they are run time.
+    delete persistNode.watchers;
+
+    endpointref.put(node.resource, JSON.stringify(persistNode));
 };
 
 /**
@@ -9837,31 +9918,25 @@ ozpIwc.DataApiValue.prototype.changesSince=function(snapshot) {
  * @param {ozpIwc.TransportPacket} serverData
  */
 ozpIwc.DataApiValue.prototype.deserialize=function(serverData) {
+
+    ozpIwc.CommonApiValue.prototype.deserialize.apply(this,arguments);
     var clone = ozpIwc.util.clone(serverData);
-
-    // we need the persistent data to conform with the structure of non persistent data.
-    this.entity= (clone.entity && typeof clone.entity.entity !== "undefined") ?  clone.entity.entity : clone.entity || {};
-    this.contentType=clone.contentType || this.contentType;
-    this.permissions=clone.permissions || this.permissions;
-    this.version=clone.version || this.version;
-
-    /**
-     * @property _links
-     * @type Object
-     */
-    this._links = (clone.entity && clone.entity._links) ?  clone.entity._links : clone._links || this._links;
-
     /**
      * @property key
      * @type String
      */
-    this.key = (clone.entity && clone.entity.key) ?  clone.entity.key : clone.key || this.key;
+    this.key =  clone.key || this.key;
+    /**
+     * @property children
+     * @type String
+     */
+    this.children = clone.children || this.children;
 
     /**
      * @property self
      * @type Object
      */
-    this.self= (clone.self) ?  clone.self : this.self;
+    this.self= clone.self || this.self;
 
 };
 
@@ -9874,10 +9949,12 @@ ozpIwc.DataApiValue.prototype.deserialize=function(serverData) {
 ozpIwc.DataApiValue.prototype.serialize=function() {
 	var serverData = {};
 	serverData.entity=this.entity;
+    serverData.children = this.children;
 	serverData.contentType=this.contentType;
 	serverData.permissions=this.permissions;
 	serverData.version=this.version;
 	serverData.self=this.self;
+    serverData.watchers =this.watchers;
 	return serverData;
 };
 
@@ -10379,6 +10456,27 @@ ozpIwc.IntentsApi.prototype.handleInFlightComplete = function (node, packetConte
     });
 };
 /**
+ * Sets the APIs data property. Removes current values, then constructs each API value anew.
+ *
+ * @method setState
+ * @param {Object} state The object containing key value pairs to set as this api's state.
+ */
+ozpIwc.IntentsApi.prototype.setState = function(state) {
+    this.data = {};
+    this.dynamicNodes = state.dynamicNodes;
+    for (var key in state.data) {
+        var node = this.findOrMakeValue({
+            resource: key,
+            contentType: state.data[key].contentType
+        });
+        node.deserialize(state.data[key]);
+    }
+    // update all the collection values
+    this.dynamicNodes.forEach(function(resource) {
+        this.updateDynamicNode(this.data[resource]);
+    },this);
+};
+/**
  * @submodule bus.api.Value
  */
 
@@ -10404,6 +10502,7 @@ ozpIwc.IntentsApiDefinitionValue = ozpIwc.util.extend(ozpIwc.CommonApiValue, fun
      * @type RegExp
      */
     this.pattern=new RegExp(ozpIwc.util.escapeRegex(this.resource)+"/[^/]*");
+    this.pattern.toJSON = RegExp.prototype.toString;
     this.handlers=[];
     this.entity={
         type: config.intentType,
@@ -10447,6 +10546,45 @@ ozpIwc.IntentsApiDefinitionValue.prototype.updateContent=function(changedNodes) 
 ozpIwc.IntentsApiDefinitionValue.prototype.getHandlers=function(packetContext) {
     return this.handlers;
 };
+
+/**
+ * Handles deserializing an {{#crossLink "ozpIwc.TransportPacket"}}{{/crossLink}} and setting this value with
+ * the contents.
+ *
+ * @method deserialize
+ * @param {ozpIwc.TransportPacket} serverData
+ */
+ozpIwc.IntentsApiDefinitionValue.prototype.deserialize=function(serverData) {
+    var clone = ozpIwc.util.clone(serverData);
+// we need the persistent data to conform with the structure of non persistent data.
+    this.entity= clone.entity || {};
+
+    this.pattern = (typeof clone.pattern == "string") ? new RegExp(clone.pattern.replace(/^\/|\/$/g, '')) : this.pattern;
+    this.pattern.toJSON = RegExp.prototype.toString;
+
+    this.contentType=clone.contentType || this.contentType;
+    this.permissions=clone.permissions || this.permissions;
+    this.version=clone.version || this.version;
+    this.watchers = clone.watchers || this.watchers;
+};
+
+/**
+ * Serializes a Intent Api Definition value to a packet.
+ *
+ * @method serialize
+ * @return {ozpIwc.TransportPacket}
+ */
+ozpIwc.IntentsApiDefinitionValue.prototype.serialize=function() {
+    var serverData = {};
+    serverData.entity=this.entity;
+    serverData.pattern=this.pattern;
+    serverData.contentType=this.contentType;
+    serverData.permissions=this.permissions;
+    serverData.version=this.version;
+    serverData.watchers=this.watchers;
+    return serverData;
+};
+
 /**
  * @submodule bus.api.Value
  */
@@ -10578,6 +10716,7 @@ ozpIwc.IntentsApiTypeValue = ozpIwc.util.extend(ozpIwc.CommonApiValue, function 
      * @type RegExp
      */
     this.pattern=new RegExp(this.resource.replace("$","\\$").replace(".","\\.")+"\/[^/]*$");
+    this.pattern.toJSON = RegExp.prototype.toString;
     this.entity={
         'type': config.intentType,
         'actions': []
@@ -10607,6 +10746,28 @@ ozpIwc.IntentsApiTypeValue.prototype.updateContent=function(changedNodes) {
         return changedNode.resource; 
     });
 };
+
+/**
+ * Handles deserializing an {{#crossLink "ozpIwc.TransportPacket"}}{{/crossLink}} and setting this value with
+ * the contents.
+ *
+ * @method deserialize
+ * @param {ozpIwc.TransportPacket} serverData
+ */
+ozpIwc.IntentsApiTypeValue.prototype.deserialize=function(serverData) {
+    ozpIwc.IntentsApiDefinitionValue.prototype.deserialize.apply(this, arguments);
+};
+
+/**
+ * Serializes a Intents Api Type value to a packet.
+ *
+ * @method serialize
+ * @return {ozpIwc.TransportPacket}
+ */
+ozpIwc.IntentsApiTypeValue.prototype.serialize=function() {
+    return  ozpIwc.IntentsApiDefinitionValue.prototype.serialize.apply(this,arguments);
+};
+
 /**
  * @submodule bus.api.Type
  */
@@ -10929,6 +11090,7 @@ ozpIwc.SystemApi.prototype.makeValue = function(packet){
         switch (packet.contentType) {
             case "application/vnd.ozp-application-v1+json":
                 var launchDefinition = "/system" + packet.resource;
+                packet.entity = packet.entity || {};
                 packet.entity.launchDefinition = packet.entity.launchDefinition || launchDefinition;
 
                 var app = new ozpIwc.SystemApiApplicationValue({
@@ -10968,8 +11130,14 @@ ozpIwc.SystemApi.prototype.makeValue = function(packet){
  * Handles System api requests with an action of "set"
  * @method handleSet
  */
-ozpIwc.SystemApi.prototype.handleSet = function() {
-    throw new ozpIwc.ApiError("badAction", "Cannot modify the system API");
+ozpIwc.SystemApi.prototype.handleSet = function(node,packetContext) {
+    packetContext.replyTo({
+        'response': 'badAction',
+        'entity': {
+            'action': packetContext.packet.action,
+            'originalRequest' : packetContext.packet
+        }
+    });
 };
 
 /**
@@ -10977,8 +11145,14 @@ ozpIwc.SystemApi.prototype.handleSet = function() {
  *
  * @method handleDelete
  */
-ozpIwc.SystemApi.prototype.handleDelete = function() {
-    throw new ozpIwc.ApiError("badAction", "Cannot modify the system API");
+ozpIwc.SystemApi.prototype.handleDelete = function(node,packetContext) {
+    packetContext.replyTo({
+        'response': 'badAction',
+        'entity': {
+            'action': packetContext.packet.action,
+            'originalRequest' : packetContext.packet
+        }
+    });
 };
 
 /**
@@ -10995,7 +11169,7 @@ ozpIwc.SystemApi.prototype.handleLaunch = function(node,packetContext) {
         resource: node.entity.launchResource,
         entity: packetContext.packet.entity
     });
-    packetContext.replyTo({'action': "ok"});
+    packetContext.replyTo({'response': "ok"});
 };
 
 /**
@@ -11006,9 +11180,9 @@ ozpIwc.SystemApi.prototype.handleLaunch = function(node,packetContext) {
 ozpIwc.SystemApi.prototype.handleInvoke = function(node,packetContext) {
     if(packetContext.packet.entity && packetContext.packet.entity.inFlightIntent){
         this.launchApplication(node,packetContext.packet.entity.inFlightIntent);
-        packetContext.replyTo({'action': "ok"});
+        packetContext.replyTo({'response': "ok"});
     } else{
-        packetContext.replyTo({'action': "badResource"});
+        packetContext.replyTo({'response': "badResource"});
     }
 
 };
@@ -11026,7 +11200,7 @@ ozpIwc.SystemApi.prototype.launchApplication=function(node,intentResource) {
             "ozpIwc.inFlightIntent="+encodeURIComponent(intentResource)
     ];
 
-    ozpIwc.util.openWindow(node.entity._links.describes.href,launchParams.join("&"));
+    ozpIwc.util.openWindow(node.entity.launchUrls.default,launchParams.join("&"));
 };
 
 
@@ -11066,8 +11240,9 @@ ozpIwc.SystemApiApplicationValue.prototype.getIntentsRegistrations=function() {
 var ozpIwc=ozpIwc || {};
 
 ozpIwc.apiRootUrl = ozpIwc.apiRootUrl || "/api";
-ozpIwc.marketplaceUsername= ozpIwc.marketplaceUsername || '';
-ozpIwc.marketplacePassword= ozpIwc.marketplacePassword || '';
+ozpIwc.config = ozpIwc.config || {};
+ozpIwc.config.basicAuthUsername= ozpIwc.config.basicAuthUsername || '';
+ozpIwc.config.basicAuthPassword= ozpIwc.config.basicAuthPassword || '';
 ozpIwc.linkRelPrefix = ozpIwc.linkRelPrefix || "ozp";
 ozpIwc.initEndpoints(ozpIwc.apiRootUrl);
 
