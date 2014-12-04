@@ -10839,7 +10839,7 @@ ozpIwc.NamesApi = ozpIwc.util.extend(ozpIwc.CommonApiBase, function(config) {
     node.set(packet);
     packet = {
         resource: '/api/intents.api',
-        entity: {'actions': ['get','set','delete','watch','unwatch','register','unregister','invoke']},
+        entity: {'actions': ['get','set','delete','watch','unwatch','register','unregister','invoke','broadcast']},
         contentType: 'application/vnd.ozp-iwc-api-v1+json'
     };
     node=this.findOrMakeValue(packet);
@@ -10859,6 +10859,9 @@ ozpIwc.NamesApi = ozpIwc.util.extend(ozpIwc.CommonApiBase, function(config) {
     node=this.findOrMakeValue(packet);
     node.set(packet);
     var self = this;
+    this.dynamicNodes.forEach(function(resource) {
+        self.updateDynamicNode(self.data[resource]);
+    });
     setInterval(function(){
         self.removeDeadNodes();
     },this.heartbeatFrequency);

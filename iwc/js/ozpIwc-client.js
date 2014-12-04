@@ -2940,7 +2940,7 @@ var ozpIwc=ozpIwc || {};
  * @todo accept a list of peer URLs that are searched in order of preference
  * @param {Object} config
  * @param {String} config.peerUrl - Base URL of the peer server
- * @param {Boolean} [config.autoPeer=true] - Whether to automatically find and connect to a peer
+ * @param {Boolean} [config.autoConnect=true] - Whether to automatically find and connect to a peer
  */
 ozpIwc.Client=function(config) {
     config=config || {};
@@ -2983,10 +2983,11 @@ ozpIwc.Client=function(config) {
     }
 
     /**
-     * @property autoPeer
+     * @property autoConnect
      * @type {Boolean}
+     * @default true
      */
-    this.autoPeer=("autoPeer" in config) ? config.autoPeer : true;
+    this.autoConnect=("autoConnect" in config) ? config.autoConnect : true;
 
     /**
      * @property msgIdSequence
@@ -3051,24 +3052,10 @@ ozpIwc.Client=function(config) {
     
     /**
      * A map of available apis and their actions.
-     * @todo pull these from the names.api
      * @property apiMap
      * @type Object
      */
-    this.apiMap={
-        "data.api" : { 'address': 'data.api',
-            'actions': ["get","set","delete","watch","unwatch","list","addChild","removeChild"]
-        },
-        "system.api" : { 'address': 'system.api',
-            'actions': ["get","set","delete","watch","unwatch","list","launch"]
-        },
-        "names.api" : { 'address': 'names.api',
-            'actions': ["get","set","delete","watch","unwatch","list"]
-        }, 
-        "intents.api" : { 'address': 'intents.api',
-            'actions': ["get","set","delete","watch","unwatch","list","register","invoke","broadcast"]
-        }
-    };
+    this.apiMap={};
 
     /**
      * @property wrapperMap
@@ -3100,7 +3087,7 @@ ozpIwc.Client=function(config) {
      */
     this.launchedIntents = [];
 
-    if(this.autoPeer) {
+    if(this.autoConnect) {
         this.connect();
     }
 
@@ -3336,44 +3323,102 @@ ozpIwc.Client.prototype.connect=function() {
                     done();
                 });
             });
-        }).then(function() {
-            // dump any queued sends, trigger that we are fully connected
-            self.preconnectionQueue.forEach(function(p) {
-                self.send(p.fields,p.callback,p.promise);
-            });
-            self.preconnectionQueue=null;
-            
-            if(!self.launchParams.inFlightIntent) {
-                return;
-            }
-            
-            // fetch the inFlightIntent
-            var packet= {
-                dst: "intents.api",
-                resource: self.launchParams.inFlightIntent,
-                action: "get"
-            };
-            return new Promise(function(resolve,reject) {
-                self.send(packet,function(response,done) {
-                    self.launchedIntents.push(response);
-                    if(response.response==='ok') {
-                        for(var k in response.entity) {
-                            self.launchParams[k]=response.entity[k];
+        }).then(function(){
+                // gather api information
+                return new Promise(function(resolve,reject) {
+
+                    self.send({
+                        dst: "names.api",
+                        action: "get",
+                        resource: "/api"
+                    },function(reply){
+                        if(reply.response === 'ok'){
+                           resolve(reply.entity);
+                        } else{
+                            reject(reply.response);
                         }
-                    }
-                    resolve();
-                    done();
+                    })
+
                 });
-            });
+        }).then(function(apis) {
+                var promiseArray = [];
+                apis.forEach(function (api) {
+                    promiseArray.push(new Promise(function (resolve, reject) {
+                        console.log(api);
+                        self.send({
+                            dst: "names.api",
+                            action: "get",
+                            resource: api
+                        }, function (res) {
+                            if (res.response === 'ok') {
+                                var name = api.replace('/api/', '');
+                                self.apiMap[name] = {
+                                    'address': name,
+                                    'actions': res.entity.actions
+                                };
+
+                                resolve();
+                            } else {
+                                reject(res.response);
+                            }
+                        });
+                    }));
+                });
+                return Promise.all(promiseArray);
+        }).then(function(){
+                for(var api in self.apiMap){
+                    var apiObj = self.apiMap[api];
+                    var apiFuncName = apiObj.address.replace('.api','');
+
+                    //prevent overriding client constructed fields
+                    if(!self.hasOwnProperty(apiFuncName)){
+                        (function(addr){
+                            self[apiFuncName] = function(){
+                                return self.api(addr);
+                            };
+                            self.apiMap[addr] = self.apiMap[addr] || {};
+                            self.apiMap[addr].functionName = apiFuncName;
+                        })(apiObj.address)
+                    }
+                }
         }).then(function() {
-            /**
-             * Fired when the client is connected to the IWC bus.
-             * @event #connected
-             */
-            self.events.trigger("connected");
-        }).catch(function(error) {
+                // dump any queued sends, trigger that we are fully connected
+                self.preconnectionQueue.forEach(function(p) {
+                    self.send(p.fields,p.callback,p.promise);
+                });
+                self.preconnectionQueue=null;
+
+                if(!self.launchParams.inFlightIntent) {
+                    return;
+                }
+
+                // fetch the inFlightIntent
+                var packet= {
+                    dst: "intents.api",
+                    resource: self.launchParams.inFlightIntent,
+                    action: "get"
+                };
+                return new Promise(function(resolve,reject) {
+                    self.send(packet,function(response,done) {
+                        self.launchedIntents.push(response);
+                        if(response.response==='ok') {
+                            for(var k in response.entity) {
+                                self.launchParams[k]=response.entity[k];
+                            }
+                        }
+                        resolve();
+                        done();
+                    });
+                });
+            }).then(function() {
+                /**
+                 * Fired when the client is connected to the IWC bus.
+                 * @event #connected
+                 */
+                self.events.trigger("connected");
+            }).catch(function(error) {
                 ozpIwc.log.log("Failed to connect to bus ",error);
-        });
+            });
     }
     return this.connectPromise; 
 };
