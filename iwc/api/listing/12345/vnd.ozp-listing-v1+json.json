@@ -1,0 +1,81 @@
+{
+    "editedDate": "2014-12-17T20:52:59.399+0000",
+    "approvedDate": "2014-12-17T20:52:59.355+0000",
+    "launchUrl": "http://ozone-development.github.io/ozp-demo/centerSampleListings/airMail/index.html",
+    "versionName": "1",
+    "uuid": "65141722-926b-4e18-b946-d3490f114028",
+    "smallIconId": "586e70d9-82e4-49bc-8ee4-f6c2ee30f33b",
+    "largeIconId": "316f38f7-1abf-4695-a41b-2c920bd833a4",
+    "bannerIconId": "e18584aa-8c12-4e19-885e-2ca9352e6d4a",
+    "featuredBannerIconId": "4c4597a8-66a7-4f71-839d-46f6fc43bc50",
+    "whatIsNew": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo.",
+    "descriptionShort": "Delivers your mail by air",
+    "approvalStatus": "APPROVED",
+    "isEnabled": true,
+    "isFeatured": true,
+    "totalComments": 0,
+    "screenshots": [{
+        "smallImageUrl": "https://localhost:8443/marketplace/api/image/f9a1e0fa-7516-490f-a575-676513a8cf88.png",
+        "largeImageUrl": "https://localhost:8443/marketplace/api/image/1daa8011-8724-411d-ba04-45dcb9436500.png",
+        "largeImageId": "1daa8011-8724-411d-ba04-45dcb9436500",
+        "smallImageId": "f9a1e0fa-7516-490f-a575-676513a8cf88"
+    }],
+    "contacts": [{
+        "name": "jim bob",
+        "email": "test@example.com",
+        "unsecurePhone": "111-111-1111",
+        "type": "Technical Support 2"
+    }],
+    "agency": "Test Organization",
+    "categories": ["Business", "Tools"],
+    "owners": [{
+        "displayName": "Test Admin 1",
+        "username": "testAdmin1"
+    }],
+    "docUrls": [{
+        "url": "https://www",
+        "name": "API Documentation"
+    }, {
+        "url": "https://www",
+        "name": "User Manual"
+    }],
+    "intents": ["application/json/edit", "application/json/view"],
+    "imageSmallUrl": "https://localhost:8443/marketplace/api/image/586e70d9-82e4-49bc-8ee4-f6c2ee30f33b.png",
+    "imageMediumUrl": "https://localhost:8443/marketplace/api/image/316f38f7-1abf-4695-a41b-2c920bd833a4.png",
+    "imageLargeUrl": "https://localhost:8443/marketplace/api/image/e18584aa-8c12-4e19-885e-2ca9352e6d4a.png",
+    "imageXlargeUrl": "https://localhost:8443/marketplace/api/image/4c4597a8-66a7-4f71-839d-46f6fc43bc50.png",
+    "agencyShort": "TO",
+    "currentRejection": null,
+    "required": [],
+    "width": null,
+    "height": null,
+    "tags": ["demo"],
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo. Quisque egestas, eros sit amet dignissim sagittis, justo enim facilisis ante, et elementum ligula elit id nunc. Ut mollis enim nec arcu porta pulvinar. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. In vitae nisl turpis. Sed congue at arcu eget feugiat. Interdum et malesuada fames ac ante ipsum primis in faucibus. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis est sapien, posuere et lobortis ac, sodales et sapien.Sed auctor molestie velit, nec sollicitudin ipsum bibendum ut. Quisque ut congue lectus. Nunc commodo non arcu sit amet vestibulum. Sed et ligula vitae justo hendrerit cursus et eget augue. Sed ullamcorper magna at euismod cursus. Vivamus id ligula purus. Nulla dapibus rhoncus tristique. Duis efficitur eleifend justo at ullamcorper. Ut condimentum velit sit amet posuere facilisis. Vestibulum at nisi elit. Aliquam eget enim accumsan, dapibus magna quis, ultricies nunc. Donec imperdiet est lacus, nec blandit felis venenatis id.",
+    "requirements": "https://www.example.com/",
+    "singleton": false,
+    "title": "Air Mail",
+    "id": 12345,
+    "type": "Web Application",
+    "_links": {
+        "curies": {
+            "href": "http://ozoneplatform.org/docs/rels/{rel}",
+            "name": "ozp",
+            "templated": true
+        },
+        "ozp:activity": {
+            "href": "https://localhost:8443/marketplace/api/listing/12345/activity"
+        },
+        "ozp:required": {
+            "href": "https://localhost:8443/marketplace/api/listing/12345/requiredListings"
+        },
+        "ozp:required-by": {
+            "href": "https://localhost:8443/marketplace/api/listing/12345/requiringListings"
+        },
+        "ozp:review": {
+            "href": "https://localhost:8443/marketplace/api/listing/12345/itemComment"
+        },
+        "self": {
+            "href": "https://localhost:8443/marketplace/api/listing/12345"
+        }
+    }
+}

@@ -1,0 +1,9 @@
+{
+    "_links": {
+        "self": {
+            "href": "https://localhost:8443/marketplace/api/image/638d9b2d-0681-4461-9083-3614aa7f77dd.png"
+        }
+    },
+    "contentType": "image/png",
+    "id": "638d9b2d-0681-4461-9083-3614aa7f77dd"
+}

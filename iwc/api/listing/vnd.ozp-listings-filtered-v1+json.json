@@ -1,0 +1,2523 @@
+{
+    "_embedded": {
+        "item": [
+            {
+                "_links": {
+                    "ozp:activity": {
+                        "href": "https://localhost:8443/marketplace/api/listing/1/activity"
+                    },
+                    "ozp:required": {
+                        "href": "https://localhost:8443/marketplace/api/listing/1/requiredListings"
+                    },
+                    "ozp:required-by": {
+                        "href": "https://localhost:8443/marketplace/api/listing/1/requiringListings"
+                    },
+                    "ozp:review": {
+                        "href": "https://localhost:8443/marketplace/api/listing/1/itemComment"
+                    },
+                    "self": {
+                        "href": "https://localhost:8443/marketplace/api/listing/1"
+                    }
+                },
+                "agency": "Test Organization",
+                "agencyShort": "TO",
+                "approvalStatus": "APPROVED",
+                "approvedDate": "2014-12-18T15:05:56.628+0000",
+                "bannerIconId": "5315717c-ea2a-4842-9caf-3d0b1dcc50f5",
+                "categories": [
+                    "Business",
+                    "Tools"
+                ],
+                "contacts": [],
+                "currentRejection": null,
+                "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo. Quisque egestas, eros sit amet dignissim sagittis, justo enim facilisis ante, et elementum ligula elit id nunc. Ut mollis enim nec arcu porta pulvinar. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. In vitae nisl turpis. Sed congue at arcu eget feugiat. Interdum et malesuada fames ac ante ipsum primis in faucibus. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis est sapien, posuere et lobortis ac, sodales et sapien.Sed auctor molestie velit, nec sollicitudin ipsum bibendum ut. Quisque ut congue lectus. Nunc commodo non arcu sit amet vestibulum. Sed et ligula vitae justo hendrerit cursus et eget augue. Sed ullamcorper magna at euismod cursus. Vivamus id ligula purus. Nulla dapibus rhoncus tristique. Duis efficitur eleifend justo at ullamcorper. Ut condimentum velit sit amet posuere facilisis. Vestibulum at nisi elit. Aliquam eget enim accumsan, dapibus magna quis, ultricies nunc. Donec imperdiet est lacus, nec blandit felis venenatis id.",
+                "descriptionShort": "Delivers your mail by air",
+                "docUrls": [
+                    {
+                        "name": "API Documentation",
+                        "url": "https://www"
+                    },
+                    {
+                        "name": "User Manual",
+                        "url": "https://www"
+                    }
+                ],
+                "editedDate": "2014-12-18T15:05:56.667+0000",
+                "featuredBannerIconId": "f050dbdd-d5aa-4369-9a76-29cb2e5067b0",
+                "height": null,
+                "id": 1,
+                "imageLargeUrl": "https://localhost:8443/marketplace/api/image/5315717c-ea2a-4842-9caf-3d0b1dcc50f5.png",
+                "imageMediumUrl": "https://localhost:8443/marketplace/api/image/29873be3-4634-424a-bb27-954010dc9df6.png",
+                "imageSmallUrl": "https://localhost:8443/marketplace/api/image/4852fef8-b34f-404a-a557-1ab9078231a6.png",
+                "imageXlargeUrl": "https://localhost:8443/marketplace/api/image/f050dbdd-d5aa-4369-9a76-29cb2e5067b0.png",
+                "intents": [
+                    "application/json/edit",
+                    "application/json/view"
+                ],
+                "isEnabled": true,
+                "isFeatured": true,
+                "largeIconId": "29873be3-4634-424a-bb27-954010dc9df6",
+                "launchUrl": "http://ozone-development.github.io/ozp-demo/centerSampleListings/airMail/index.html",
+                "owners": [
+                    {
+                        "displayName": "Test Admin 1",
+                        "username": "testAdmin1"
+                    }
+                ],
+                "required": [],
+                "requirements": "https://www",
+                "screenshots": [
+                    {
+                        "largeImageId": "e9472814-b1db-4699-ac31-cf5d0b232625",
+                        "largeImageUrl": "https://localhost:8443/marketplace/api/image/e9472814-b1db-4699-ac31-cf5d0b232625.png",
+                        "smallImageId": "4d8ac61f-a4ba-4958-b8e6-082b1c77b31e",
+                        "smallImageUrl": "https://localhost:8443/marketplace/api/image/4d8ac61f-a4ba-4958-b8e6-082b1c77b31e.png"
+                    }
+                ],
+                "singleton": false,
+                "smallIconId": "4852fef8-b34f-404a-a557-1ab9078231a6",
+                "tags": [
+                    "demo"
+                ],
+                "title": "Air Mail",
+                "totalComments": 0,
+                "type": "Web Application",
+                "uuid": "7247ade3-6752-4195-85c7-d6aea2779406",
+                "versionName": "1",
+                "whatIsNew": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo.",
+                "width": null
+            },
+            {
+                "_links": {
+                    "ozp:activity": {
+                        "href": "https://localhost:8443/marketplace/api/listing/2/activity"
+                    },
+                    "ozp:required": {
+                        "href": "https://localhost:8443/marketplace/api/listing/2/requiredListings"
+                    },
+                    "ozp:required-by": {
+                        "href": "https://localhost:8443/marketplace/api/listing/2/requiringListings"
+                    },
+                    "ozp:review": {
+                        "href": "https://localhost:8443/marketplace/api/listing/2/itemComment"
+                    },
+                    "self": {
+                        "href": "https://localhost:8443/marketplace/api/listing/2"
+                    }
+                },
+                "agency": "Test Organization",
+                "agencyShort": "TO",
+                "approvalStatus": "APPROVED",
+                "approvedDate": "2014-12-18T15:05:58.772+0000",
+                "bannerIconId": "4ee39db6-b7e5-4c06-a561-4edc99ff7ce3",
+                "categories": [
+                    "Business",
+                    "Tools"
+                ],
+                "contacts": [],
+                "currentRejection": null,
+                "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo. Quisque egestas, eros sit amet dignissim sagittis, justo enim facilisis ante, et elementum ligula elit id nunc. Ut mollis enim nec arcu porta pulvinar. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. In vitae nisl turpis. Sed congue at arcu eget feugiat. Interdum et malesuada fames ac ante ipsum primis in faucibus. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis est sapien, posuere et lobortis ac, sodales et sapien.Sed auctor molestie velit, nec sollicitudin ipsum bibendum ut. Quisque ut congue lectus. Nunc commodo non arcu sit amet vestibulum. Sed et ligula vitae justo hendrerit cursus et eget augue. Sed ullamcorper magna at euismod cursus. Vivamus id ligula purus. Nulla dapibus rhoncus tristique. Duis efficitur eleifend justo at ullamcorper. Ut condimentum velit sit amet posuere facilisis. Vestibulum at nisi elit. Aliquam eget enim accumsan, dapibus magna quis, ultricies nunc. Donec imperdiet est lacus, nec blandit felis venenatis id.",
+                "descriptionShort": "A basket to hold your bread.",
+                "docUrls": [
+                    {
+                        "name": "API Documentation",
+                        "url": "https://www"
+                    },
+                    {
+                        "name": "User Manual",
+                        "url": "https://www"
+                    }
+                ],
+                "editedDate": "2014-12-18T15:05:58.801+0000",
+                "featuredBannerIconId": "148a4245-ded6-428f-9a07-11a771c667af",
+                "height": null,
+                "id": 2,
+                "imageLargeUrl": "https://localhost:8443/marketplace/api/image/4ee39db6-b7e5-4c06-a561-4edc99ff7ce3.png",
+                "imageMediumUrl": "https://localhost:8443/marketplace/api/image/0a13ce3e-01af-4f79-aa2d-3282f7a5da9d.png",
+                "imageSmallUrl": "https://localhost:8443/marketplace/api/image/7ce481ee-e2f5-458c-bd7a-b8d6af8a4ff7.png",
+                "imageXlargeUrl": "https://localhost:8443/marketplace/api/image/148a4245-ded6-428f-9a07-11a771c667af.png",
+                "intents": [
+                    "application/json/edit",
+                    "application/json/view"
+                ],
+                "isEnabled": true,
+                "isFeatured": true,
+                "largeIconId": "0a13ce3e-01af-4f79-aa2d-3282f7a5da9d",
+                "launchUrl": "http://ozone-development.github.io/ozp-demo/centerSampleListings/breadBasket/index.html",
+                "owners": [
+                    {
+                        "displayName": "Test Admin 1",
+                        "username": "testAdmin1"
+                    }
+                ],
+                "required": [],
+                "requirements": "https://www",
+                "screenshots": [
+                    {
+                        "largeImageId": "90bdba11-e130-461f-9171-b4b01fefcd42",
+                        "largeImageUrl": "https://localhost:8443/marketplace/api/image/90bdba11-e130-461f-9171-b4b01fefcd42.png",
+                        "smallImageId": "80d19c6c-0aae-4fe1-99e2-ed37c0b117da",
+                        "smallImageUrl": "https://localhost:8443/marketplace/api/image/80d19c6c-0aae-4fe1-99e2-ed37c0b117da.png"
+                    }
+                ],
+                "singleton": false,
+                "smallIconId": "7ce481ee-e2f5-458c-bd7a-b8d6af8a4ff7",
+                "tags": [
+                    "demo"
+                ],
+                "title": "Bread Basket",
+                "totalComments": 0,
+                "type": "Web Application",
+                "uuid": "a6ec68e8-2eb2-49de-bfa2-e7533b9855b6",
+                "versionName": "1",
+                "whatIsNew": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo.",
+                "width": null
+            },
+            {
+                "_links": {
+                    "ozp:activity": {
+                        "href": "https://localhost:8443/marketplace/api/listing/3/activity"
+                    },
+                    "ozp:required": {
+                        "href": "https://localhost:8443/marketplace/api/listing/3/requiredListings"
+                    },
+                    "ozp:required-by": {
+                        "href": "https://localhost:8443/marketplace/api/listing/3/requiringListings"
+                    },
+                    "ozp:review": {
+                        "href": "https://localhost:8443/marketplace/api/listing/3/itemComment"
+                    },
+                    "self": {
+                        "href": "https://localhost:8443/marketplace/api/listing/3"
+                    }
+                },
+                "agency": "Test Organization",
+                "agencyShort": "TO",
+                "approvalStatus": "APPROVED",
+                "approvedDate": "2014-12-18T15:06:00.678+0000",
+                "bannerIconId": "6edf82cb-d6b3-4d22-ac5f-1e9efb4af237",
+                "categories": [
+                    "Business",
+                    "Tools"
+                ],
+                "contacts": [],
+                "currentRejection": null,
+                "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo. Quisque egestas, eros sit amet dignissim sagittis, justo enim facilisis ante, et elementum ligula elit id nunc. Ut mollis enim nec arcu porta pulvinar. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. In vitae nisl turpis. Sed congue at arcu eget feugiat. Interdum et malesuada fames ac ante ipsum primis in faucibus. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis est sapien, posuere et lobortis ac, sodales et sapien.Sed auctor molestie velit, nec sollicitudin ipsum bibendum ut. Quisque ut congue lectus. Nunc commodo non arcu sit amet vestibulum. Sed et ligula vitae justo hendrerit cursus et eget augue. Sed ullamcorper magna at euismod cursus. Vivamus id ligula purus. Nulla dapibus rhoncus tristique. Duis efficitur eleifend justo at ullamcorper. Ut condimentum velit sit amet posuere facilisis. Vestibulum at nisi elit. Aliquam eget enim accumsan, dapibus magna quis, ultricies nunc. Donec imperdiet est lacus, nec blandit felis venenatis id.",
+                "descriptionShort": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo.",
+                "docUrls": [
+                    {
+                        "name": "API Documentation",
+                        "url": "https://www"
+                    },
+                    {
+                        "name": "User Manual",
+                        "url": "https://www"
+                    }
+                ],
+                "editedDate": "2014-12-18T15:06:00.706+0000",
+                "featuredBannerIconId": "645821cc-2bae-4ff5-8e91-f3c18690cf7b",
+                "height": null,
+                "id": 3,
+                "imageLargeUrl": "https://localhost:8443/marketplace/api/image/6edf82cb-d6b3-4d22-ac5f-1e9efb4af237.png",
+                "imageMediumUrl": "https://localhost:8443/marketplace/api/image/e81933ac-26ba-465f-b477-c952250b9128.png",
+                "imageSmallUrl": "https://localhost:8443/marketplace/api/image/8cd9fab8-97b6-40d8-80c6-8cd5b4b2a457.png",
+                "imageXlargeUrl": "https://localhost:8443/marketplace/api/image/645821cc-2bae-4ff5-8e91-f3c18690cf7b.png",
+                "intents": [
+                    "application/json/edit",
+                    "application/json/view"
+                ],
+                "isEnabled": true,
+                "isFeatured": true,
+                "largeIconId": "e81933ac-26ba-465f-b477-c952250b9128",
+                "launchUrl": "http://ozone-development.github.io/ozp-demo/centerSampleListings/chartCourse/index.html",
+                "owners": [
+                    {
+                        "displayName": "Test Admin 1",
+                        "username": "testAdmin1"
+                    }
+                ],
+                "required": [],
+                "requirements": "https://www",
+                "screenshots": [
+                    {
+                        "largeImageId": "3aed30ec-f856-4fe3-90cc-fbb0d85da749",
+                        "largeImageUrl": "https://localhost:8443/marketplace/api/image/3aed30ec-f856-4fe3-90cc-fbb0d85da749.png",
+                        "smallImageId": "c9116fe4-62f5-42ff-9883-be7459d275b9",
+                        "smallImageUrl": "https://localhost:8443/marketplace/api/image/c9116fe4-62f5-42ff-9883-be7459d275b9.png"
+                    }
+                ],
+                "singleton": false,
+                "smallIconId": "8cd9fab8-97b6-40d8-80c6-8cd5b4b2a457",
+                "tags": [
+                    "demo"
+                ],
+                "title": "Chart Course",
+                "totalComments": 0,
+                "type": "Web Application",
+                "uuid": "73f4fff4-a1ef-465d-8d7a-c4b0a6db8f6a",
+                "versionName": "1",
+                "whatIsNew": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo.",
+                "width": null
+            },
+            {
+                "_links": {
+                    "ozp:activity": {
+                        "href": "https://localhost:8443/marketplace/api/listing/4/activity"
+                    },
+                    "ozp:required": {
+                        "href": "https://localhost:8443/marketplace/api/listing/4/requiredListings"
+                    },
+                    "ozp:required-by": {
+                        "href": "https://localhost:8443/marketplace/api/listing/4/requiringListings"
+                    },
+                    "ozp:review": {
+                        "href": "https://localhost:8443/marketplace/api/listing/4/itemComment"
+                    },
+                    "self": {
+                        "href": "https://localhost:8443/marketplace/api/listing/4"
+                    }
+                },
+                "agency": "Test Organization",
+                "agencyShort": "TO",
+                "approvalStatus": "APPROVED",
+                "approvedDate": "2014-12-18T15:06:02.488+0000",
+                "bannerIconId": "ac70735a-31bc-4123-b626-0e35aca2d57d",
+                "categories": [
+                    "Business",
+                    "Tools"
+                ],
+                "contacts": [],
+                "currentRejection": null,
+                "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo. Quisque egestas, eros sit amet dignissim sagittis, justo enim facilisis ante, et elementum ligula elit id nunc. Ut mollis enim nec arcu porta pulvinar. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. In vitae nisl turpis. Sed congue at arcu eget feugiat. Interdum et malesuada fames ac ante ipsum primis in faucibus. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis est sapien, posuere et lobortis ac, sodales et sapien.Sed auctor molestie velit, nec sollicitudin ipsum bibendum ut. Quisque ut congue lectus. Nunc commodo non arcu sit amet vestibulum. Sed et ligula vitae justo hendrerit cursus et eget augue. Sed ullamcorper magna at euismod cursus. Vivamus id ligula purus. Nulla dapibus rhoncus tristique. Duis efficitur eleifend justo at ullamcorper. Ut condimentum velit sit amet posuere facilisis. Vestibulum at nisi elit. Aliquam eget enim accumsan, dapibus magna quis, ultricies nunc. Donec imperdiet est lacus, nec blandit felis venenatis id.",
+                "descriptionShort": "A box full of chatter",
+                "docUrls": [
+                    {
+                        "name": "API Documentation",
+                        "url": "https://www"
+                    },
+                    {
+                        "name": "User Manual",
+                        "url": "https://www"
+                    }
+                ],
+                "editedDate": "2014-12-18T15:06:02.513+0000",
+                "featuredBannerIconId": "c5eda5b1-5cbc-41a8-9fff-e493d63ef683",
+                "height": null,
+                "id": 4,
+                "imageLargeUrl": "https://localhost:8443/marketplace/api/image/ac70735a-31bc-4123-b626-0e35aca2d57d.png",
+                "imageMediumUrl": "https://localhost:8443/marketplace/api/image/fac5125e-c9a9-45d0-aa22-31b8059f60de.png",
+                "imageSmallUrl": "https://localhost:8443/marketplace/api/image/f9c23009-6b10-4ffe-a2ef-5feadf155386.png",
+                "imageXlargeUrl": "https://localhost:8443/marketplace/api/image/c5eda5b1-5cbc-41a8-9fff-e493d63ef683.png",
+                "intents": [
+                    "application/json/edit",
+                    "application/json/view"
+                ],
+                "isEnabled": true,
+                "isFeatured": true,
+                "largeIconId": "fac5125e-c9a9-45d0-aa22-31b8059f60de",
+                "launchUrl": "http://ozone-development.github.io/ozp-demo/centerSampleListings/chatterBox/index.html",
+                "owners": [
+                    {
+                        "displayName": "Test Admin 1",
+                        "username": "testAdmin1"
+                    }
+                ],
+                "required": [],
+                "requirements": "https://www",
+                "screenshots": [
+                    {
+                        "largeImageId": "b2a83476-fdb3-405a-a31a-a30d3bc11e96",
+                        "largeImageUrl": "https://localhost:8443/marketplace/api/image/b2a83476-fdb3-405a-a31a-a30d3bc11e96.png",
+                        "smallImageId": "f8b4e970-4b44-4eff-a4c7-ddb156328389",
+                        "smallImageUrl": "https://localhost:8443/marketplace/api/image/f8b4e970-4b44-4eff-a4c7-ddb156328389.png"
+                    }
+                ],
+                "singleton": false,
+                "smallIconId": "f9c23009-6b10-4ffe-a2ef-5feadf155386",
+                "tags": [
+                    "demo"
+                ],
+                "title": "ChatterBox",
+                "totalComments": 0,
+                "type": "Web Application",
+                "uuid": "aa4bf3f1-8815-4e32-98e7-f0c6478d238a",
+                "versionName": "1",
+                "whatIsNew": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo.",
+                "width": null
+            },
+            {
+                "_links": {
+                    "ozp:activity": {
+                        "href": "https://localhost:8443/marketplace/api/listing/5/activity"
+                    },
+                    "ozp:required": {
+                        "href": "https://localhost:8443/marketplace/api/listing/5/requiredListings"
+                    },
+                    "ozp:required-by": {
+                        "href": "https://localhost:8443/marketplace/api/listing/5/requiringListings"
+                    },
+                    "ozp:review": {
+                        "href": "https://localhost:8443/marketplace/api/listing/5/itemComment"
+                    },
+                    "self": {
+                        "href": "https://localhost:8443/marketplace/api/listing/5"
+                    }
+                },
+                "agency": "Test Organization",
+                "agencyShort": "TO",
+                "approvalStatus": "APPROVED",
+                "approvedDate": "2014-12-18T15:06:04.397+0000",
+                "bannerIconId": "e0475c4f-b1e0-484a-8db7-e5774fde667c",
+                "categories": [
+                    "Business",
+                    "Tools"
+                ],
+                "contacts": [],
+                "currentRejection": null,
+                "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo. Quisque egestas, eros sit amet dignissim sagittis, justo enim facilisis ante, et elementum ligula elit id nunc. Ut mollis enim nec arcu porta pulvinar. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. In vitae nisl turpis. Sed congue at arcu eget feugiat. Interdum et malesuada fames ac ante ipsum primis in faucibus. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis est sapien, posuere et lobortis ac, sodales et sapien.Sed auctor molestie velit, nec sollicitudin ipsum bibendum ut. Quisque ut congue lectus. Nunc commodo non arcu sit amet vestibulum. Sed et ligula vitae justo hendrerit cursus et eget augue. Sed ullamcorper magna at euismod cursus. Vivamus id ligula purus. Nulla dapibus rhoncus tristique. Duis efficitur eleifend justo at ullamcorper. Ut condimentum velit sit amet posuere facilisis. Vestibulum at nisi elit. Aliquam eget enim accumsan, dapibus magna quis, ultricies nunc. Donec imperdiet est lacus, nec blandit felis venenatis id.",
+                "descriptionShort": "A clipboard. Pretty self explanatory.",
+                "docUrls": [
+                    {
+                        "name": "API Documentation",
+                        "url": "https://www"
+                    },
+                    {
+                        "name": "User Manual",
+                        "url": "https://www"
+                    }
+                ],
+                "editedDate": "2014-12-18T15:06:04.420+0000",
+                "featuredBannerIconId": "90a3c9a6-6c6a-4fdb-b467-fc9294ec1378",
+                "height": null,
+                "id": 5,
+                "imageLargeUrl": "https://localhost:8443/marketplace/api/image/e0475c4f-b1e0-484a-8db7-e5774fde667c.png",
+                "imageMediumUrl": "https://localhost:8443/marketplace/api/image/2eb89633-289d-4856-bed0-3d9f2e2fcc8b.png",
+                "imageSmallUrl": "https://localhost:8443/marketplace/api/image/0eeb2ea9-5d54-4eff-bac7-93f24d9168ed.png",
+                "imageXlargeUrl": "https://localhost:8443/marketplace/api/image/90a3c9a6-6c6a-4fdb-b467-fc9294ec1378.png",
+                "intents": [
+                    "application/json/edit",
+                    "application/json/view"
+                ],
+                "isEnabled": true,
+                "isFeatured": true,
+                "largeIconId": "2eb89633-289d-4856-bed0-3d9f2e2fcc8b",
+                "launchUrl": "http://ozone-development.github.io/ozp-demo/centerSampleListings/clipboard/index.html",
+                "owners": [
+                    {
+                        "displayName": "Test Admin 1",
+                        "username": "testAdmin1"
+                    }
+                ],
+                "required": [],
+                "requirements": "https://www",
+                "screenshots": [
+                    {
+                        "largeImageId": "54a77099-4a9b-4e3d-b939-a02d0d88dc09",
+                        "largeImageUrl": "https://localhost:8443/marketplace/api/image/54a77099-4a9b-4e3d-b939-a02d0d88dc09.png",
+                        "smallImageId": "27b2d3d8-4265-4299-b824-76736c4ff6f4",
+                        "smallImageUrl": "https://localhost:8443/marketplace/api/image/27b2d3d8-4265-4299-b824-76736c4ff6f4.png"
+                    }
+                ],
+                "singleton": false,
+                "smallIconId": "0eeb2ea9-5d54-4eff-bac7-93f24d9168ed",
+                "tags": [
+                    "demo"
+                ],
+                "title": "Clipboard",
+                "totalComments": 0,
+                "type": "Web Application",
+                "uuid": "701e55f4-6e8b-4cfb-beff-49ce725db469",
+                "versionName": "1",
+                "whatIsNew": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo.",
+                "width": null
+            },
+            {
+                "_links": {
+                    "ozp:activity": {
+                        "href": "https://localhost:8443/marketplace/api/listing/6/activity"
+                    },
+                    "ozp:required": {
+                        "href": "https://localhost:8443/marketplace/api/listing/6/requiredListings"
+                    },
+                    "ozp:required-by": {
+                        "href": "https://localhost:8443/marketplace/api/listing/6/requiringListings"
+                    },
+                    "ozp:review": {
+                        "href": "https://localhost:8443/marketplace/api/listing/6/itemComment"
+                    },
+                    "self": {
+                        "href": "https://localhost:8443/marketplace/api/listing/6"
+                    }
+                },
+                "agency": "Test Organization",
+                "agencyShort": "TO",
+                "approvalStatus": "APPROVED",
+                "approvedDate": "2014-12-18T15:06:06.158+0000",
+                "bannerIconId": "59c996f5-3b5b-4cec-b0a6-1caeee123b99",
+                "categories": [
+                    "Business",
+                    "Tools"
+                ],
+                "contacts": [],
+                "currentRejection": null,
+                "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo. Quisque egestas, eros sit amet dignissim sagittis, justo enim facilisis ante, et elementum ligula elit id nunc. Ut mollis enim nec arcu porta pulvinar. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. In vitae nisl turpis. Sed congue at arcu eget feugiat. Interdum et malesuada fames ac ante ipsum primis in faucibus. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis est sapien, posuere et lobortis ac, sodales et sapien.Sed auctor molestie velit, nec sollicitudin ipsum bibendum ut. Quisque ut congue lectus. Nunc commodo non arcu sit amet vestibulum. Sed et ligula vitae justo hendrerit cursus et eget augue. Sed ullamcorper magna at euismod cursus. Vivamus id ligula purus. Nulla dapibus rhoncus tristique. Duis efficitur eleifend justo at ullamcorper. Ut condimentum velit sit amet posuere facilisis. Vestibulum at nisi elit. Aliquam eget enim accumsan, dapibus magna quis, ultricies nunc. Donec imperdiet est lacus, nec blandit felis venenatis id.",
+                "descriptionShort": "A hatch that can also be latched.",
+                "docUrls": [
+                    {
+                        "name": "API Documentation",
+                        "url": "https://www"
+                    },
+                    {
+                        "name": "User Manual",
+                        "url": "https://www"
+                    }
+                ],
+                "editedDate": "2014-12-18T15:06:06.187+0000",
+                "featuredBannerIconId": "f0c7ce1d-8d56-4a1b-ac05-c06273977f74",
+                "height": null,
+                "id": 6,
+                "imageLargeUrl": "https://localhost:8443/marketplace/api/image/59c996f5-3b5b-4cec-b0a6-1caeee123b99.png",
+                "imageMediumUrl": "https://localhost:8443/marketplace/api/image/23ba6a75-2a27-4e8f-bfe8-b6ccb5e55871.png",
+                "imageSmallUrl": "https://localhost:8443/marketplace/api/image/4cbbef19-6de8-4130-acbd-94ce3dcb8a67.png",
+                "imageXlargeUrl": "https://localhost:8443/marketplace/api/image/f0c7ce1d-8d56-4a1b-ac05-c06273977f74.png",
+                "intents": [
+                    "application/json/edit",
+                    "application/json/view"
+                ],
+                "isEnabled": true,
+                "isFeatured": true,
+                "largeIconId": "23ba6a75-2a27-4e8f-bfe8-b6ccb5e55871",
+                "launchUrl": "http://ozone-development.github.io/ozp-demo/centerSampleListings/hatchLatch/index.html",
+                "owners": [
+                    {
+                        "displayName": "Test Admin 1",
+                        "username": "testAdmin1"
+                    }
+                ],
+                "required": [],
+                "requirements": "https://www",
+                "screenshots": [
+                    {
+                        "largeImageId": "14ba4ec0-e77f-451e-ab5b-3d8d0b2f36ba",
+                        "largeImageUrl": "https://localhost:8443/marketplace/api/image/14ba4ec0-e77f-451e-ab5b-3d8d0b2f36ba.png",
+                        "smallImageId": "15cf981e-4a22-41cd-a6b9-3973fff2f282",
+                        "smallImageUrl": "https://localhost:8443/marketplace/api/image/15cf981e-4a22-41cd-a6b9-3973fff2f282.png"
+                    }
+                ],
+                "singleton": false,
+                "smallIconId": "4cbbef19-6de8-4130-acbd-94ce3dcb8a67",
+                "tags": [
+                    "demo"
+                ],
+                "title": "HatchLatch",
+                "totalComments": 0,
+                "type": "Web Application",
+                "uuid": "0c6d23ab-bd85-4524-8933-a6633f305284",
+                "versionName": "1",
+                "whatIsNew": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo.",
+                "width": null
+            },
+            {
+                "_links": {
+                    "ozp:activity": {
+                        "href": "https://localhost:8443/marketplace/api/listing/7/activity"
+                    },
+                    "ozp:required": {
+                        "href": "https://localhost:8443/marketplace/api/listing/7/requiredListings"
+                    },
+                    "ozp:required-by": {
+                        "href": "https://localhost:8443/marketplace/api/listing/7/requiringListings"
+                    },
+                    "ozp:review": {
+                        "href": "https://localhost:8443/marketplace/api/listing/7/itemComment"
+                    },
+                    "self": {
+                        "href": "https://localhost:8443/marketplace/api/listing/7"
+                    }
+                },
+                "agency": "Test Organization",
+                "agencyShort": "TO",
+                "approvalStatus": "APPROVED",
+                "approvedDate": "2014-12-18T15:06:08.001+0000",
+                "bannerIconId": "4288af5a-fcae-49e4-85b2-e4612c8a3c37",
+                "categories": [
+                    "Business",
+                    "Tools"
+                ],
+                "contacts": [],
+                "currentRejection": null,
+                "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo. Quisque egestas, eros sit amet dignissim sagittis, justo enim facilisis ante, et elementum ligula elit id nunc. Ut mollis enim nec arcu porta pulvinar. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. In vitae nisl turpis. Sed congue at arcu eget feugiat. Interdum et malesuada fames ac ante ipsum primis in faucibus. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis est sapien, posuere et lobortis ac, sodales et sapien.Sed auctor molestie velit, nec sollicitudin ipsum bibendum ut. Quisque ut congue lectus. Nunc commodo non arcu sit amet vestibulum. Sed et ligula vitae justo hendrerit cursus et eget augue. Sed ullamcorper magna at euismod cursus. Vivamus id ligula purus. Nulla dapibus rhoncus tristique. Duis efficitur eleifend justo at ullamcorper. Ut condimentum velit sit amet posuere facilisis. Vestibulum at nisi elit. Aliquam eget enim accumsan, dapibus magna quis, ultricies nunc. Donec imperdiet est lacus, nec blandit felis venenatis id.",
+                "descriptionShort": "Want a great place to do your jotting? Try this spot.",
+                "docUrls": [
+                    {
+                        "name": "API Documentation",
+                        "url": "https://www"
+                    },
+                    {
+                        "name": "User Manual",
+                        "url": "https://www"
+                    }
+                ],
+                "editedDate": "2014-12-18T15:06:08.022+0000",
+                "featuredBannerIconId": "4e99af3d-7760-4005-a567-0d1438df8b2b",
+                "height": null,
+                "id": 7,
+                "imageLargeUrl": "https://localhost:8443/marketplace/api/image/4288af5a-fcae-49e4-85b2-e4612c8a3c37.png",
+                "imageMediumUrl": "https://localhost:8443/marketplace/api/image/0cd9dce2-93da-4bd7-bef5-a1b42741a96b.png",
+                "imageSmallUrl": "https://localhost:8443/marketplace/api/image/b448d815-26e8-4371-a4b6-77ecb801f03f.png",
+                "imageXlargeUrl": "https://localhost:8443/marketplace/api/image/4e99af3d-7760-4005-a567-0d1438df8b2b.png",
+                "intents": [
+                    "application/json/edit",
+                    "application/json/view"
+                ],
+                "isEnabled": true,
+                "isFeatured": true,
+                "largeIconId": "0cd9dce2-93da-4bd7-bef5-a1b42741a96b",
+                "launchUrl": "http://ozone-development.github.io/ozp-demo/centerSampleListings/jotSpot/index.html",
+                "owners": [
+                    {
+                        "displayName": "Test Admin 1",
+                        "username": "testAdmin1"
+                    }
+                ],
+                "required": [],
+                "requirements": "https://www",
+                "screenshots": [
+                    {
+                        "largeImageId": "c4dd9098-c3fa-41ed-9c4a-2403d70ce5ca",
+                        "largeImageUrl": "https://localhost:8443/marketplace/api/image/c4dd9098-c3fa-41ed-9c4a-2403d70ce5ca.png",
+                        "smallImageId": "a58a70be-9537-4e34-abf9-b76deabf4718",
+                        "smallImageUrl": "https://localhost:8443/marketplace/api/image/a58a70be-9537-4e34-abf9-b76deabf4718.png"
+                    }
+                ],
+                "singleton": false,
+                "smallIconId": "b448d815-26e8-4371-a4b6-77ecb801f03f",
+                "tags": [
+                    "demo"
+                ],
+                "title": "JotSpot",
+                "totalComments": 0,
+                "type": "Web Application",
+                "uuid": "908ad818-e58a-4fa3-b3be-2b0b8fc894d5",
+                "versionName": "1",
+                "whatIsNew": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo.",
+                "width": null
+            },
+            {
+                "_links": {
+                    "ozp:activity": {
+                        "href": "https://localhost:8443/marketplace/api/listing/8/activity"
+                    },
+                    "ozp:required": {
+                        "href": "https://localhost:8443/marketplace/api/listing/8/requiredListings"
+                    },
+                    "ozp:required-by": {
+                        "href": "https://localhost:8443/marketplace/api/listing/8/requiringListings"
+                    },
+                    "ozp:review": {
+                        "href": "https://localhost:8443/marketplace/api/listing/8/itemComment"
+                    },
+                    "self": {
+                        "href": "https://localhost:8443/marketplace/api/listing/8"
+                    }
+                },
+                "agency": "Test Organization",
+                "agencyShort": "TO",
+                "approvalStatus": "APPROVED",
+                "approvedDate": "2014-12-18T15:06:09.738+0000",
+                "bannerIconId": "a672fc65-0326-48cc-8fd4-503ee66ddea8",
+                "categories": [
+                    "Business",
+                    "Tools"
+                ],
+                "contacts": [],
+                "currentRejection": null,
+                "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo. Quisque egestas, eros sit amet dignissim sagittis, justo enim facilisis ante, et elementum ligula elit id nunc. Ut mollis enim nec arcu porta pulvinar. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. In vitae nisl turpis. Sed congue at arcu eget feugiat. Interdum et malesuada fames ac ante ipsum primis in faucibus. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis est sapien, posuere et lobortis ac, sodales et sapien.Sed auctor molestie velit, nec sollicitudin ipsum bibendum ut. Quisque ut congue lectus. Nunc commodo non arcu sit amet vestibulum. Sed et ligula vitae justo hendrerit cursus et eget augue. Sed ullamcorper magna at euismod cursus. Vivamus id ligula purus. Nulla dapibus rhoncus tristique. Duis efficitur eleifend justo at ullamcorper. Ut condimentum velit sit amet posuere facilisis. Vestibulum at nisi elit. Aliquam eget enim accumsan, dapibus magna quis, ultricies nunc. Donec imperdiet est lacus, nec blandit felis venenatis id.",
+                "descriptionShort": "A journal forged in the mountains of Moria.",
+                "docUrls": [
+                    {
+                        "name": "API Documentation",
+                        "url": "https://www"
+                    },
+                    {
+                        "name": "User Manual",
+                        "url": "https://www"
+                    }
+                ],
+                "editedDate": "2014-12-18T15:06:09.760+0000",
+                "featuredBannerIconId": "92fb1897-0529-4706-86ef-64904e69a004",
+                "height": null,
+                "id": 8,
+                "imageLargeUrl": "https://localhost:8443/marketplace/api/image/a672fc65-0326-48cc-8fd4-503ee66ddea8.png",
+                "imageMediumUrl": "https://localhost:8443/marketplace/api/image/45d8e7b6-82fa-4709-bfc0-928d5efaf434.png",
+                "imageSmallUrl": "https://localhost:8443/marketplace/api/image/27b09238-7965-48f8-8371-8e5c99b7750e.png",
+                "imageXlargeUrl": "https://localhost:8443/marketplace/api/image/92fb1897-0529-4706-86ef-64904e69a004.png",
+                "intents": [
+                    "application/json/edit",
+                    "application/json/view"
+                ],
+                "isEnabled": true,
+                "isFeatured": true,
+                "largeIconId": "45d8e7b6-82fa-4709-bfc0-928d5efaf434",
+                "launchUrl": "http://ozone-development.github.io/ozp-demo/centerSampleListings/journalForge/index.html",
+                "owners": [
+                    {
+                        "displayName": "Test Admin 1",
+                        "username": "testAdmin1"
+                    }
+                ],
+                "required": [],
+                "requirements": "https://www",
+                "screenshots": [
+                    {
+                        "largeImageId": "59cedd9f-33b8-43ba-9342-c33de8a40d5b",
+                        "largeImageUrl": "https://localhost:8443/marketplace/api/image/59cedd9f-33b8-43ba-9342-c33de8a40d5b.png",
+                        "smallImageId": "b890717c-de2b-4188-b0ae-07f2368c0476",
+                        "smallImageUrl": "https://localhost:8443/marketplace/api/image/b890717c-de2b-4188-b0ae-07f2368c0476.png"
+                    }
+                ],
+                "singleton": false,
+                "smallIconId": "27b09238-7965-48f8-8371-8e5c99b7750e",
+                "tags": [
+                    "demo"
+                ],
+                "title": "JournalForge",
+                "totalComments": 0,
+                "type": "Web Application",
+                "uuid": "838663df-6980-4463-b265-7ee72ed5ccfb",
+                "versionName": "1",
+                "whatIsNew": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo.",
+                "width": null
+            },
+            {
+                "_links": {
+                    "ozp:activity": {
+                        "href": "https://localhost:8443/marketplace/api/listing/9/activity"
+                    },
+                    "ozp:required": {
+                        "href": "https://localhost:8443/marketplace/api/listing/9/requiredListings"
+                    },
+                    "ozp:required-by": {
+                        "href": "https://localhost:8443/marketplace/api/listing/9/requiringListings"
+                    },
+                    "ozp:review": {
+                        "href": "https://localhost:8443/marketplace/api/listing/9/itemComment"
+                    },
+                    "self": {
+                        "href": "https://localhost:8443/marketplace/api/listing/9"
+                    }
+                },
+                "agency": "Test Organization",
+                "agencyShort": "TO",
+                "approvalStatus": "APPROVED",
+                "approvedDate": "2014-12-18T15:06:11.467+0000",
+                "bannerIconId": "581baa23-6828-48d4-b102-970d790b6709",
+                "categories": [
+                    "Business",
+                    "Tools"
+                ],
+                "contacts": [],
+                "currentRejection": null,
+                "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo. Quisque egestas, eros sit amet dignissim sagittis, justo enim facilisis ante, et elementum ligula elit id nunc. Ut mollis enim nec arcu porta pulvinar. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. In vitae nisl turpis. Sed congue at arcu eget feugiat. Interdum et malesuada fames ac ante ipsum primis in faucibus. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis est sapien, posuere et lobortis ac, sodales et sapien.Sed auctor molestie velit, nec sollicitudin ipsum bibendum ut. Quisque ut congue lectus. Nunc commodo non arcu sit amet vestibulum. Sed et ligula vitae justo hendrerit cursus et eget augue. Sed ullamcorper magna at euismod cursus. Vivamus id ligula purus. Nulla dapibus rhoncus tristique. Duis efficitur eleifend justo at ullamcorper. Ut condimentum velit sit amet posuere facilisis. Vestibulum at nisi elit. Aliquam eget enim accumsan, dapibus magna quis, ultricies nunc. Donec imperdiet est lacus, nec blandit felis venenatis id.",
+                "descriptionShort": "Who needs a lantern when you have the moon?",
+                "docUrls": [
+                    {
+                        "name": "API Documentation",
+                        "url": "https://www"
+                    },
+                    {
+                        "name": "User Manual",
+                        "url": "https://www"
+                    }
+                ],
+                "editedDate": "2014-12-18T15:06:11.488+0000",
+                "featuredBannerIconId": "2a6e1ccc-a410-4173-82aa-0c8a2fe752c5",
+                "height": null,
+                "id": 9,
+                "imageLargeUrl": "https://localhost:8443/marketplace/api/image/581baa23-6828-48d4-b102-970d790b6709.png",
+                "imageMediumUrl": "https://localhost:8443/marketplace/api/image/56a85307-8d63-472a-9fdf-a4ba1e13264d.png",
+                "imageSmallUrl": "https://localhost:8443/marketplace/api/image/8d45400c-380c-4721-bd26-bcd9f2ea9b0e.png",
+                "imageXlargeUrl": "https://localhost:8443/marketplace/api/image/2a6e1ccc-a410-4173-82aa-0c8a2fe752c5.png",
+                "intents": [
+                    "application/json/edit",
+                    "application/json/view"
+                ],
+                "isEnabled": true,
+                "isFeatured": true,
+                "largeIconId": "56a85307-8d63-472a-9fdf-a4ba1e13264d",
+                "launchUrl": "http://ozone-development.github.io/ozp-demo/centerSampleListings/lunarLantern/index.html",
+                "owners": [
+                    {
+                        "displayName": "Test Admin 1",
+                        "username": "testAdmin1"
+                    }
+                ],
+                "required": [],
+                "requirements": "https://www",
+                "screenshots": [
+                    {
+                        "largeImageId": "6402d14f-3a63-4657-99e6-9a2998384611",
+                        "largeImageUrl": "https://localhost:8443/marketplace/api/image/6402d14f-3a63-4657-99e6-9a2998384611.png",
+                        "smallImageId": "87b55e8d-84e8-4ddb-a877-b43ed81e914a",
+                        "smallImageUrl": "https://localhost:8443/marketplace/api/image/87b55e8d-84e8-4ddb-a877-b43ed81e914a.png"
+                    }
+                ],
+                "singleton": false,
+                "smallIconId": "8d45400c-380c-4721-bd26-bcd9f2ea9b0e",
+                "tags": [
+                    "demo"
+                ],
+                "title": "LunarLantern",
+                "totalComments": 0,
+                "type": "Web Application",
+                "uuid": "a0df4544-51c4-4cd5-b1dd-91c42dfb8ba4",
+                "versionName": "1",
+                "whatIsNew": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo.",
+                "width": null
+            },
+            {
+                "_links": {
+                    "ozp:activity": {
+                        "href": "https://localhost:8443/marketplace/api/listing/10/activity"
+                    },
+                    "ozp:required": {
+                        "href": "https://localhost:8443/marketplace/api/listing/10/requiredListings"
+                    },
+                    "ozp:required-by": {
+                        "href": "https://localhost:8443/marketplace/api/listing/10/requiringListings"
+                    },
+                    "ozp:review": {
+                        "href": "https://localhost:8443/marketplace/api/listing/10/itemComment"
+                    },
+                    "self": {
+                        "href": "https://localhost:8443/marketplace/api/listing/10"
+                    }
+                },
+                "agency": "Test Organization",
+                "agencyShort": "TO",
+                "approvalStatus": "APPROVED",
+                "approvedDate": "2014-12-18T15:06:13.275+0000",
+                "bannerIconId": "011470a0-fab9-4643-9414-9ccab287c93a",
+                "categories": [
+                    "Business",
+                    "Tools"
+                ],
+                "contacts": [],
+                "currentRejection": null,
+                "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo. Quisque egestas, eros sit amet dignissim sagittis, justo enim facilisis ante, et elementum ligula elit id nunc. Ut mollis enim nec arcu porta pulvinar. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. In vitae nisl turpis. Sed congue at arcu eget feugiat. Interdum et malesuada fames ac ante ipsum primis in faucibus. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis est sapien, posuere et lobortis ac, sodales et sapien.Sed auctor molestie velit, nec sollicitudin ipsum bibendum ut. Quisque ut congue lectus. Nunc commodo non arcu sit amet vestibulum. Sed et ligula vitae justo hendrerit cursus et eget augue. Sed ullamcorper magna at euismod cursus. Vivamus id ligula purus. Nulla dapibus rhoncus tristique. Duis efficitur eleifend justo at ullamcorper. Ut condimentum velit sit amet posuere facilisis. Vestibulum at nisi elit. Aliquam eget enim accumsan, dapibus magna quis, ultricies nunc. Donec imperdiet est lacus, nec blandit felis venenatis id.",
+                "descriptionShort": "MAPPing the globe since 2014",
+                "docUrls": [
+                    {
+                        "name": "API Documentation",
+                        "url": "https://www"
+                    },
+                    {
+                        "name": "User Manual",
+                        "url": "https://www"
+                    }
+                ],
+                "editedDate": "2014-12-18T15:06:13.302+0000",
+                "featuredBannerIconId": "31b2f172-e974-4c9e-923a-a8e1c34f3fea",
+                "height": null,
+                "id": 10,
+                "imageLargeUrl": "https://localhost:8443/marketplace/api/image/011470a0-fab9-4643-9414-9ccab287c93a.png",
+                "imageMediumUrl": "https://localhost:8443/marketplace/api/image/f78069e9-1128-4a45-a46f-09946ca7dc5f.png",
+                "imageSmallUrl": "https://localhost:8443/marketplace/api/image/d1c8d048-4f39-43f0-ac07-081b13e363b8.png",
+                "imageXlargeUrl": "https://localhost:8443/marketplace/api/image/31b2f172-e974-4c9e-923a-a8e1c34f3fea.png",
+                "intents": [
+                    "application/json/edit",
+                    "application/json/view"
+                ],
+                "isEnabled": true,
+                "isFeatured": true,
+                "largeIconId": "f78069e9-1128-4a45-a46f-09946ca7dc5f",
+                "launchUrl": "http://ozone-development.github.io/ozp-demo/centerSampleListings/mapp/index.html",
+                "owners": [
+                    {
+                        "displayName": "Test Admin 1",
+                        "username": "testAdmin1"
+                    }
+                ],
+                "required": [],
+                "requirements": "https://www",
+                "screenshots": [
+                    {
+                        "largeImageId": "93bd1cd8-e16b-4e63-82ad-5e7bfeac1fad",
+                        "largeImageUrl": "https://localhost:8443/marketplace/api/image/93bd1cd8-e16b-4e63-82ad-5e7bfeac1fad.png",
+                        "smallImageId": "2b652871-3439-41ae-adf2-647b62b462bb",
+                        "smallImageUrl": "https://localhost:8443/marketplace/api/image/2b652871-3439-41ae-adf2-647b62b462bb.png"
+                    }
+                ],
+                "singleton": false,
+                "smallIconId": "d1c8d048-4f39-43f0-ac07-081b13e363b8",
+                "tags": [
+                    "demo"
+                ],
+                "title": "MAPP",
+                "totalComments": 0,
+                "type": "Web Application",
+                "uuid": "4f2ea8e5-7999-4f4a-bae8-e68f0d53a611",
+                "versionName": "1",
+                "whatIsNew": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo.",
+                "width": null
+            },
+            {
+                "_links": {
+                    "ozp:activity": {
+                        "href": "https://localhost:8443/marketplace/api/listing/11/activity"
+                    },
+                    "ozp:required": {
+                        "href": "https://localhost:8443/marketplace/api/listing/11/requiredListings"
+                    },
+                    "ozp:required-by": {
+                        "href": "https://localhost:8443/marketplace/api/listing/11/requiringListings"
+                    },
+                    "ozp:review": {
+                        "href": "https://localhost:8443/marketplace/api/listing/11/itemComment"
+                    },
+                    "self": {
+                        "href": "https://localhost:8443/marketplace/api/listing/11"
+                    }
+                },
+                "agency": "Test Organization",
+                "agencyShort": "TO",
+                "approvalStatus": "APPROVED",
+                "approvedDate": "2014-12-18T15:06:15.153+0000",
+                "bannerIconId": "5df72fd7-b905-4672-9db3-434baf7fd4dc",
+                "categories": [
+                    "Business",
+                    "Tools"
+                ],
+                "contacts": [],
+                "currentRejection": null,
+                "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo. Quisque egestas, eros sit amet dignissim sagittis, justo enim facilisis ante, et elementum ligula elit id nunc. Ut mollis enim nec arcu porta pulvinar. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. In vitae nisl turpis. Sed congue at arcu eget feugiat. Interdum et malesuada fames ac ante ipsum primis in faucibus. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis est sapien, posuere et lobortis ac, sodales et sapien.Sed auctor molestie velit, nec sollicitudin ipsum bibendum ut. Quisque ut congue lectus. Nunc commodo non arcu sit amet vestibulum. Sed et ligula vitae justo hendrerit cursus et eget augue. Sed ullamcorper magna at euismod cursus. Vivamus id ligula purus. Nulla dapibus rhoncus tristique. Duis efficitur eleifend justo at ullamcorper. Ut condimentum velit sit amet posuere facilisis. Vestibulum at nisi elit. Aliquam eget enim accumsan, dapibus magna quis, ultricies nunc. Donec imperdiet est lacus, nec blandit felis venenatis id.",
+                "descriptionShort": "Manilla makes folders easy - easier than the Easy button at Staples.",
+                "docUrls": [
+                    {
+                        "name": "API Documentation",
+                        "url": "https://www"
+                    },
+                    {
+                        "name": "User Manual",
+                        "url": "https://www"
+                    }
+                ],
+                "editedDate": "2014-12-18T15:06:15.180+0000",
+                "featuredBannerIconId": "3f0488b9-bfcb-4427-8a4d-ccf7e8b7129f",
+                "height": null,
+                "id": 11,
+                "imageLargeUrl": "https://localhost:8443/marketplace/api/image/5df72fd7-b905-4672-9db3-434baf7fd4dc.png",
+                "imageMediumUrl": "https://localhost:8443/marketplace/api/image/b78a7cac-b4a9-4115-9c79-5a7e1c74f3ff.png",
+                "imageSmallUrl": "https://localhost:8443/marketplace/api/image/5d6b137e-541e-4ef2-be46-2a0603ec5412.png",
+                "imageXlargeUrl": "https://localhost:8443/marketplace/api/image/3f0488b9-bfcb-4427-8a4d-ccf7e8b7129f.png",
+                "intents": [
+                    "application/json/edit",
+                    "application/json/view"
+                ],
+                "isEnabled": true,
+                "isFeatured": true,
+                "largeIconId": "b78a7cac-b4a9-4115-9c79-5a7e1c74f3ff",
+                "launchUrl": "http://ozone-development.github.io/ozp-demo/centerSampleListings/manilla/index.html",
+                "owners": [
+                    {
+                        "displayName": "Test Admin 1",
+                        "username": "testAdmin1"
+                    }
+                ],
+                "required": [],
+                "requirements": "https://www",
+                "screenshots": [
+                    {
+                        "largeImageId": "d77fadb9-34f3-4a13-99e5-a49e064e5326",
+                        "largeImageUrl": "https://localhost:8443/marketplace/api/image/d77fadb9-34f3-4a13-99e5-a49e064e5326.png",
+                        "smallImageId": "87ab081e-e8a8-4b42-9aa4-89bc1129a0a6",
+                        "smallImageUrl": "https://localhost:8443/marketplace/api/image/87ab081e-e8a8-4b42-9aa4-89bc1129a0a6.png"
+                    }
+                ],
+                "singleton": false,
+                "smallIconId": "5d6b137e-541e-4ef2-be46-2a0603ec5412",
+                "tags": [
+                    "demo"
+                ],
+                "title": "Manilla",
+                "totalComments": 0,
+                "type": "Web Application",
+                "uuid": "e9c80acc-bbd5-4176-8a16-95fc212fab0d",
+                "versionName": "1",
+                "whatIsNew": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo.",
+                "width": null
+            },
+            {
+                "_links": {
+                    "ozp:activity": {
+                        "href": "https://localhost:8443/marketplace/api/listing/12/activity"
+                    },
+                    "ozp:required": {
+                        "href": "https://localhost:8443/marketplace/api/listing/12/requiredListings"
+                    },
+                    "ozp:required-by": {
+                        "href": "https://localhost:8443/marketplace/api/listing/12/requiringListings"
+                    },
+                    "ozp:review": {
+                        "href": "https://localhost:8443/marketplace/api/listing/12/itemComment"
+                    },
+                    "self": {
+                        "href": "https://localhost:8443/marketplace/api/listing/12"
+                    }
+                },
+                "agency": "Test Organization",
+                "agencyShort": "TO",
+                "approvalStatus": "APPROVED",
+                "approvedDate": "2014-12-18T15:06:17.035+0000",
+                "bannerIconId": "fa30a97a-125e-4f96-80fe-50499c4b282f",
+                "categories": [
+                    "Business",
+                    "Tools"
+                ],
+                "contacts": [],
+                "currentRejection": null,
+                "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo. Quisque egestas, eros sit amet dignissim sagittis, justo enim facilisis ante, et elementum ligula elit id nunc. Ut mollis enim nec arcu porta pulvinar. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. In vitae nisl turpis. Sed congue at arcu eget feugiat. Interdum et malesuada fames ac ante ipsum primis in faucibus. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis est sapien, posuere et lobortis ac, sodales et sapien.Sed auctor molestie velit, nec sollicitudin ipsum bibendum ut. Quisque ut congue lectus. Nunc commodo non arcu sit amet vestibulum. Sed et ligula vitae justo hendrerit cursus et eget augue. Sed ullamcorper magna at euismod cursus. Vivamus id ligula purus. Nulla dapibus rhoncus tristique. Duis efficitur eleifend justo at ullamcorper. Ut condimentum velit sit amet posuere facilisis. Vestibulum at nisi elit. Aliquam eget enim accumsan, dapibus magna quis, ultricies nunc. Donec imperdiet est lacus, nec blandit felis venenatis id.",
+                "descriptionShort": "A box that plays wonderful music.",
+                "docUrls": [
+                    {
+                        "name": "API Documentation",
+                        "url": "https://www"
+                    },
+                    {
+                        "name": "User Manual",
+                        "url": "https://www"
+                    }
+                ],
+                "editedDate": "2014-12-18T15:06:17.064+0000",
+                "featuredBannerIconId": "2d31f968-e0e2-4fcf-a04e-55c83265d16b",
+                "height": null,
+                "id": 12,
+                "imageLargeUrl": "https://localhost:8443/marketplace/api/image/fa30a97a-125e-4f96-80fe-50499c4b282f.png",
+                "imageMediumUrl": "https://localhost:8443/marketplace/api/image/d798abe9-0ceb-4315-a134-1806f44b9242.png",
+                "imageSmallUrl": "https://localhost:8443/marketplace/api/image/5dcf3d08-6c84-4580-971e-dff1715ffff4.png",
+                "imageXlargeUrl": "https://localhost:8443/marketplace/api/image/2d31f968-e0e2-4fcf-a04e-55c83265d16b.png",
+                "intents": [
+                    "application/json/edit",
+                    "application/json/view"
+                ],
+                "isEnabled": true,
+                "isFeatured": true,
+                "largeIconId": "d798abe9-0ceb-4315-a134-1806f44b9242",
+                "launchUrl": "http://ozone-development.github.io/ozp-demo/centerSampleListings/musicBox/index.html",
+                "owners": [
+                    {
+                        "displayName": "Test Admin 1",
+                        "username": "testAdmin1"
+                    }
+                ],
+                "required": [],
+                "requirements": "https://www",
+                "screenshots": [
+                    {
+                        "largeImageId": "70b2d27e-200b-4eac-846c-cf395338f13b",
+                        "largeImageUrl": "https://localhost:8443/marketplace/api/image/70b2d27e-200b-4eac-846c-cf395338f13b.png",
+                        "smallImageId": "f22e6a7b-fa77-4496-9d20-1d96960cbf87",
+                        "smallImageUrl": "https://localhost:8443/marketplace/api/image/f22e6a7b-fa77-4496-9d20-1d96960cbf87.png"
+                    }
+                ],
+                "singleton": false,
+                "smallIconId": "5dcf3d08-6c84-4580-971e-dff1715ffff4",
+                "tags": [
+                    "demo"
+                ],
+                "title": "MusicBox",
+                "totalComments": 0,
+                "type": "Web Application",
+                "uuid": "dbc41901-ad85-4cb7-b4e1-f3b01ed1b2ef",
+                "versionName": "1",
+                "whatIsNew": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo.",
+                "width": null
+            },
+            {
+                "_links": {
+                    "ozp:activity": {
+                        "href": "https://localhost:8443/marketplace/api/listing/13/activity"
+                    },
+                    "ozp:required": {
+                        "href": "https://localhost:8443/marketplace/api/listing/13/requiredListings"
+                    },
+                    "ozp:required-by": {
+                        "href": "https://localhost:8443/marketplace/api/listing/13/requiringListings"
+                    },
+                    "ozp:review": {
+                        "href": "https://localhost:8443/marketplace/api/listing/13/itemComment"
+                    },
+                    "self": {
+                        "href": "https://localhost:8443/marketplace/api/listing/13"
+                    }
+                },
+                "agency": "Test Organization",
+                "agencyShort": "TO",
+                "approvalStatus": "APPROVED",
+                "approvedDate": "2014-12-18T15:06:18.765+0000",
+                "bannerIconId": "354e71f5-17a5-4302-9205-60ff148756aa",
+                "categories": [
+                    "Business",
+                    "Tools"
+                ],
+                "contacts": [],
+                "currentRejection": null,
+                "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo. Quisque egestas, eros sit amet dignissim sagittis, justo enim facilisis ante, et elementum ligula elit id nunc. Ut mollis enim nec arcu porta pulvinar. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. In vitae nisl turpis. Sed congue at arcu eget feugiat. Interdum et malesuada fames ac ante ipsum primis in faucibus. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis est sapien, posuere et lobortis ac, sodales et sapien.Sed auctor molestie velit, nec sollicitudin ipsum bibendum ut. Quisque ut congue lectus. Nunc commodo non arcu sit amet vestibulum. Sed et ligula vitae justo hendrerit cursus et eget augue. Sed ullamcorper magna at euismod cursus. Vivamus id ligula purus. Nulla dapibus rhoncus tristique. Duis efficitur eleifend justo at ullamcorper. Ut condimentum velit sit amet posuere facilisis. Vestibulum at nisi elit. Aliquam eget enim accumsan, dapibus magna quis, ultricies nunc. Donec imperdiet est lacus, nec blandit felis venenatis id.",
+                "descriptionShort": "MyCalc is a TI-89 emulator compatible with the OZP framework",
+                "docUrls": [
+                    {
+                        "name": "API Documentation",
+                        "url": "https://www"
+                    },
+                    {
+                        "name": "User Manual",
+                        "url": "https://www"
+                    }
+                ],
+                "editedDate": "2014-12-18T15:06:18.780+0000",
+                "featuredBannerIconId": "b3dcc20f-0227-4588-b960-0265d8895288",
+                "height": null,
+                "id": 13,
+                "imageLargeUrl": "https://localhost:8443/marketplace/api/image/354e71f5-17a5-4302-9205-60ff148756aa.png",
+                "imageMediumUrl": "https://localhost:8443/marketplace/api/image/6730fca8-eb4d-4bd4-bc44-c022f0cc6612.png",
+                "imageSmallUrl": "https://localhost:8443/marketplace/api/image/2f0411f6-651f-4c2b-bb3e-7ef74bdce081.png",
+                "imageXlargeUrl": "https://localhost:8443/marketplace/api/image/b3dcc20f-0227-4588-b960-0265d8895288.png",
+                "intents": [
+                    "application/json/edit",
+                    "application/json/view"
+                ],
+                "isEnabled": true,
+                "isFeatured": true,
+                "largeIconId": "6730fca8-eb4d-4bd4-bc44-c022f0cc6612",
+                "launchUrl": "http://ozone-development.github.io/ozp-demo/centerSampleListings/myCalc/index.html",
+                "owners": [
+                    {
+                        "displayName": "Test Admin 1",
+                        "username": "testAdmin1"
+                    }
+                ],
+                "required": [],
+                "requirements": "https://www",
+                "screenshots": [
+                    {
+                        "largeImageId": "2448fa61-a272-4a91-8937-0bf28fb49cf2",
+                        "largeImageUrl": "https://localhost:8443/marketplace/api/image/2448fa61-a272-4a91-8937-0bf28fb49cf2.png",
+                        "smallImageId": "8e590f39-1bfc-4a26-818f-0b6859ffbdd1",
+                        "smallImageUrl": "https://localhost:8443/marketplace/api/image/8e590f39-1bfc-4a26-818f-0b6859ffbdd1.png"
+                    }
+                ],
+                "singleton": false,
+                "smallIconId": "2f0411f6-651f-4c2b-bb3e-7ef74bdce081",
+                "tags": [
+                    "demo"
+                ],
+                "title": "MyCalc",
+                "totalComments": 0,
+                "type": "Web Application",
+                "uuid": "93f5171b-6e4e-4d82-a3ca-3de70525ac7e",
+                "versionName": "1",
+                "whatIsNew": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo.",
+                "width": null
+            },
+            {
+                "_links": {
+                    "ozp:activity": {
+                        "href": "https://localhost:8443/marketplace/api/listing/14/activity"
+                    },
+                    "ozp:required": {
+                        "href": "https://localhost:8443/marketplace/api/listing/14/requiredListings"
+                    },
+                    "ozp:required-by": {
+                        "href": "https://localhost:8443/marketplace/api/listing/14/requiringListings"
+                    },
+                    "ozp:review": {
+                        "href": "https://localhost:8443/marketplace/api/listing/14/itemComment"
+                    },
+                    "self": {
+                        "href": "https://localhost:8443/marketplace/api/listing/14"
+                    }
+                },
+                "agency": "Test Organization",
+                "agencyShort": "TO",
+                "approvalStatus": "APPROVED",
+                "approvedDate": "2014-12-18T15:06:20.460+0000",
+                "bannerIconId": "96d5158b-9398-410d-866a-f7ea5b6fb8d0",
+                "categories": [
+                    "Business",
+                    "Tools"
+                ],
+                "contacts": [],
+                "currentRejection": null,
+                "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo. Quisque egestas, eros sit amet dignissim sagittis, justo enim facilisis ante, et elementum ligula elit id nunc. Ut mollis enim nec arcu porta pulvinar. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. In vitae nisl turpis. Sed congue at arcu eget feugiat. Interdum et malesuada fames ac ante ipsum primis in faucibus. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis est sapien, posuere et lobortis ac, sodales et sapien.Sed auctor molestie velit, nec sollicitudin ipsum bibendum ut. Quisque ut congue lectus. Nunc commodo non arcu sit amet vestibulum. Sed et ligula vitae justo hendrerit cursus et eget augue. Sed ullamcorper magna at euismod cursus. Vivamus id ligula purus. Nulla dapibus rhoncus tristique. Duis efficitur eleifend justo at ullamcorper. Ut condimentum velit sit amet posuere facilisis. Vestibulum at nisi elit. Aliquam eget enim accumsan, dapibus magna quis, ultricies nunc. Donec imperdiet est lacus, nec blandit felis venenatis id.",
+                "descriptionShort": "If you write software, you are probably not photogenic. This app may help, but probably not.",
+                "docUrls": [
+                    {
+                        "name": "API Documentation",
+                        "url": "https://www"
+                    },
+                    {
+                        "name": "User Manual",
+                        "url": "https://www"
+                    }
+                ],
+                "editedDate": "2014-12-18T15:06:20.477+0000",
+                "featuredBannerIconId": "39d864d9-3a03-4c36-a5ef-2dd44b704848",
+                "height": null,
+                "id": 14,
+                "imageLargeUrl": "https://localhost:8443/marketplace/api/image/96d5158b-9398-410d-866a-f7ea5b6fb8d0.png",
+                "imageMediumUrl": "https://localhost:8443/marketplace/api/image/9175d926-cf0d-4b5d-9ee4-0245afa2eb54.png",
+                "imageSmallUrl": "https://localhost:8443/marketplace/api/image/4e461208-a721-46de-b696-6642f2bc20ca.png",
+                "imageXlargeUrl": "https://localhost:8443/marketplace/api/image/39d864d9-3a03-4c36-a5ef-2dd44b704848.png",
+                "intents": [
+                    "application/json/edit",
+                    "application/json/view"
+                ],
+                "isEnabled": true,
+                "isFeatured": true,
+                "largeIconId": "9175d926-cf0d-4b5d-9ee4-0245afa2eb54",
+                "launchUrl": "http://ozone-development.github.io/ozp-demo/centerSampleListings/photogenic/index.html",
+                "owners": [
+                    {
+                        "displayName": "Test Admin 1",
+                        "username": "testAdmin1"
+                    }
+                ],
+                "required": [],
+                "requirements": "https://www",
+                "screenshots": [
+                    {
+                        "largeImageId": "edcc8669-89fd-4779-86cb-2aeab51aeb30",
+                        "largeImageUrl": "https://localhost:8443/marketplace/api/image/edcc8669-89fd-4779-86cb-2aeab51aeb30.png",
+                        "smallImageId": "c6d0f97b-8cff-436b-8c42-d5e10ceac676",
+                        "smallImageUrl": "https://localhost:8443/marketplace/api/image/c6d0f97b-8cff-436b-8c42-d5e10ceac676.png"
+                    }
+                ],
+                "singleton": false,
+                "smallIconId": "4e461208-a721-46de-b696-6642f2bc20ca",
+                "tags": [
+                    "demo"
+                ],
+                "title": "Photogenic",
+                "totalComments": 0,
+                "type": "Web Application",
+                "uuid": "3271fe57-f69c-488e-b128-402fa09ae501",
+                "versionName": "1",
+                "whatIsNew": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo.",
+                "width": null
+            },
+            {
+                "_links": {
+                    "ozp:activity": {
+                        "href": "https://localhost:8443/marketplace/api/listing/15/activity"
+                    },
+                    "ozp:required": {
+                        "href": "https://localhost:8443/marketplace/api/listing/15/requiredListings"
+                    },
+                    "ozp:required-by": {
+                        "href": "https://localhost:8443/marketplace/api/listing/15/requiringListings"
+                    },
+                    "ozp:review": {
+                        "href": "https://localhost:8443/marketplace/api/listing/15/itemComment"
+                    },
+                    "self": {
+                        "href": "https://localhost:8443/marketplace/api/listing/15"
+                    }
+                },
+                "agency": "Test Organization",
+                "agencyShort": "TO",
+                "approvalStatus": "APPROVED",
+                "approvedDate": "2014-12-18T15:06:22.223+0000",
+                "bannerIconId": "c5aaa002-f90f-449e-8558-098a2cfd1c72",
+                "categories": [
+                    "Business",
+                    "Tools"
+                ],
+                "contacts": [],
+                "currentRejection": null,
+                "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo. Quisque egestas, eros sit amet dignissim sagittis, justo enim facilisis ante, et elementum ligula elit id nunc. Ut mollis enim nec arcu porta pulvinar. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. In vitae nisl turpis. Sed congue at arcu eget feugiat. Interdum et malesuada fames ac ante ipsum primis in faucibus. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis est sapien, posuere et lobortis ac, sodales et sapien.Sed auctor molestie velit, nec sollicitudin ipsum bibendum ut. Quisque ut congue lectus. Nunc commodo non arcu sit amet vestibulum. Sed et ligula vitae justo hendrerit cursus et eget augue. Sed ullamcorper magna at euismod cursus. Vivamus id ligula purus. Nulla dapibus rhoncus tristique. Duis efficitur eleifend justo at ullamcorper. Ut condimentum velit sit amet posuere facilisis. Vestibulum at nisi elit. Aliquam eget enim accumsan, dapibus magna quis, ultricies nunc. Donec imperdiet est lacus, nec blandit felis venenatis id.",
+                "descriptionShort": "Playback audio, video, even history itself. Playback has no boundaries, including reality.",
+                "docUrls": [
+                    {
+                        "name": "API Documentation",
+                        "url": "https://www"
+                    },
+                    {
+                        "name": "User Manual",
+                        "url": "https://www"
+                    }
+                ],
+                "editedDate": "2014-12-18T15:06:22.242+0000",
+                "featuredBannerIconId": "37846f93-e69c-413a-b86f-d4451ec71bc3",
+                "height": null,
+                "id": 15,
+                "imageLargeUrl": "https://localhost:8443/marketplace/api/image/c5aaa002-f90f-449e-8558-098a2cfd1c72.png",
+                "imageMediumUrl": "https://localhost:8443/marketplace/api/image/387fa5ee-445e-4227-8410-b1d35e3a91cc.png",
+                "imageSmallUrl": "https://localhost:8443/marketplace/api/image/e40fd9b0-1255-423d-ab8e-003d79472657.png",
+                "imageXlargeUrl": "https://localhost:8443/marketplace/api/image/37846f93-e69c-413a-b86f-d4451ec71bc3.png",
+                "intents": [
+                    "application/json/edit",
+                    "application/json/view"
+                ],
+                "isEnabled": true,
+                "isFeatured": true,
+                "largeIconId": "387fa5ee-445e-4227-8410-b1d35e3a91cc",
+                "launchUrl": "http://ozone-development.github.io/ozp-demo/centerSampleListings/playback/index.html",
+                "owners": [
+                    {
+                        "displayName": "Test Admin 1",
+                        "username": "testAdmin1"
+                    }
+                ],
+                "required": [],
+                "requirements": "https://www",
+                "screenshots": [
+                    {
+                        "largeImageId": "51669536-0931-4cbb-94ec-68448d6899f2",
+                        "largeImageUrl": "https://localhost:8443/marketplace/api/image/51669536-0931-4cbb-94ec-68448d6899f2.png",
+                        "smallImageId": "f3120a67-a4a5-4169-aafe-0a5024d105e9",
+                        "smallImageUrl": "https://localhost:8443/marketplace/api/image/f3120a67-a4a5-4169-aafe-0a5024d105e9.png"
+                    }
+                ],
+                "singleton": false,
+                "smallIconId": "e40fd9b0-1255-423d-ab8e-003d79472657",
+                "tags": [
+                    "demo"
+                ],
+                "title": "Playback",
+                "totalComments": 0,
+                "type": "Web Application",
+                "uuid": "a7ca15fa-5d25-4711-af8c-5afce36fa5ea",
+                "versionName": "1",
+                "whatIsNew": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo.",
+                "width": null
+            },
+            {
+                "_links": {
+                    "ozp:activity": {
+                        "href": "https://localhost:8443/marketplace/api/listing/16/activity"
+                    },
+                    "ozp:required": {
+                        "href": "https://localhost:8443/marketplace/api/listing/16/requiredListings"
+                    },
+                    "ozp:required-by": {
+                        "href": "https://localhost:8443/marketplace/api/listing/16/requiringListings"
+                    },
+                    "ozp:review": {
+                        "href": "https://localhost:8443/marketplace/api/listing/16/itemComment"
+                    },
+                    "self": {
+                        "href": "https://localhost:8443/marketplace/api/listing/16"
+                    }
+                },
+                "agency": "Test Organization",
+                "agencyShort": "TO",
+                "approvalStatus": "APPROVED",
+                "approvedDate": "2014-12-18T15:06:23.836+0000",
+                "bannerIconId": "a1435d34-b17e-44fb-8ec0-3ab11c31ee0e",
+                "categories": [
+                    "Business",
+                    "Tools"
+                ],
+                "contacts": [],
+                "currentRejection": null,
+                "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo. Quisque egestas, eros sit amet dignissim sagittis, justo enim facilisis ante, et elementum ligula elit id nunc. Ut mollis enim nec arcu porta pulvinar. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. In vitae nisl turpis. Sed congue at arcu eget feugiat. Interdum et malesuada fames ac ante ipsum primis in faucibus. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis est sapien, posuere et lobortis ac, sodales et sapien.Sed auctor molestie velit, nec sollicitudin ipsum bibendum ut. Quisque ut congue lectus. Nunc commodo non arcu sit amet vestibulum. Sed et ligula vitae justo hendrerit cursus et eget augue. Sed ullamcorper magna at euismod cursus. Vivamus id ligula purus. Nulla dapibus rhoncus tristique. Duis efficitur eleifend justo at ullamcorper. Ut condimentum velit sit amet posuere facilisis. Vestibulum at nisi elit. Aliquam eget enim accumsan, dapibus magna quis, ultricies nunc. Donec imperdiet est lacus, nec blandit felis venenatis id.",
+                "descriptionShort": "PlotPossum is the professional version of ChartingChipmunk.",
+                "docUrls": [
+                    {
+                        "name": "API Documentation",
+                        "url": "https://www"
+                    },
+                    {
+                        "name": "User Manual",
+                        "url": "https://www"
+                    }
+                ],
+                "editedDate": "2014-12-18T15:06:23.853+0000",
+                "featuredBannerIconId": "45027971-8a78-4199-9d30-2e7f76b1c228",
+                "height": null,
+                "id": 16,
+                "imageLargeUrl": "https://localhost:8443/marketplace/api/image/a1435d34-b17e-44fb-8ec0-3ab11c31ee0e.png",
+                "imageMediumUrl": "https://localhost:8443/marketplace/api/image/2f1a07dc-c6fd-491e-9f68-222b77fefe83.png",
+                "imageSmallUrl": "https://localhost:8443/marketplace/api/image/4e12a16a-5d34-47e3-b293-e6d6477c2d29.png",
+                "imageXlargeUrl": "https://localhost:8443/marketplace/api/image/45027971-8a78-4199-9d30-2e7f76b1c228.png",
+                "intents": [
+                    "application/json/edit",
+                    "application/json/view"
+                ],
+                "isEnabled": true,
+                "isFeatured": true,
+                "largeIconId": "2f1a07dc-c6fd-491e-9f68-222b77fefe83",
+                "launchUrl": "http://ozone-development.github.io/ozp-demo/centerSampleListings/plotPossum/index.html",
+                "owners": [
+                    {
+                        "displayName": "Test Admin 1",
+                        "username": "testAdmin1"
+                    }
+                ],
+                "required": [],
+                "requirements": "https://www",
+                "screenshots": [
+                    {
+                        "largeImageId": "345385f0-41a5-475e-b524-2b8b21da2125",
+                        "largeImageUrl": "https://localhost:8443/marketplace/api/image/345385f0-41a5-475e-b524-2b8b21da2125.png",
+                        "smallImageId": "24bd81d1-e122-407f-9961-23f7aac935db",
+                        "smallImageUrl": "https://localhost:8443/marketplace/api/image/24bd81d1-e122-407f-9961-23f7aac935db.png"
+                    }
+                ],
+                "singleton": false,
+                "smallIconId": "4e12a16a-5d34-47e3-b293-e6d6477c2d29",
+                "tags": [
+                    "demo"
+                ],
+                "title": "PlotPossum",
+                "totalComments": 0,
+                "type": "Web Application",
+                "uuid": "1737d6d5-f2d1-49d0-ab8c-967f37c451f9",
+                "versionName": "1",
+                "whatIsNew": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo.",
+                "width": null
+            },
+            {
+                "_links": {
+                    "ozp:activity": {
+                        "href": "https://localhost:8443/marketplace/api/listing/17/activity"
+                    },
+                    "ozp:required": {
+                        "href": "https://localhost:8443/marketplace/api/listing/17/requiredListings"
+                    },
+                    "ozp:required-by": {
+                        "href": "https://localhost:8443/marketplace/api/listing/17/requiringListings"
+                    },
+                    "ozp:review": {
+                        "href": "https://localhost:8443/marketplace/api/listing/17/itemComment"
+                    },
+                    "self": {
+                        "href": "https://localhost:8443/marketplace/api/listing/17"
+                    }
+                },
+                "agency": "Test Organization",
+                "agencyShort": "TO",
+                "approvalStatus": "APPROVED",
+                "approvedDate": "2014-12-18T15:06:25.575+0000",
+                "bannerIconId": "706fb15f-cd88-44b5-91da-e9f35ceedfe2",
+                "categories": [
+                    "Business",
+                    "Tools"
+                ],
+                "contacts": [],
+                "currentRejection": null,
+                "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo. Quisque egestas, eros sit amet dignissim sagittis, justo enim facilisis ante, et elementum ligula elit id nunc. Ut mollis enim nec arcu porta pulvinar. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. In vitae nisl turpis. Sed congue at arcu eget feugiat. Interdum et malesuada fames ac ante ipsum primis in faucibus. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis est sapien, posuere et lobortis ac, sodales et sapien.Sed auctor molestie velit, nec sollicitudin ipsum bibendum ut. Quisque ut congue lectus. Nunc commodo non arcu sit amet vestibulum. Sed et ligula vitae justo hendrerit cursus et eget augue. Sed ullamcorper magna at euismod cursus. Vivamus id ligula purus. Nulla dapibus rhoncus tristique. Duis efficitur eleifend justo at ullamcorper. Ut condimentum velit sit amet posuere facilisis. Vestibulum at nisi elit. Aliquam eget enim accumsan, dapibus magna quis, ultricies nunc. Donec imperdiet est lacus, nec blandit felis venenatis id.",
+                "descriptionShort": "PrimeSight is similar to SecondarySight, only better.",
+                "docUrls": [
+                    {
+                        "name": "API Documentation",
+                        "url": "https://www"
+                    },
+                    {
+                        "name": "User Manual",
+                        "url": "https://www"
+                    }
+                ],
+                "editedDate": "2014-12-18T15:06:25.590+0000",
+                "featuredBannerIconId": "483eb99e-a000-460f-9922-abdb517e9a43",
+                "height": null,
+                "id": 17,
+                "imageLargeUrl": "https://localhost:8443/marketplace/api/image/706fb15f-cd88-44b5-91da-e9f35ceedfe2.png",
+                "imageMediumUrl": "https://localhost:8443/marketplace/api/image/40566f6b-545e-4166-b0f4-cebe2dfc9241.png",
+                "imageSmallUrl": "https://localhost:8443/marketplace/api/image/0c87dbdd-cfcf-475c-90fc-70bbdbf033dd.png",
+                "imageXlargeUrl": "https://localhost:8443/marketplace/api/image/483eb99e-a000-460f-9922-abdb517e9a43.png",
+                "intents": [
+                    "application/json/edit",
+                    "application/json/view"
+                ],
+                "isEnabled": true,
+                "isFeatured": true,
+                "largeIconId": "40566f6b-545e-4166-b0f4-cebe2dfc9241",
+                "launchUrl": "http://ozone-development.github.io/ozp-demo/centerSampleListings/primeSight/index.html",
+                "owners": [
+                    {
+                        "displayName": "Test Admin 1",
+                        "username": "testAdmin1"
+                    }
+                ],
+                "required": [],
+                "requirements": "https://www",
+                "screenshots": [
+                    {
+                        "largeImageId": "ba8b8ac9-8f57-4788-8798-19db903cbb2d",
+                        "largeImageUrl": "https://localhost:8443/marketplace/api/image/ba8b8ac9-8f57-4788-8798-19db903cbb2d.png",
+                        "smallImageId": "a354685c-5e5d-4da6-a8e5-8d89d4afcbe4",
+                        "smallImageUrl": "https://localhost:8443/marketplace/api/image/a354685c-5e5d-4da6-a8e5-8d89d4afcbe4.png"
+                    }
+                ],
+                "singleton": false,
+                "smallIconId": "0c87dbdd-cfcf-475c-90fc-70bbdbf033dd",
+                "tags": [
+                    "demo"
+                ],
+                "title": "PrimeSight",
+                "totalComments": 0,
+                "type": "Web Application",
+                "uuid": "3477eaa9-38f7-497e-a1af-dde550ccd5a3",
+                "versionName": "1",
+                "whatIsNew": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo.",
+                "width": null
+            },
+            {
+                "_links": {
+                    "ozp:activity": {
+                        "href": "https://localhost:8443/marketplace/api/listing/18/activity"
+                    },
+                    "ozp:required": {
+                        "href": "https://localhost:8443/marketplace/api/listing/18/requiredListings"
+                    },
+                    "ozp:required-by": {
+                        "href": "https://localhost:8443/marketplace/api/listing/18/requiringListings"
+                    },
+                    "ozp:review": {
+                        "href": "https://localhost:8443/marketplace/api/listing/18/itemComment"
+                    },
+                    "self": {
+                        "href": "https://localhost:8443/marketplace/api/listing/18"
+                    }
+                },
+                "agency": "Test Organization",
+                "agencyShort": "TO",
+                "approvalStatus": "APPROVED",
+                "approvedDate": "2014-12-18T15:06:27.316+0000",
+                "bannerIconId": "b00b18fd-4992-4584-9a2f-dbb9d6b0a46a",
+                "categories": [
+                    "Business",
+                    "Tools"
+                ],
+                "contacts": [],
+                "currentRejection": null,
+                "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo. Quisque egestas, eros sit amet dignissim sagittis, justo enim facilisis ante, et elementum ligula elit id nunc. Ut mollis enim nec arcu porta pulvinar. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. In vitae nisl turpis. Sed congue at arcu eget feugiat. Interdum et malesuada fames ac ante ipsum primis in faucibus. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis est sapien, posuere et lobortis ac, sodales et sapien.Sed auctor molestie velit, nec sollicitudin ipsum bibendum ut. Quisque ut congue lectus. Nunc commodo non arcu sit amet vestibulum. Sed et ligula vitae justo hendrerit cursus et eget augue. Sed ullamcorper magna at euismod cursus. Vivamus id ligula purus. Nulla dapibus rhoncus tristique. Duis efficitur eleifend justo at ullamcorper. Ut condimentum velit sit amet posuere facilisis. Vestibulum at nisi elit. Aliquam eget enim accumsan, dapibus magna quis, ultricies nunc. Donec imperdiet est lacus, nec blandit felis venenatis id.",
+                "descriptionShort": "If you have ever dropped something down a well, this application will help you find it",
+                "docUrls": [
+                    {
+                        "name": "API Documentation",
+                        "url": "https://www"
+                    },
+                    {
+                        "name": "User Manual",
+                        "url": "https://www"
+                    }
+                ],
+                "editedDate": "2014-12-18T15:06:27.332+0000",
+                "featuredBannerIconId": "6b636bcf-7a52-4fb7-86b5-35d16d26fb9a",
+                "height": null,
+                "id": 18,
+                "imageLargeUrl": "https://localhost:8443/marketplace/api/image/b00b18fd-4992-4584-9a2f-dbb9d6b0a46a.png",
+                "imageMediumUrl": "https://localhost:8443/marketplace/api/image/4337d57a-a04a-4a92-a9e2-f03921fdc789.png",
+                "imageSmallUrl": "https://localhost:8443/marketplace/api/image/e31ccac5-619d-48b4-b377-b2e57de3d4e6.png",
+                "imageXlargeUrl": "https://localhost:8443/marketplace/api/image/6b636bcf-7a52-4fb7-86b5-35d16d26fb9a.png",
+                "intents": [
+                    "application/json/edit",
+                    "application/json/view"
+                ],
+                "isEnabled": true,
+                "isFeatured": true,
+                "largeIconId": "4337d57a-a04a-4a92-a9e2-f03921fdc789",
+                "launchUrl": "http://ozone-development.github.io/ozp-demo/centerSampleListings/searchWell/index.html",
+                "owners": [
+                    {
+                        "displayName": "Test Admin 1",
+                        "username": "testAdmin1"
+                    }
+                ],
+                "required": [],
+                "requirements": "https://www",
+                "screenshots": [
+                    {
+                        "largeImageId": "5e8e39fd-e34d-4ca3-a2d9-8b554ea5f5e3",
+                        "largeImageUrl": "https://localhost:8443/marketplace/api/image/5e8e39fd-e34d-4ca3-a2d9-8b554ea5f5e3.png",
+                        "smallImageId": "2a5630a6-1c20-4cde-98b8-a3c7366fe1c3",
+                        "smallImageUrl": "https://localhost:8443/marketplace/api/image/2a5630a6-1c20-4cde-98b8-a3c7366fe1c3.png"
+                    }
+                ],
+                "singleton": false,
+                "smallIconId": "e31ccac5-619d-48b4-b377-b2e57de3d4e6",
+                "tags": [
+                    "demo"
+                ],
+                "title": "SearchWell",
+                "totalComments": 0,
+                "type": "Web Application",
+                "uuid": "a0ed12ee-1af5-42b5-a2aa-56d63b102f5f",
+                "versionName": "1",
+                "whatIsNew": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo.",
+                "width": null
+            },
+            {
+                "_links": {
+                    "ozp:activity": {
+                        "href": "https://localhost:8443/marketplace/api/listing/19/activity"
+                    },
+                    "ozp:required": {
+                        "href": "https://localhost:8443/marketplace/api/listing/19/requiredListings"
+                    },
+                    "ozp:required-by": {
+                        "href": "https://localhost:8443/marketplace/api/listing/19/requiringListings"
+                    },
+                    "ozp:review": {
+                        "href": "https://localhost:8443/marketplace/api/listing/19/itemComment"
+                    },
+                    "self": {
+                        "href": "https://localhost:8443/marketplace/api/listing/19"
+                    }
+                },
+                "agency": "Test Organization",
+                "agencyShort": "TO",
+                "approvalStatus": "APPROVED",
+                "approvedDate": "2014-12-18T15:06:29.026+0000",
+                "bannerIconId": "14b357a0-0c28-42df-a626-c97ba5256181",
+                "categories": [
+                    "Business",
+                    "Tools"
+                ],
+                "contacts": [],
+                "currentRejection": null,
+                "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo. Quisque egestas, eros sit amet dignissim sagittis, justo enim facilisis ante, et elementum ligula elit id nunc. Ut mollis enim nec arcu porta pulvinar. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. In vitae nisl turpis. Sed congue at arcu eget feugiat. Interdum et malesuada fames ac ante ipsum primis in faucibus. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis est sapien, posuere et lobortis ac, sodales et sapien.Sed auctor molestie velit, nec sollicitudin ipsum bibendum ut. Quisque ut congue lectus. Nunc commodo non arcu sit amet vestibulum. Sed et ligula vitae justo hendrerit cursus et eget augue. Sed ullamcorper magna at euismod cursus. Vivamus id ligula purus. Nulla dapibus rhoncus tristique. Duis efficitur eleifend justo at ullamcorper. Ut condimentum velit sit amet posuere facilisis. Vestibulum at nisi elit. Aliquam eget enim accumsan, dapibus magna quis, ultricies nunc. Donec imperdiet est lacus, nec blandit felis venenatis id.",
+                "descriptionShort": "The best seats, period.",
+                "docUrls": [
+                    {
+                        "name": "API Documentation",
+                        "url": "https://www"
+                    },
+                    {
+                        "name": "User Manual",
+                        "url": "https://www"
+                    }
+                ],
+                "editedDate": "2014-12-18T15:06:29.040+0000",
+                "featuredBannerIconId": "086f7b87-92fe-4bfc-97cf-4f3cf3cfff12",
+                "height": null,
+                "id": 19,
+                "imageLargeUrl": "https://localhost:8443/marketplace/api/image/14b357a0-0c28-42df-a626-c97ba5256181.png",
+                "imageMediumUrl": "https://localhost:8443/marketplace/api/image/eb719821-eccc-4926-acb5-a509422d43d2.png",
+                "imageSmallUrl": "https://localhost:8443/marketplace/api/image/855d16bf-4dd3-451f-a243-39238114e79c.png",
+                "imageXlargeUrl": "https://localhost:8443/marketplace/api/image/086f7b87-92fe-4bfc-97cf-4f3cf3cfff12.png",
+                "intents": [
+                    "application/json/edit",
+                    "application/json/view"
+                ],
+                "isEnabled": true,
+                "isFeatured": true,
+                "largeIconId": "eb719821-eccc-4926-acb5-a509422d43d2",
+                "launchUrl": "http://ozone-development.github.io/ozp-demo/centerSampleListings/skybox/index.html",
+                "owners": [
+                    {
+                        "displayName": "Test Admin 1",
+                        "username": "testAdmin1"
+                    }
+                ],
+                "required": [],
+                "requirements": "https://www",
+                "screenshots": [
+                    {
+                        "largeImageId": "6d4a0a50-609c-459f-b39e-fcc7702744c0",
+                        "largeImageUrl": "https://localhost:8443/marketplace/api/image/6d4a0a50-609c-459f-b39e-fcc7702744c0.png",
+                        "smallImageId": "f674d45f-bfc8-4215-9404-d31e675976ab",
+                        "smallImageUrl": "https://localhost:8443/marketplace/api/image/f674d45f-bfc8-4215-9404-d31e675976ab.png"
+                    }
+                ],
+                "singleton": false,
+                "smallIconId": "855d16bf-4dd3-451f-a243-39238114e79c",
+                "tags": [
+                    "demo"
+                ],
+                "title": "Skybox",
+                "totalComments": 0,
+                "type": "Web Application",
+                "uuid": "c7d60a64-2752-4f45-8ba3-60e10cd5210a",
+                "versionName": "1",
+                "whatIsNew": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo.",
+                "width": null
+            },
+            {
+                "_links": {
+                    "ozp:activity": {
+                        "href": "https://localhost:8443/marketplace/api/listing/20/activity"
+                    },
+                    "ozp:required": {
+                        "href": "https://localhost:8443/marketplace/api/listing/20/requiredListings"
+                    },
+                    "ozp:required-by": {
+                        "href": "https://localhost:8443/marketplace/api/listing/20/requiringListings"
+                    },
+                    "ozp:review": {
+                        "href": "https://localhost:8443/marketplace/api/listing/20/itemComment"
+                    },
+                    "self": {
+                        "href": "https://localhost:8443/marketplace/api/listing/20"
+                    }
+                },
+                "agency": "Test Organization",
+                "agencyShort": "TO",
+                "approvalStatus": "APPROVED",
+                "approvedDate": "2014-12-18T15:06:30.645+0000",
+                "bannerIconId": "e6854abf-c69f-4b83-9f80-8429f230460f",
+                "categories": [
+                    "Business",
+                    "Tools"
+                ],
+                "contacts": [],
+                "currentRejection": null,
+                "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo. Quisque egestas, eros sit amet dignissim sagittis, justo enim facilisis ante, et elementum ligula elit id nunc. Ut mollis enim nec arcu porta pulvinar. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. In vitae nisl turpis. Sed congue at arcu eget feugiat. Interdum et malesuada fames ac ante ipsum primis in faucibus. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis est sapien, posuere et lobortis ac, sodales et sapien.Sed auctor molestie velit, nec sollicitudin ipsum bibendum ut. Quisque ut congue lectus. Nunc commodo non arcu sit amet vestibulum. Sed et ligula vitae justo hendrerit cursus et eget augue. Sed ullamcorper magna at euismod cursus. Vivamus id ligula purus. Nulla dapibus rhoncus tristique. Duis efficitur eleifend justo at ullamcorper. Ut condimentum velit sit amet posuere facilisis. Vestibulum at nisi elit. Aliquam eget enim accumsan, dapibus magna quis, ultricies nunc. Donec imperdiet est lacus, nec blandit felis venenatis id.",
+                "descriptionShort": "Makes taking notes on trees almost as easy as taking them on paper.",
+                "docUrls": [
+                    {
+                        "name": "API Documentation",
+                        "url": "https://www"
+                    },
+                    {
+                        "name": "User Manual",
+                        "url": "https://www"
+                    }
+                ],
+                "editedDate": "2014-12-18T15:06:30.660+0000",
+                "featuredBannerIconId": "525b0aef-8b83-4629-ada5-73f5caf7c13b",
+                "height": null,
+                "id": 20,
+                "imageLargeUrl": "https://localhost:8443/marketplace/api/image/e6854abf-c69f-4b83-9f80-8429f230460f.png",
+                "imageMediumUrl": "https://localhost:8443/marketplace/api/image/bad2d7f4-2cc3-41cb-ac19-062977e7ee07.png",
+                "imageSmallUrl": "https://localhost:8443/marketplace/api/image/2d34a72f-e781-48c4-ac27-7c8e8d7f732f.png",
+                "imageXlargeUrl": "https://localhost:8443/marketplace/api/image/525b0aef-8b83-4629-ada5-73f5caf7c13b.png",
+                "intents": [
+                    "application/json/edit",
+                    "application/json/view"
+                ],
+                "isEnabled": true,
+                "isFeatured": true,
+                "largeIconId": "bad2d7f4-2cc3-41cb-ac19-062977e7ee07",
+                "launchUrl": "http://ozone-development.github.io/ozp-demo/centerSampleListings/treeNote/index.html",
+                "owners": [
+                    {
+                        "displayName": "Test Admin 1",
+                        "username": "testAdmin1"
+                    }
+                ],
+                "required": [],
+                "requirements": "https://www",
+                "screenshots": [
+                    {
+                        "largeImageId": "ee4a1553-47b8-440c-b98c-8722ca0a908e",
+                        "largeImageUrl": "https://localhost:8443/marketplace/api/image/ee4a1553-47b8-440c-b98c-8722ca0a908e.png",
+                        "smallImageId": "3bf9a527-3a9c-4d9d-a1ca-fe71b009604b",
+                        "smallImageUrl": "https://localhost:8443/marketplace/api/image/3bf9a527-3a9c-4d9d-a1ca-fe71b009604b.png"
+                    }
+                ],
+                "singleton": false,
+                "smallIconId": "2d34a72f-e781-48c4-ac27-7c8e8d7f732f",
+                "tags": [
+                    "demo"
+                ],
+                "title": "TreeNote",
+                "totalComments": 0,
+                "type": "Web Application",
+                "uuid": "3c1011d5-85af-42a1-84d6-9ce38fd3b093",
+                "versionName": "1",
+                "whatIsNew": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo.",
+                "width": null
+            },
+            {
+                "_links": {
+                    "ozp:activity": {
+                        "href": "https://localhost:8443/marketplace/api/listing/21/activity"
+                    },
+                    "ozp:required": {
+                        "href": "https://localhost:8443/marketplace/api/listing/21/requiredListings"
+                    },
+                    "ozp:required-by": {
+                        "href": "https://localhost:8443/marketplace/api/listing/21/requiringListings"
+                    },
+                    "ozp:review": {
+                        "href": "https://localhost:8443/marketplace/api/listing/21/itemComment"
+                    },
+                    "self": {
+                        "href": "https://localhost:8443/marketplace/api/listing/21"
+                    }
+                },
+                "agency": "Test Organization",
+                "agencyShort": "TO",
+                "approvalStatus": "APPROVED",
+                "approvedDate": "2014-12-18T15:06:32.314+0000",
+                "bannerIconId": "53428727-8117-4aa5-9f85-3aa0b4ff6258",
+                "categories": [
+                    "Business",
+                    "Tools"
+                ],
+                "contacts": [],
+                "currentRejection": null,
+                "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo. Quisque egestas, eros sit amet dignissim sagittis, justo enim facilisis ante, et elementum ligula elit id nunc. Ut mollis enim nec arcu porta pulvinar. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. In vitae nisl turpis. Sed congue at arcu eget feugiat. Interdum et malesuada fames ac ante ipsum primis in faucibus. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis est sapien, posuere et lobortis ac, sodales et sapien.Sed auctor molestie velit, nec sollicitudin ipsum bibendum ut. Quisque ut congue lectus. Nunc commodo non arcu sit amet vestibulum. Sed et ligula vitae justo hendrerit cursus et eget augue. Sed ullamcorper magna at euismod cursus. Vivamus id ligula purus. Nulla dapibus rhoncus tristique. Duis efficitur eleifend justo at ullamcorper. Ut condimentum velit sit amet posuere facilisis. Vestibulum at nisi elit. Aliquam eget enim accumsan, dapibus magna quis, ultricies nunc. Donec imperdiet est lacus, nec blandit felis venenatis id.",
+                "descriptionShort": "Impress your boss with these fantastic and completely nonsensical whiteboard graphs!",
+                "docUrls": [
+                    {
+                        "name": "API Documentation",
+                        "url": "https://www"
+                    },
+                    {
+                        "name": "User Manual",
+                        "url": "https://www"
+                    }
+                ],
+                "editedDate": "2014-12-18T15:06:32.329+0000",
+                "featuredBannerIconId": "c04e23c7-4541-4bb4-99b2-cbca7c5680ae",
+                "height": null,
+                "id": 21,
+                "imageLargeUrl": "https://localhost:8443/marketplace/api/image/53428727-8117-4aa5-9f85-3aa0b4ff6258.png",
+                "imageMediumUrl": "https://localhost:8443/marketplace/api/image/072f7f26-1759-412e-aef2-bff9f4a88803.png",
+                "imageSmallUrl": "https://localhost:8443/marketplace/api/image/01eae226-787e-4ccc-9973-b5ea7fa5d6cd.png",
+                "imageXlargeUrl": "https://localhost:8443/marketplace/api/image/c04e23c7-4541-4bb4-99b2-cbca7c5680ae.png",
+                "intents": [
+                    "application/json/edit",
+                    "application/json/view"
+                ],
+                "isEnabled": true,
+                "isFeatured": true,
+                "largeIconId": "072f7f26-1759-412e-aef2-bff9f4a88803",
+                "launchUrl": "http://ozone-development.github.io/ozp-demo/centerSampleListings/whiteboardGraphs/index.html",
+                "owners": [
+                    {
+                        "displayName": "Test Admin 1",
+                        "username": "testAdmin1"
+                    }
+                ],
+                "required": [],
+                "requirements": "https://www",
+                "screenshots": [
+                    {
+                        "largeImageId": "9659bebe-89b3-4166-ae18-d508e1be16e2",
+                        "largeImageUrl": "https://localhost:8443/marketplace/api/image/9659bebe-89b3-4166-ae18-d508e1be16e2.png",
+                        "smallImageId": "e4c87d2e-8e47-422f-b040-1114a90b6674",
+                        "smallImageUrl": "https://localhost:8443/marketplace/api/image/e4c87d2e-8e47-422f-b040-1114a90b6674.png"
+                    }
+                ],
+                "singleton": false,
+                "smallIconId": "01eae226-787e-4ccc-9973-b5ea7fa5d6cd",
+                "tags": [
+                    "demo"
+                ],
+                "title": "WhiteboardGraphs",
+                "totalComments": 0,
+                "type": "Web Application",
+                "uuid": "6822da14-d435-4c06-81b0-b177f9d424ea",
+                "versionName": "1",
+                "whatIsNew": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo.",
+                "width": null
+            },
+            {
+                "_links": {
+                    "ozp:activity": {
+                        "href": "https://localhost:8443/marketplace/api/listing/22/activity"
+                    },
+                    "ozp:required": {
+                        "href": "https://localhost:8443/marketplace/api/listing/22/requiredListings"
+                    },
+                    "ozp:required-by": {
+                        "href": "https://localhost:8443/marketplace/api/listing/22/requiringListings"
+                    },
+                    "ozp:review": {
+                        "href": "https://localhost:8443/marketplace/api/listing/22/itemComment"
+                    },
+                    "self": {
+                        "href": "https://localhost:8443/marketplace/api/listing/22"
+                    }
+                },
+                "agency": "Test Organization",
+                "agencyShort": "TO",
+                "approvalStatus": "APPROVED",
+                "approvedDate": "2014-12-18T15:06:34.029+0000",
+                "bannerIconId": "e43556ee-fbef-4da5-877d-a3c979d79ff6",
+                "categories": [
+                    "Business",
+                    "Tools"
+                ],
+                "contacts": [],
+                "currentRejection": null,
+                "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo. Quisque egestas, eros sit amet dignissim sagittis, justo enim facilisis ante, et elementum ligula elit id nunc. Ut mollis enim nec arcu porta pulvinar. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. In vitae nisl turpis. Sed congue at arcu eget feugiat. Interdum et malesuada fames ac ante ipsum primis in faucibus. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis est sapien, posuere et lobortis ac, sodales et sapien.Sed auctor molestie velit, nec sollicitudin ipsum bibendum ut. Quisque ut congue lectus. Nunc commodo non arcu sit amet vestibulum. Sed et ligula vitae justo hendrerit cursus et eget augue. Sed ullamcorper magna at euismod cursus. Vivamus id ligula purus. Nulla dapibus rhoncus tristique. Duis efficitur eleifend justo at ullamcorper. Ut condimentum velit sit amet posuere facilisis. Vestibulum at nisi elit. Aliquam eget enim accumsan, dapibus magna quis, ultricies nunc. Donec imperdiet est lacus, nec blandit felis venenatis id.",
+                "descriptionShort": "The best bouncing blue ball you've ever seen",
+                "docUrls": [
+                    {
+                        "name": "API Documentation",
+                        "url": "https://www"
+                    },
+                    {
+                        "name": "User Manual",
+                        "url": "https://www"
+                    }
+                ],
+                "editedDate": "2014-12-18T15:06:34.044+0000",
+                "featuredBannerIconId": "ce5b4970-c240-45a0-b389-dc1b3aa5be75",
+                "height": null,
+                "id": 22,
+                "imageLargeUrl": "https://localhost:8443/marketplace/api/image/e43556ee-fbef-4da5-877d-a3c979d79ff6.png",
+                "imageMediumUrl": "https://localhost:8443/marketplace/api/image/f55fe5ce-6d26-4dbb-9a95-45f7f8de4fff.png",
+                "imageSmallUrl": "https://localhost:8443/marketplace/api/image/06a18322-aaf3-452e-87f0-9bd70178df30.png",
+                "imageXlargeUrl": "https://localhost:8443/marketplace/api/image/ce5b4970-c240-45a0-b389-dc1b3aa5be75.png",
+                "intents": [
+                    "application/json/edit",
+                    "application/json/view"
+                ],
+                "isEnabled": true,
+                "isFeatured": false,
+                "largeIconId": "f55fe5ce-6d26-4dbb-9a95-45f7f8de4fff",
+                "launchUrl": "http://ozone-development.github.io/ozp-demo/bouncingBalls/index.html?color=blue",
+                "owners": [
+                    {
+                        "displayName": "Test Admin 1",
+                        "username": "testAdmin1"
+                    }
+                ],
+                "required": [],
+                "requirements": "https://www",
+                "screenshots": [
+                    {
+                        "largeImageId": "e144ffef-d2e1-4bac-93fa-4dd0c52b9950",
+                        "largeImageUrl": "https://localhost:8443/marketplace/api/image/e144ffef-d2e1-4bac-93fa-4dd0c52b9950.png",
+                        "smallImageId": "7affb3ff-b46e-4020-a00e-a574b7c97f32",
+                        "smallImageUrl": "https://localhost:8443/marketplace/api/image/7affb3ff-b46e-4020-a00e-a574b7c97f32.png"
+                    }
+                ],
+                "singleton": false,
+                "smallIconId": "06a18322-aaf3-452e-87f0-9bd70178df30",
+                "tags": [
+                    "demo"
+                ],
+                "title": "Bouncing Blue Ball",
+                "totalComments": 0,
+                "type": "Web Application",
+                "uuid": "bb7ced31-6f46-409e-a8b2-6b869c139520",
+                "versionName": "1",
+                "whatIsNew": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo.",
+                "width": null
+            },
+            {
+                "_links": {
+                    "ozp:activity": {
+                        "href": "https://localhost:8443/marketplace/api/listing/23/activity"
+                    },
+                    "ozp:required": {
+                        "href": "https://localhost:8443/marketplace/api/listing/23/requiredListings"
+                    },
+                    "ozp:required-by": {
+                        "href": "https://localhost:8443/marketplace/api/listing/23/requiringListings"
+                    },
+                    "ozp:review": {
+                        "href": "https://localhost:8443/marketplace/api/listing/23/itemComment"
+                    },
+                    "self": {
+                        "href": "https://localhost:8443/marketplace/api/listing/23"
+                    }
+                },
+                "agency": "Test Organization",
+                "agencyShort": "TO",
+                "approvalStatus": "APPROVED",
+                "approvedDate": "2014-12-18T15:06:35.637+0000",
+                "bannerIconId": "59af3680-022b-48cf-aa56-166890ff7e11",
+                "categories": [
+                    "Business",
+                    "Tools"
+                ],
+                "contacts": [],
+                "currentRejection": null,
+                "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo. Quisque egestas, eros sit amet dignissim sagittis, justo enim facilisis ante, et elementum ligula elit id nunc. Ut mollis enim nec arcu porta pulvinar. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. In vitae nisl turpis. Sed congue at arcu eget feugiat. Interdum et malesuada fames ac ante ipsum primis in faucibus. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis est sapien, posuere et lobortis ac, sodales et sapien.Sed auctor molestie velit, nec sollicitudin ipsum bibendum ut. Quisque ut congue lectus. Nunc commodo non arcu sit amet vestibulum. Sed et ligula vitae justo hendrerit cursus et eget augue. Sed ullamcorper magna at euismod cursus. Vivamus id ligula purus. Nulla dapibus rhoncus tristique. Duis efficitur eleifend justo at ullamcorper. Ut condimentum velit sit amet posuere facilisis. Vestibulum at nisi elit. Aliquam eget enim accumsan, dapibus magna quis, ultricies nunc. Donec imperdiet est lacus, nec blandit felis venenatis id.",
+                "descriptionShort": "The best bouncing red ball you've ever seen",
+                "docUrls": [
+                    {
+                        "name": "API Documentation",
+                        "url": "https://www"
+                    },
+                    {
+                        "name": "User Manual",
+                        "url": "https://www"
+                    }
+                ],
+                "editedDate": "2014-12-18T15:06:35.656+0000",
+                "featuredBannerIconId": "9dac590d-052c-41f7-b176-15832e5c0a3d",
+                "height": null,
+                "id": 23,
+                "imageLargeUrl": "https://localhost:8443/marketplace/api/image/59af3680-022b-48cf-aa56-166890ff7e11.png",
+                "imageMediumUrl": "https://localhost:8443/marketplace/api/image/33b8c3ae-81e8-4948-a97f-d6546f79f60d.png",
+                "imageSmallUrl": "https://localhost:8443/marketplace/api/image/c03ce74a-2a54-4561-bac8-7271f9c3c993.png",
+                "imageXlargeUrl": "https://localhost:8443/marketplace/api/image/9dac590d-052c-41f7-b176-15832e5c0a3d.png",
+                "intents": [
+                    "application/json/edit",
+                    "application/json/view"
+                ],
+                "isEnabled": true,
+                "isFeatured": false,
+                "largeIconId": "33b8c3ae-81e8-4948-a97f-d6546f79f60d",
+                "launchUrl": "http://ozone-development.github.io/ozp-demo/bouncingBalls/index.html?color=red",
+                "owners": [
+                    {
+                        "displayName": "Test Admin 1",
+                        "username": "testAdmin1"
+                    }
+                ],
+                "required": [],
+                "requirements": "https://www",
+                "screenshots": [
+                    {
+                        "largeImageId": "42ea25bf-3817-49c7-bb5d-293d703648ce",
+                        "largeImageUrl": "https://localhost:8443/marketplace/api/image/42ea25bf-3817-49c7-bb5d-293d703648ce.png",
+                        "smallImageId": "ffb11a1f-b041-42f6-b69e-9cd25478dcad",
+                        "smallImageUrl": "https://localhost:8443/marketplace/api/image/ffb11a1f-b041-42f6-b69e-9cd25478dcad.png"
+                    }
+                ],
+                "singleton": false,
+                "smallIconId": "c03ce74a-2a54-4561-bac8-7271f9c3c993",
+                "tags": [
+                    "demo"
+                ],
+                "title": "Bouncing Red Ball",
+                "totalComments": 0,
+                "type": "Web Application",
+                "uuid": "c30cfce1-d702-49af-83ae-b5cf5c1195e0",
+                "versionName": "1",
+                "whatIsNew": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo.",
+                "width": null
+            },
+            {
+                "_links": {
+                    "ozp:activity": {
+                        "href": "https://localhost:8443/marketplace/api/listing/24/activity"
+                    },
+                    "ozp:required": {
+                        "href": "https://localhost:8443/marketplace/api/listing/24/requiredListings"
+                    },
+                    "ozp:required-by": {
+                        "href": "https://localhost:8443/marketplace/api/listing/24/requiringListings"
+                    },
+                    "ozp:review": {
+                        "href": "https://localhost:8443/marketplace/api/listing/24/itemComment"
+                    },
+                    "self": {
+                        "href": "https://localhost:8443/marketplace/api/listing/24"
+                    }
+                },
+                "agency": "Test Organization",
+                "agencyShort": "TO",
+                "approvalStatus": "APPROVED",
+                "approvedDate": "2014-12-18T15:06:37.171+0000",
+                "bannerIconId": "f59001c9-b942-4687-a6a6-0bf594f80b58",
+                "categories": [
+                    "Business",
+                    "Tools"
+                ],
+                "contacts": [],
+                "currentRejection": null,
+                "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo. Quisque egestas, eros sit amet dignissim sagittis, justo enim facilisis ante, et elementum ligula elit id nunc. Ut mollis enim nec arcu porta pulvinar. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. In vitae nisl turpis. Sed congue at arcu eget feugiat. Interdum et malesuada fames ac ante ipsum primis in faucibus. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis est sapien, posuere et lobortis ac, sodales et sapien.Sed auctor molestie velit, nec sollicitudin ipsum bibendum ut. Quisque ut congue lectus. Nunc commodo non arcu sit amet vestibulum. Sed et ligula vitae justo hendrerit cursus et eget augue. Sed ullamcorper magna at euismod cursus. Vivamus id ligula purus. Nulla dapibus rhoncus tristique. Duis efficitur eleifend justo at ullamcorper. Ut condimentum velit sit amet posuere facilisis. Vestibulum at nisi elit. Aliquam eget enim accumsan, dapibus magna quis, ultricies nunc. Donec imperdiet est lacus, nec blandit felis venenatis id.",
+                "descriptionShort": "The best bouncing black ball you've ever seen",
+                "docUrls": [
+                    {
+                        "name": "API Documentation",
+                        "url": "https://www"
+                    },
+                    {
+                        "name": "User Manual",
+                        "url": "https://www"
+                    }
+                ],
+                "editedDate": "2014-12-18T15:06:37.195+0000",
+                "featuredBannerIconId": "ec21808b-2c13-47a7-834d-c9e82b7a93f1",
+                "height": null,
+                "id": 24,
+                "imageLargeUrl": "https://localhost:8443/marketplace/api/image/f59001c9-b942-4687-a6a6-0bf594f80b58.png",
+                "imageMediumUrl": "https://localhost:8443/marketplace/api/image/e18a5bd7-d6ad-441c-903b-fb867600127c.png",
+                "imageSmallUrl": "https://localhost:8443/marketplace/api/image/976ff61b-d417-4434-86d0-fd73f7c953f7.png",
+                "imageXlargeUrl": "https://localhost:8443/marketplace/api/image/ec21808b-2c13-47a7-834d-c9e82b7a93f1.png",
+                "intents": [
+                    "application/json/edit",
+                    "application/json/view"
+                ],
+                "isEnabled": true,
+                "isFeatured": false,
+                "largeIconId": "e18a5bd7-d6ad-441c-903b-fb867600127c",
+                "launchUrl": "http://ozone-development.github.io/ozp-demo/bouncingBalls/index.html?color=black",
+                "owners": [
+                    {
+                        "displayName": "Test Admin 1",
+                        "username": "testAdmin1"
+                    }
+                ],
+                "required": [],
+                "requirements": "https://www",
+                "screenshots": [
+                    {
+                        "largeImageId": "93cb950a-b67f-45c9-b9ed-96eadc0024f7",
+                        "largeImageUrl": "https://localhost:8443/marketplace/api/image/93cb950a-b67f-45c9-b9ed-96eadc0024f7.png",
+                        "smallImageId": "5a30640d-d999-400c-ba6d-a6f804b78d78",
+                        "smallImageUrl": "https://localhost:8443/marketplace/api/image/5a30640d-d999-400c-ba6d-a6f804b78d78.png"
+                    }
+                ],
+                "singleton": false,
+                "smallIconId": "976ff61b-d417-4434-86d0-fd73f7c953f7",
+                "tags": [
+                    "demo"
+                ],
+                "title": "Bouncing Black Ball",
+                "totalComments": 0,
+                "type": "Web Application",
+                "uuid": "308f8953-1f16-475a-9375-882c66fe117f",
+                "versionName": "1",
+                "whatIsNew": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo.",
+                "width": null
+            },
+            {
+                "_links": {
+                    "ozp:activity": {
+                        "href": "https://localhost:8443/marketplace/api/listing/25/activity"
+                    },
+                    "ozp:required": {
+                        "href": "https://localhost:8443/marketplace/api/listing/25/requiredListings"
+                    },
+                    "ozp:required-by": {
+                        "href": "https://localhost:8443/marketplace/api/listing/25/requiringListings"
+                    },
+                    "ozp:review": {
+                        "href": "https://localhost:8443/marketplace/api/listing/25/itemComment"
+                    },
+                    "self": {
+                        "href": "https://localhost:8443/marketplace/api/listing/25"
+                    }
+                },
+                "agency": "Test Organization",
+                "agencyShort": "TO",
+                "approvalStatus": "APPROVED",
+                "approvedDate": "2014-12-18T15:06:38.738+0000",
+                "bannerIconId": "bbb76677-241e-401a-b630-6b3a25b7df38",
+                "categories": [
+                    "Business",
+                    "Tools"
+                ],
+                "contacts": [],
+                "currentRejection": null,
+                "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo. Quisque egestas, eros sit amet dignissim sagittis, justo enim facilisis ante, et elementum ligula elit id nunc. Ut mollis enim nec arcu porta pulvinar. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. In vitae nisl turpis. Sed congue at arcu eget feugiat. Interdum et malesuada fames ac ante ipsum primis in faucibus. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis est sapien, posuere et lobortis ac, sodales et sapien.Sed auctor molestie velit, nec sollicitudin ipsum bibendum ut. Quisque ut congue lectus. Nunc commodo non arcu sit amet vestibulum. Sed et ligula vitae justo hendrerit cursus et eget augue. Sed ullamcorper magna at euismod cursus. Vivamus id ligula purus. Nulla dapibus rhoncus tristique. Duis efficitur eleifend justo at ullamcorper. Ut condimentum velit sit amet posuere facilisis. Vestibulum at nisi elit. Aliquam eget enim accumsan, dapibus magna quis, ultricies nunc. Donec imperdiet est lacus, nec blandit felis venenatis id.",
+                "descriptionShort": "The best bouncing green ball you've ever seen",
+                "docUrls": [
+                    {
+                        "name": "API Documentation",
+                        "url": "https://www"
+                    },
+                    {
+                        "name": "User Manual",
+                        "url": "https://www"
+                    }
+                ],
+                "editedDate": "2014-12-18T15:06:38.753+0000",
+                "featuredBannerIconId": "cf37b852-6650-4792-9090-2077c11a5dfe",
+                "height": null,
+                "id": 25,
+                "imageLargeUrl": "https://localhost:8443/marketplace/api/image/bbb76677-241e-401a-b630-6b3a25b7df38.png",
+                "imageMediumUrl": "https://localhost:8443/marketplace/api/image/15d79c0f-7618-430b-a41c-5913b5f16035.png",
+                "imageSmallUrl": "https://localhost:8443/marketplace/api/image/7c411b0e-8cca-4f62-aab6-51c61acf9d89.png",
+                "imageXlargeUrl": "https://localhost:8443/marketplace/api/image/cf37b852-6650-4792-9090-2077c11a5dfe.png",
+                "intents": [
+                    "application/json/edit",
+                    "application/json/view"
+                ],
+                "isEnabled": true,
+                "isFeatured": false,
+                "largeIconId": "15d79c0f-7618-430b-a41c-5913b5f16035",
+                "launchUrl": "http://ozone-development.github.io/ozp-demo/bouncingBalls/index.html?color=green",
+                "owners": [
+                    {
+                        "displayName": "Test Admin 1",
+                        "username": "testAdmin1"
+                    }
+                ],
+                "required": [],
+                "requirements": "https://www",
+                "screenshots": [
+                    {
+                        "largeImageId": "b14efca2-f05c-4961-8bde-3ceff11ae464",
+                        "largeImageUrl": "https://localhost:8443/marketplace/api/image/b14efca2-f05c-4961-8bde-3ceff11ae464.png",
+                        "smallImageId": "145d7161-6ed4-4e7b-8f3f-85843243cf3d",
+                        "smallImageUrl": "https://localhost:8443/marketplace/api/image/145d7161-6ed4-4e7b-8f3f-85843243cf3d.png"
+                    }
+                ],
+                "singleton": false,
+                "smallIconId": "7c411b0e-8cca-4f62-aab6-51c61acf9d89",
+                "tags": [
+                    "demo"
+                ],
+                "title": "Bouncing Green Ball",
+                "totalComments": 0,
+                "type": "Web Application",
+                "uuid": "84b0dbba-15eb-47eb-a7c5-fa45f0274c33",
+                "versionName": "1",
+                "whatIsNew": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo.",
+                "width": null
+            },
+            {
+                "_links": {
+                    "ozp:activity": {
+                        "href": "https://localhost:8443/marketplace/api/listing/26/activity"
+                    },
+                    "ozp:required": {
+                        "href": "https://localhost:8443/marketplace/api/listing/26/requiredListings"
+                    },
+                    "ozp:required-by": {
+                        "href": "https://localhost:8443/marketplace/api/listing/26/requiringListings"
+                    },
+                    "ozp:review": {
+                        "href": "https://localhost:8443/marketplace/api/listing/26/itemComment"
+                    },
+                    "self": {
+                        "href": "https://localhost:8443/marketplace/api/listing/26"
+                    }
+                },
+                "agency": "Test Organization",
+                "agencyShort": "TO",
+                "approvalStatus": "APPROVED",
+                "approvedDate": "2014-12-18T15:06:40.279+0000",
+                "bannerIconId": "920784df-dc8e-496a-9ac1-f9e0f1446187",
+                "categories": [
+                    "Business",
+                    "Tools"
+                ],
+                "contacts": [],
+                "currentRejection": null,
+                "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo. Quisque egestas, eros sit amet dignissim sagittis, justo enim facilisis ante, et elementum ligula elit id nunc. Ut mollis enim nec arcu porta pulvinar. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. In vitae nisl turpis. Sed congue at arcu eget feugiat. Interdum et malesuada fames ac ante ipsum primis in faucibus. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis est sapien, posuere et lobortis ac, sodales et sapien.Sed auctor molestie velit, nec sollicitudin ipsum bibendum ut. Quisque ut congue lectus. Nunc commodo non arcu sit amet vestibulum. Sed et ligula vitae justo hendrerit cursus et eget augue. Sed ullamcorper magna at euismod cursus. Vivamus id ligula purus. Nulla dapibus rhoncus tristique. Duis efficitur eleifend justo at ullamcorper. Ut condimentum velit sit amet posuere facilisis. Vestibulum at nisi elit. Aliquam eget enim accumsan, dapibus magna quis, ultricies nunc. Donec imperdiet est lacus, nec blandit felis venenatis id.",
+                "descriptionShort": "An application for trading stocks",
+                "docUrls": [
+                    {
+                        "name": "API Documentation",
+                        "url": "https://www"
+                    },
+                    {
+                        "name": "User Manual",
+                        "url": "https://www"
+                    }
+                ],
+                "editedDate": "2014-12-18T15:06:40.294+0000",
+                "featuredBannerIconId": "031e4045-0fb1-4d7e-b330-ae4d51ce4b63",
+                "height": null,
+                "id": 26,
+                "imageLargeUrl": "https://localhost:8443/marketplace/api/image/920784df-dc8e-496a-9ac1-f9e0f1446187.png",
+                "imageMediumUrl": "https://localhost:8443/marketplace/api/image/97d5cb5b-34e6-4385-80b6-339ae8558afb.png",
+                "imageSmallUrl": "https://localhost:8443/marketplace/api/image/c488d790-04c4-4170-8489-bdf009027f27.png",
+                "imageXlargeUrl": "https://localhost:8443/marketplace/api/image/031e4045-0fb1-4d7e-b330-ae4d51ce4b63.png",
+                "intents": [
+                    "application/json/edit",
+                    "application/json/view"
+                ],
+                "isEnabled": true,
+                "isFeatured": false,
+                "largeIconId": "97d5cb5b-34e6-4385-80b6-339ae8558afb",
+                "launchUrl": "http://ozone-development.github.io/ozp-demo/stockTrader/index.html",
+                "owners": [
+                    {
+                        "displayName": "Test Admin 1",
+                        "username": "testAdmin1"
+                    }
+                ],
+                "required": [],
+                "requirements": "https://www",
+                "screenshots": [
+                    {
+                        "largeImageId": "77c0556b-9145-4771-a236-372c72447d86",
+                        "largeImageUrl": "https://localhost:8443/marketplace/api/image/77c0556b-9145-4771-a236-372c72447d86.png",
+                        "smallImageId": "85f4df43-cbb2-4a03-9da8-6d67e75bfedb",
+                        "smallImageUrl": "https://localhost:8443/marketplace/api/image/85f4df43-cbb2-4a03-9da8-6d67e75bfedb.png"
+                    }
+                ],
+                "singleton": false,
+                "smallIconId": "c488d790-04c4-4170-8489-bdf009027f27",
+                "tags": [
+                    "demo"
+                ],
+                "title": "Stock Trader",
+                "totalComments": 0,
+                "type": "Web Application",
+                "uuid": "906d4a99-d12b-4daa-b246-5fc6ac050d0e",
+                "versionName": "1",
+                "whatIsNew": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo.",
+                "width": null
+            },
+            {
+                "_links": {
+                    "ozp:activity": {
+                        "href": "https://localhost:8443/marketplace/api/listing/27/activity"
+                    },
+                    "ozp:required": {
+                        "href": "https://localhost:8443/marketplace/api/listing/27/requiredListings"
+                    },
+                    "ozp:required-by": {
+                        "href": "https://localhost:8443/marketplace/api/listing/27/requiringListings"
+                    },
+                    "ozp:review": {
+                        "href": "https://localhost:8443/marketplace/api/listing/27/itemComment"
+                    },
+                    "self": {
+                        "href": "https://localhost:8443/marketplace/api/listing/27"
+                    }
+                },
+                "agency": "Test Organization",
+                "agencyShort": "TO",
+                "approvalStatus": "APPROVED",
+                "approvedDate": "2014-12-18T15:06:41.798+0000",
+                "bannerIconId": "bf8f5f7f-5d36-4e03-b57d-218ca05b3048",
+                "categories": [
+                    "Business",
+                    "Tools"
+                ],
+                "contacts": [],
+                "currentRejection": null,
+                "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo. Quisque egestas, eros sit amet dignissim sagittis, justo enim facilisis ante, et elementum ligula elit id nunc. Ut mollis enim nec arcu porta pulvinar. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. In vitae nisl turpis. Sed congue at arcu eget feugiat. Interdum et malesuada fames ac ante ipsum primis in faucibus. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis est sapien, posuere et lobortis ac, sodales et sapien.Sed auctor molestie velit, nec sollicitudin ipsum bibendum ut. Quisque ut congue lectus. Nunc commodo non arcu sit amet vestibulum. Sed et ligula vitae justo hendrerit cursus et eget augue. Sed ullamcorper magna at euismod cursus. Vivamus id ligula purus. Nulla dapibus rhoncus tristique. Duis efficitur eleifend justo at ullamcorper. Ut condimentum velit sit amet posuere facilisis. Vestibulum at nisi elit. Aliquam eget enim accumsan, dapibus magna quis, ultricies nunc. Donec imperdiet est lacus, nec blandit felis venenatis id.",
+                "descriptionShort": "An application for charting stock data",
+                "docUrls": [
+                    {
+                        "name": "API Documentation",
+                        "url": "https://www"
+                    },
+                    {
+                        "name": "User Manual",
+                        "url": "https://www"
+                    }
+                ],
+                "editedDate": "2014-12-18T15:06:41.814+0000",
+                "featuredBannerIconId": "9239c771-710e-4842-bb31-76a6c1a765fc",
+                "height": null,
+                "id": 27,
+                "imageLargeUrl": "https://localhost:8443/marketplace/api/image/bf8f5f7f-5d36-4e03-b57d-218ca05b3048.png",
+                "imageMediumUrl": "https://localhost:8443/marketplace/api/image/30a7462d-6ff8-4252-b17c-6e0df545398e.png",
+                "imageSmallUrl": "https://localhost:8443/marketplace/api/image/f9738f75-b973-407a-b6a3-ef0a590e763f.png",
+                "imageXlargeUrl": "https://localhost:8443/marketplace/api/image/9239c771-710e-4842-bb31-76a6c1a765fc.png",
+                "intents": [
+                    "application/json/edit",
+                    "application/json/view"
+                ],
+                "isEnabled": true,
+                "isFeatured": false,
+                "largeIconId": "30a7462d-6ff8-4252-b17c-6e0df545398e",
+                "launchUrl": "http://ozone-development.github.io/ozp-demo/chart/index.html",
+                "owners": [
+                    {
+                        "displayName": "Test Admin 1",
+                        "username": "testAdmin1"
+                    }
+                ],
+                "required": [],
+                "requirements": "https://www",
+                "screenshots": [
+                    {
+                        "largeImageId": "d210df7d-4d88-4a6f-ac07-074382380a09",
+                        "largeImageUrl": "https://localhost:8443/marketplace/api/image/d210df7d-4d88-4a6f-ac07-074382380a09.png",
+                        "smallImageId": "d0856501-a9bf-41db-bd98-39df16c19e57",
+                        "smallImageUrl": "https://localhost:8443/marketplace/api/image/d0856501-a9bf-41db-bd98-39df16c19e57.png"
+                    }
+                ],
+                "singleton": false,
+                "smallIconId": "f9738f75-b973-407a-b6a3-ef0a590e763f",
+                "tags": [
+                    "demo"
+                ],
+                "title": "Stock Price Charter",
+                "totalComments": 0,
+                "type": "Web Application",
+                "uuid": "b6a8e5a8-1251-4263-a8f7-2139776c284b",
+                "versionName": "1",
+                "whatIsNew": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo.",
+                "width": null
+            },
+            {
+                "_links": {
+                    "ozp:activity": {
+                        "href": "https://localhost:8443/marketplace/api/listing/28/activity"
+                    },
+                    "ozp:required": {
+                        "href": "https://localhost:8443/marketplace/api/listing/28/requiredListings"
+                    },
+                    "ozp:required-by": {
+                        "href": "https://localhost:8443/marketplace/api/listing/28/requiringListings"
+                    },
+                    "ozp:review": {
+                        "href": "https://localhost:8443/marketplace/api/listing/28/itemComment"
+                    },
+                    "self": {
+                        "href": "https://localhost:8443/marketplace/api/listing/28"
+                    }
+                },
+                "agency": "Test Organization",
+                "agencyShort": "TO",
+                "approvalStatus": "APPROVED",
+                "approvedDate": "2014-12-18T15:06:43.551+0000",
+                "bannerIconId": "2627f804-59ce-4e45-8c19-738576a08bf2",
+                "categories": [
+                    "Business",
+                    "Tools"
+                ],
+                "contacts": [],
+                "currentRejection": null,
+                "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo. Quisque egestas, eros sit amet dignissim sagittis, justo enim facilisis ante, et elementum ligula elit id nunc. Ut mollis enim nec arcu porta pulvinar. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. In vitae nisl turpis. Sed congue at arcu eget feugiat. Interdum et malesuada fames ac ante ipsum primis in faucibus. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis est sapien, posuere et lobortis ac, sodales et sapien.Sed auctor molestie velit, nec sollicitudin ipsum bibendum ut. Quisque ut congue lectus. Nunc commodo non arcu sit amet vestibulum. Sed et ligula vitae justo hendrerit cursus et eget augue. Sed ullamcorper magna at euismod cursus. Vivamus id ligula purus. Nulla dapibus rhoncus tristique. Duis efficitur eleifend justo at ullamcorper. Ut condimentum velit sit amet posuere facilisis. Vestibulum at nisi elit. Aliquam eget enim accumsan, dapibus magna quis, ultricies nunc. Donec imperdiet est lacus, nec blandit felis venenatis id.",
+                "descriptionShort": "An application for framing other applications",
+                "docUrls": [
+                    {
+                        "name": "API Documentation",
+                        "url": "https://www"
+                    },
+                    {
+                        "name": "User Manual",
+                        "url": "https://www"
+                    }
+                ],
+                "editedDate": "2014-12-18T15:06:43.566+0000",
+                "featuredBannerIconId": "efb5bd4f-6c2a-4edb-9382-5e9f4206a021",
+                "height": null,
+                "id": 28,
+                "imageLargeUrl": "https://localhost:8443/marketplace/api/image/2627f804-59ce-4e45-8c19-738576a08bf2.png",
+                "imageMediumUrl": "https://localhost:8443/marketplace/api/image/9db08e79-d7b6-47fd-8cee-93bd3907be41.png",
+                "imageSmallUrl": "https://localhost:8443/marketplace/api/image/b13192b9-49d4-44a2-93be-cf2724d92b1d.png",
+                "imageXlargeUrl": "https://localhost:8443/marketplace/api/image/efb5bd4f-6c2a-4edb-9382-5e9f4206a021.png",
+                "intents": [
+                    "application/json/edit",
+                    "application/json/view"
+                ],
+                "isEnabled": true,
+                "isFeatured": false,
+                "largeIconId": "9db08e79-d7b6-47fd-8cee-93bd3907be41",
+                "launchUrl": "http://ozone-development.github.io/ozp-demo/frameit/index.html",
+                "owners": [
+                    {
+                        "displayName": "Test Admin 1",
+                        "username": "testAdmin1"
+                    }
+                ],
+                "required": [],
+                "requirements": "https://www",
+                "screenshots": [
+                    {
+                        "largeImageId": "695e6436-f7dc-4ea0-89be-e1d87548964c",
+                        "largeImageUrl": "https://localhost:8443/marketplace/api/image/695e6436-f7dc-4ea0-89be-e1d87548964c.png",
+                        "smallImageId": "46c997c9-92ee-4925-823b-2a8ce4aaf774",
+                        "smallImageUrl": "https://localhost:8443/marketplace/api/image/46c997c9-92ee-4925-823b-2a8ce4aaf774.png"
+                    }
+                ],
+                "singleton": false,
+                "smallIconId": "b13192b9-49d4-44a2-93be-cf2724d92b1d",
+                "tags": [
+                    "demo"
+                ],
+                "title": "FrameIt",
+                "totalComments": 0,
+                "type": "Web Application",
+                "uuid": "04ddd6bd-bc59-451f-9c0e-da6cbba542cd",
+                "versionName": "1",
+                "whatIsNew": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum lectus faucibus ante dapibus commodo.",
+                "width": null
+            }
+        ]
+    },
+    "_links": {
+        "curies": {
+            "href": "http://ozoneplatform.org/docs/rels/{rel}",
+            "name": "ozp",
+            "templated": true
+        },
+        "item": [
+            {
+                "href": "https://localhost:8443/marketplace/api/listing/1"
+            },
+            {
+                "href": "https://localhost:8443/marketplace/api/listing/2"
+            },
+            {
+                "href": "https://localhost:8443/marketplace/api/listing/3"
+            },
+            {
+                "href": "https://localhost:8443/marketplace/api/listing/4"
+            },
+            {
+                "href": "https://localhost:8443/marketplace/api/listing/5"
+            },
+            {
+                "href": "https://localhost:8443/marketplace/api/listing/6"
+            },
+            {
+                "href": "https://localhost:8443/marketplace/api/listing/7"
+            },
+            {
+                "href": "https://localhost:8443/marketplace/api/listing/8"
+            },
+            {
+                "href": "https://localhost:8443/marketplace/api/listing/9"
+            },
+            {
+                "href": "https://localhost:8443/marketplace/api/listing/10"
+            },
+            {
+                "href": "https://localhost:8443/marketplace/api/listing/11"
+            },
+            {
+                "href": "https://localhost:8443/marketplace/api/listing/12"
+            },
+            {
+                "href": "https://localhost:8443/marketplace/api/listing/13"
+            },
+            {
+                "href": "https://localhost:8443/marketplace/api/listing/14"
+            },
+            {
+                "href": "https://localhost:8443/marketplace/api/listing/15"
+            },
+            {
+                "href": "https://localhost:8443/marketplace/api/listing/16"
+            },
+            {
+                "href": "https://localhost:8443/marketplace/api/listing/17"
+            },
+            {
+                "href": "https://localhost:8443/marketplace/api/listing/18"
+            },
+            {
+                "href": "https://localhost:8443/marketplace/api/listing/19"
+            },
+            {
+                "href": "https://localhost:8443/marketplace/api/listing/20"
+            },
+            {
+                "href": "https://localhost:8443/marketplace/api/listing/21"
+            },
+            {
+                "href": "https://localhost:8443/marketplace/api/listing/22"
+            },
+            {
+                "href": "https://localhost:8443/marketplace/api/listing/23"
+            },
+            {
+                "href": "https://localhost:8443/marketplace/api/listing/24"
+            },
+            {
+                "href": "https://localhost:8443/marketplace/api/listing/25"
+            },
+            {
+                "href": "https://localhost:8443/marketplace/api/listing/26"
+            },
+            {
+                "href": "https://localhost:8443/marketplace/api/listing/27"
+            },
+            {
+                "href": "https://localhost:8443/marketplace/api/listing/28"
+            }
+        ],
+        "self": {
+            "href": "https://localhost:8443/marketplace/api/listing"
+        }
+    },
+    "counts": {
+        "APPROVED": 28,
+        "APPROVED_ORG": 0,
+        "IN_PROGRESS": 0,
+        "PENDING": 0,
+        "REJECTED": 0,
+        "enabled": 28,
+        "organizations": {
+            "1": 28,
+            "2": 0
+        }
+    },
+    "total": 28
+}
