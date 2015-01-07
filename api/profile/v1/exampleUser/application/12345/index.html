@@ -1,0 +1,46 @@
+{
+    "name" : "Blue Bouncing Ball",
+    "id": "94c734b0-cbbb-4caf-9cb8-29a3d45afc84",
+    "description" : "A blue bouncing ball",
+    "descriptionShort": "A blue bouncing ball",
+    "contentType": "application/vnd.ozp-application-v1+json",
+    "type" : "application",
+    "state" : "active",
+    "uiHints": {
+        "width" : 400,
+        "height" : 400,
+        "singleton" : false
+    },
+    "tags": [
+        "demo"
+    ],
+    "intents": [
+        {
+            "type": "application/ozp-demo-ball+json",
+            "action": "view",
+            "icon": "http://localhost:15000/largeIcon.png",
+            "label": "Blue Ball"
+        }
+    ],
+    "icons" : {
+        "small": "http://localhost:15000/largeIcon.png",
+        "large": "http://localhost:15000/smallIcon.png",
+        "banner": "http://localhost:15000/smallIcon.png",
+        "featuredBanner": "http://localhost:15000/smallIcon.png"
+    },
+    "screenshots" : [
+        {
+            "href" : "http://localhost:15000/screenShot.png",
+            "title" : "A screenshot"
+        }
+    ],
+    "launchUrls" : {
+        "default": "http://localhost:15000/?color=blue",
+        "test" : "http://test.localhost:15000/?color=blue"
+    },
+    "_links": {
+        "self" : { "href": "/api/profile/v1/exampleUser/application/12345"},
+        "describes" : { "href": "http://localhost:15000/?color=blue"},
+        "ozp:iwcSelf" : {"href": "web+ozp://system.api/application/23456"}
+    }
+}
