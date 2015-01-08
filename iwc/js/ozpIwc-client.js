@@ -3474,7 +3474,12 @@ ozpIwc.Client=function(config) {
     var configUrl=config.peerUrl;
     if(typeof(configUrl) === "string") {
         this.peerUrlCheck=function(url,resolve) {
-            resolve(configUrl);
+            if(typeof url !== 'undefined'){
+                resolve(url);
+            } else {
+                resolve(configUrl);
+            }
+
         };
     } else if(Array.isArray(configUrl)) {
         this.peerUrlCheck=function(url,resolve) {

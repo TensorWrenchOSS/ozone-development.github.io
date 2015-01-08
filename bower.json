@@ -6,7 +6,7 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
-    "ozp-iwc": "ozone-development/ozp-iwc",
+    "ozp-iwc": "ozone-development/ozp-iwc#master",
     "ozp-data-schemas": "ozone-development/ozp-data-schemas#master"
   }
 }
