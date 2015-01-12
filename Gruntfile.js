@@ -1,8 +1,6 @@
 module.exports = function(grunt) {
   var iwcConfigOverides={
-        apiRootUrl:"https://www.owfgoss.org/ng/dev-alpha/mp/api",
-        basicAuthUsername:"testAdmin1",
-        basicAuthPassword:"password"
+        apiRootUrl:"https://www.owfgoss.org/ng/dev/mp/api",
   };
   // Project configuration.
   grunt.initConfig({
