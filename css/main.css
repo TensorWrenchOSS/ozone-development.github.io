@@ -261,9 +261,14 @@ h1[class^="icon-"], h1[class*=" icon-"] {
         font-size: 35pt;
         line-height: 1;
         text-transform: uppercase;
-        color: white;
+        color: #ccc;
         text-align: center;
     }
+    
+        .section-container.one h1,
+        .section-container.two h1 {
+            color: white;
+        }
 
     .section-container h2 {
         letter-spacing: 10px;
