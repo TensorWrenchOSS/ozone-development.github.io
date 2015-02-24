@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html ng-app="ozpIwc.debugger">
+
     <head>
         <title>OZP IWC Debugger</title>
         <link rel="stylesheet" type="text/css" href="css/debugger.css">
+        <link rel="shortcut icon" href="favicon.ico?v=2" />
 
         <script type="text/javascript">
             var ozpIwc = ozpIwc || {};
@@ -13,177 +15,55 @@
             ozpIwc.acceptPostMessageParticipants=false;
             
             // forces the debugger to be the API leaders
-            ozpIwc.defaultLeaderPriority = 1000;
+            ozpIwc.defaultLeaderPriority = Date.now();
+            // for resizing the height of an iframe (hal-browser)
+            function resizeIframe(obj) {
+                obj.style.height = window.innerHeight + 'px';
+            }
         </script>
         <script src="js/debugger.js"></script>
     </head>
     <body ng-controller="debuggerController">
-
-    <tabset>
-        <tab heading="Traffic Snooper" ng-controller="packetLogController">
-            <div class="btn-group">
-                <button class="btn" ng-class="{true:'btn-danger',false:'btn-primary'}[logging]" 
-                     btn-checkbox ng-model="logging"
-                     tooltip-placement="bottom" tooltip="Start/Stop packet capture.">
-                    Capture({{packets.length}}) 
-                </button>           
-                <button class="btn btn-primary" ng-disabled="packets.length === 0" 
-                        ng-click="packets=[]"
-                        tooltip-placement="bottom" tooltip="Clear captured packets.">
-                    Clear
-                </button>
-
-            </div>
-
-            <select ng-model="maxShown" tooltip-placement="bottom" 
-                    tooltip="Number of packets to display.  Higher numbers may reduce browser performance in high packets/second situations.">
-                <option value="50">50 Packets</option>
-                <option value="100">100 Packets</option>
-                <option value="150">150 Packets</option>
-                <option value="200">200 Packets</option>
-            </select>
-            <input ng-model="viewFilter" type="text" size="40"
-                   placeholder="filter packets..."
-                   tooltip-placement="bottom" tooltip="Search packets for text.">
-            </input>
-            <table class="hidden-rows">
-                <thead><tr>
-                        <td class="dateString">Time</td>
-                        <td class="srcPeer">Src Peer</td>
-                        <td class="sequence">Sequence</td>
-                        <td class="dst">Destination</td>
-                        <td class="src">Source</td>
-                        <td class="msgId">Message ID</td>
-                        <td class="replyTo">Reply To</td>
-                        <td class="action">Action</td>
-                        <td class="response">Response</td>
-                        <td class="resource">Resource</td>
-                        <td class="contentType">Content Type</td>
-                    </tr></thead><tbody>
-                    <tr ng-repeat-start="packet in packets | filter:viewFilter | limitTo:-maxShown" ng-click="isExpanded = !isExpanded">
-                        <td class="dateString">{{packet.data.time | date:'yyyy-MM-dd HH:mm:ss.sss'}}</td>
-                        <td class="srcPeer">{{packet.srcPeer}}</td>
-                        <td class="sequence">{{packet.sequence}}</td>
-                        <td class="dst">{{packet.data.dst}}</td>
-                        <td class="src">{{packet.data.src}}</td>
-                        <td class="msgId">{{packet.data.msgId}}</td>
-                        <td class="replyTo">{{packet.data.replyTo}}</td>
-                        <td class="action">{{packet.data.action}}</td>
-                        <td class="response">{{packet.data.response}}</td>
-                        <td class="resource">{{packet.data.resource}}</td>
-                        <td class="contentType">{{packet.data.contentType}}</td>
-                    </tr>
-                    <tr ng-repeat-end >
-                        <td colspan="10" ><pre collapse="!isExpanded">{{ packet | json }} </pre></td>
-                    </tr>
-                </tbody></table>
-        </tab>
-        <tab heading="Metrics" ng-controller="metricsController" active="tabActive">
-            <div class="btn-group">
-                 <button class="btn btn-primary" ng-click="refresh()">Refresh</button>  
-                <button class="btn" ng-class="{true:'btn-danger',false:'btn-primary'}[updateActive]" 
-                     btn-checkbox ng-model="updateActive"
-                     tooltip-placement="bottom" tooltip="Start/Stop continuous metrics updates.">
-                    Update Metrics
-                </button>
-            </div>
-
-            <select ng-model="updateFrequency" tooltip-placement="bottom" 
-                    tooltip="How often to update the metrics.">
-                <option value="1000">Every second</option>
-                <option value="2000">Every 2 seconds</option>
-                <option value="5000">Every 5 seconds</option>
-                <option value="15000">Every 15 seconds</option>
-            </select>
-            <input ng-model="viewFilter" type="text" size="40"
-                   placeholder="filter metrics..."
-                   tooltip-placement="bottom" tooltip="Search for metric...">
-            </input>
-            <table>
-                <thead>
-                    <tr>
-                        <td>Metric</td>
-                        <td>Unit</td>
-                        <td>Value</td>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr ng-repeat="metric in metrics | orderBy:'name' | filter:viewFilter">
-                        <td>{{metric.name}}</td>
-                        <td>{{metric.unit}}</td>
-                        <td><pre>{{metric.value | json}}</pre></td>
-                    </tr>
-                </tbody>
-            </table>
-        </tab>
-        <tab heading="{{api.address}}" ng-repeat="api in apis" ng-controller="apiDisplayController">
-            <div class="btn-group">
-                <button class="btn btn-primary" ng-click="query()">Query</button>
-                <button class="btn btn-primary" ng-click="refresh()">Refresh</button>
-            </div>
-            Filter: <input ng-model="viewFilter" type="text" style="width:75%"></input>
-            <table class="table-striped">
-                <thead><tr>
-                        <td>Resource</td>
-                        <td>Content Type</td>
-                        <td>Permissions</td>
-                        <td>Entity</td>
-                        <td ng-show="api.hasChildren">Children</td>
-                    </tr></thead>
-                <tbody>
-                    <tr ng-repeat="key in keys | orderBy:'resource' | filter:viewFilter ">
-                        <td>
-
-                            <div class="btn-group btn-group-xs">
-                                <button class="btn"
-                                        ng-class="{true:'btn-danger',false:'btn-primary'}[key.isWatched]" 
-                                        btn-checkbox 
-                                        ng-model="key.isWatched" 
-                                        ng-change="watchKey(key)">
-
-                                    <span class="glyphicon glyphicon-eye-open"></span>
-                                </button>
-                                <button class="btn btn-primary" ng-click="loadKey(key)">
-                                    <span class="glyphicon glyphicon-refresh"></span>
-                                </button>
-
-
-                            </div>
-                            {{key.resource}}
-
-                        </td>
-                        <td>{{key.contentType}}</td>
-                        <td><pre>{{key.permissions | json}}</pre></td>
-                        <td><pre>{{ key.entity | json }}</pre></td>
-                        <td ng-show="api.hasChildren"><pre>{{ key.children | json}}</pre></td>
-                    </tr>
-                </tbody>
-            </table>
-        </tab>
-        <tab heading="Elections" ng-controller="electionController">
-            <div class="container-fluid">
-                <div class="row">
-                    <div class="col-md-2" >
-                        <label for="apiSel">Api Election</label>
-                        <select id="apiSel"ng-options="item as item.title for item in apis"
-                                ng-model="selectedElection" tooltip-placement="bottom"
-                                tooltip="Which api to display elections for.">
-                        </select>
-                        <div class="btn-group">
-                            <button class="btn btn-primary" ng-click="toggle()">{{enableOrNot}}</button>
-                            <button class="btn btn-primary" ng-click="clear()">Clear</button></br>
-                            <label for="recvChk">Show Receive Packets</label>
-                            <input id="recvChk" type="checkbox" ng-model="recvToggle" ng-init="recvToggle=true"/>
-                        </div></br>
-                        <label for="packetPre">Packet Contents</label>
-                        <pre id="packetPre">{{packetContents}}</pre>
-                    </div>
-                    <vis-timeline timeline-id="1" class="col-md-10" style="margin-top: 20px;"></vis-timeline>
-
-                </div>
-            </div>
-        </tab>
-        <tab heading="Debugger Address: {{client.address}}" disabled="true"></tab>
-    </tabset>
-</body>
+    <!-- Sidenav -->
+    <div id="side-wrap">
+        <ul class="side-nav">
+            <li>
+                <a ui-sref="general" ui-sref-active="selected">General</a>
+            </li>
+            <hr />
+            <li>
+                <a ui-sref="traffic-snooper" ui-sref-active="selected">Traffic Snooper </a>
+            </li>
+            <li>
+                <a ui-sref="metrics" ui-sref-active="selected">Metrics </a>
+            </li>
+            <li>
+                <a ui-sref="elections" ui-sref-active="selected">Elections</a>
+            </li>
+            <hr />
+            <li>
+                <a ui-sref="system-api" ui-sref-active="selected">System API</a>
+            </li>
+            <li>
+                <a ui-sref="data-api" ui-sref-active="selected">Data API</a>
+            </li>
+            <li>
+                <a ui-sref="intents-api" ui-sref-active="selected">Intents API</a>
+            </li>
+            <li>
+                <a ui-sref="names-api" ui-sref-active="selected">Names API</a>
+            </li>
+            <hr />
+            <li>
+                <a ui-sref="hal-browser({url: ozpIwc.apiRootUrl})" ui-sref-active="selected">HAL Browser</a>
+            </li>
+            <hr />
+            <li> {{::client.address}}</li>
+        </ul>
+    </div>
+    <!-- Apps -->
+    <div class="app-pane">
+        <div ui-view></div>
+    </div>
+    </body>
 </html>

@@ -1,0 +1,32 @@
+<div class="container-fluid">
+    <div class="col-sm-6">
+        <h3>Backend Build</h3>
+        <table class="table table-striped table-bordered">
+            <thead>
+            <th>Property</th>
+            <th>value</th>
+            </thead>
+            <tbody>
+            <tr ng-repeat="(key,value) in systemBuild">
+                <td ng-if="key != 'contentType'">{{key}}</td>
+                <td ng-if="key != 'contentType'">{{value}}</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="col-sm-6">
+        <h3>IWC Build</h3>
+        <table class="table table-striped table-bordered">
+            <thead>
+            <th>Property</th>
+            <th>value</th>
+            </thead>
+            <tbody>
+            <tr>
+                <td>version</td>
+                <td>{{ozpIwc.version}}</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

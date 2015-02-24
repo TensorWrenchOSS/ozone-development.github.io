@@ -1,0 +1,62 @@
+<div class="container-fluid">
+    <div class="col-sm-12">
+        <h3>Overview</h3>
+        <p>
+            IWC (Inter Widget Communication) provides an in-browser communications
+            network between participants in multiple browser tabs, iframes, or
+            workers using HTML5 standard features. These participants, which can
+            be from different origins, can use the client API to send messages
+            to any other participant on the network.
+        </p>
+        <p>
+            For persistence, IWC connects to a backend service that exposes a
+            REST API, in this case
+            <a class="link-cursor" ng-click="endpointClicked(ozpIwc.apiRootUrl)">{{ozpIwc.apiRootUrl}}</a>.
+            This REST API is HATEOAS (specifically HAL) compliant, so this debugger
+            includes a HAL Browser to make exploring the API easier.
+        </p>
+        <p>
+            IWC itself is broken down into a number of client-side APIs (all of
+            which are backed by the the REST service mentioned above). The core
+            APIs currently include:
+            <ul>
+                <li><code>system.api</code>: information about applications, users, and general system data like name and version </li>
+                <li><code>data.api</code>: a key-value store for storing and retrieving application-specific data</li>
+                <li><code>intents.api</code>: modeled off of Android, Intents are used to request actions from other applications</li>
+                <li><code>names.api</code>: network details for the IWC bus</li>
+            </ul>
+        </p>
+        <hr/>
+        <h3>Network logging</h3>
+        <p> The debugger has the following tools designed to debug IWC communication issues: </p>
+        <ul>
+            <li><b>Traffic Snooper</b>: Captures packets of data as they travel through the IWC. This tool does not persist packet captures,
+                rather holds a copy as it is enabled.</li>
+            <li><b>Metrics</b>: Captures metric values from the IWC on a periodic basis. If data is desired immediately,
+                the <code>Gather</code> button will grab the latest values for the selected metrics.</li>
+            <li><b>Elections</b>: A timeline of election events. Since the IWC is a distributed system, elections have to
+                occur in order for a leader to be determined.</li>
+        </ul>
+        <hr/>
+
+        <h3>APIs</h3>
+        <p> Each api has a dedicated debugger page for viewing(<code>View Data</code>)and updating its resources(<code>Send Message</code>).
+            Individual APIs have additional applications added for API specific debugging:</p>
+        <ul>
+            <li><b>Data API:</b> <code>Webtop</code>: Parses and loads default Webtop dashboard data.</li>
+            <li><b>System API:</b> <code>My Apps</code>: Lists bookmarked applications for the user's account.</li>
+        </ul>
+        <hr/>
+
+        <h3>General Tools</h3>
+        <p>Some tools are not IWC specific, but have great significance when trying to determine an IWC related error.
+        These tools can be used for non IWC related tasks, but have been added to centralize tool locations.</p>
+        <ul>
+            <li><b>HAL Browser</b>: Used for exploring HAL data. The IWC backend is HAL compliant. This tool makes
+                walking through data obtained from the backend faster and easier to understand by parsing HAL data into a
+                more readable format.</li>
+        </ul>
+        <hr/>
+
+    </div>
+</div>

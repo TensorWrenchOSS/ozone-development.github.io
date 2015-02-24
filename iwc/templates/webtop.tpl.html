@@ -1,0 +1,63 @@
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-md-12">
+      <button type="button" class="btn btn-primary" ng-click="refresh()">Refresh All</button>
+      <span>Reload marketplace data from <code>system.api</code> and
+      dashboard data from the <code>data.api</code></span>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-12">
+      <h2>Dashboards
+        <span class="label label-default" ng-show="loadingDashboards">Loading ...</span>
+        <span class="label label-danger" ng-show="invalidDashboards">Invalid Dashboard Data</span>
+      </h2>
+    </div>
+  </div>
+  <div class="row" style="margin-bottom: 20px;">
+    <div class="col-xs-12">
+      <button type="button" class="btn btn-primary"
+              ng-click="syncDashboardData()">Sync Application Ids
+      </button>
+      <span> If you see invalid apps for any of the dashboards, it means an application found
+      in the dashboard data has a name the matches up with an application retrieved from the marketplace,
+      but the application id doesn't match. This happens because the application ids change each time the
+      sample marketplace data is reloaded in the backend. Hit this button to synchronize the ids in the
+      dashboard data (<code>data.api</code>) with those in the marketplace (<code>system.api</code>).</span>
+
+    </div>
+    <div class="col-xs-12" style="margin-top: 15px;">
+      <button type="button" class="btn btn-warning" ng-click="reloadDashboardData()">Reload Dashboard Data</button>
+      <span> Reload the <code>data.api</code> with demo dashboard data located <a href="data/dashboard-data.json">here</a></span>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-12">
+      <button type="button" class="btn btn-warning" ng-click="clearDashboardData()">Clear Dashboard Data</button>
+      <span> Clear all dashboard data</span>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-12">
+      <p>Dashboards: <strong>{{dashboardData.dashboards.length}}</strong></p>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Apps</th>
+            <th>Valid Apps</th>
+            <th>Invalid Apps</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="board in dashboardData.dashboards">
+            <td>{{board.name}}</td>
+            <td>{{board.frames.length}}</td>
+            <td>{{board.validApps}}</td>
+            <td>{{board.invalidApps}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

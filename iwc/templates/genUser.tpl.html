@@ -1,0 +1,16 @@
+<div class="container-fluid">
+    <div class="col-sm-12">
+        <table class="table table-striped table-bordered">
+            <thead>
+            <th>Property</th>
+            <th>Value</th>
+            </thead>
+            <tbody>
+            <tr ng-repeat="(key,value) in systemUser">
+                <td ng-if="key != 'contentType'">{{key}}</td>
+                <td ng-if="key != 'contentType'">{{value}}</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

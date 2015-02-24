@@ -1,0 +1,43 @@
+<div class="container-fluid">
+  <div class="row">
+    <div clas="col-md-12">
+
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-12">
+      <h2> Marketplace  <span class="label label-default" ng-show="loadingMarketplace">Loading ...</span> <button type="button" class="btn btn-primary" ng-click="refresh()">Refresh</button> </h2>
+      <p>Applications: <strong>{{appListings.length}}</strong> Username: <strong>{{username}}</strong>, Role: <strong>{{userRole}}</strong></p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-12">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Large Icon</th>
+            <th>Small Icon</th>
+            <th>Name</th>
+            <th>Short Description</th>
+            <th>Id</th>
+            <th>Link</th>
+          </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="app in appListings">
+          <td>
+            <img width="32" height="32" ng-src="{{app.icons.large}}"/>
+          </td>
+          <td>
+            <img width="16" height="16" ng-src="{{app.icons.small}}"/>
+          </td>
+          <td>{{app.name}}</td>
+          <td>{{app.descriptionShort}}</td>
+          <td>{{app.id}}</td>
+          <td><a href="{{app.launchUrls.default}}">Link</a></td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,13 @@
+<div class="container-fluid">
+    <tabset>
+        <tab heading="View Data"  ng-controller="ApiDisplayCtrl" api="system.api">
+            <api-data></api-data>
+        </tab>
+        <tab heading="Send Message"  ng-controller="ApiDisplayCtrl" api="system.api">
+            <api-message></api-message>
+        </tab>
+        <tab heading="My Apps">
+          <my-apps ng-controller="MyAppsCtrl"></my-apps>
+        </tab>
+    </tabset>
+</div>

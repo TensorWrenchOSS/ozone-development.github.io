@@ -1,0 +1,68 @@
+<div class="container-fluid">
+    <div class="col-sm-6">
+        <form class="form-horizontal" role="form">
+            <div class="form-group">
+                <label for="action" class="col-sm-3 control-label">Action: </label>
+                <div class="col-sm-9">
+                    <select class="form-control" id="action" ng-model="msg.action">
+                        <option ng-repeat="action in actions" value="{{action}}">{{action}}</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="resourceList" class="col-sm-3 control-label">Resource:</label>
+                <div class="col-sm-9">
+                    <input  type="text" name="resourceList" id="resourceList" class="form-control" ng-model="msg.resource"
+                            selectBoxOptions="">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="contentType" class="col-sm-3 control-label">ContentType:</label>
+                <div class="col-sm-9">
+                    <input type="text" class="form-control" id="contentType"
+                           placeholder="application/mydata+json" ng-model="msg.contentType">
+                </div>
+            </div>
+            <div ng-show="entityVisible">
+                <div class="form-group">
+                    <label for="entity" class="col-sm-3 control-label">Entity (manual):</label>
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control" id="entity"
+                               placeholder='{"mustUseValidJSON": "true"}' ng-model="msg.entity">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="entityFromFile" class="col-sm-4 control-label tex-align-left">Entity (from .json file):</label>
+                    <div class="col-sm-4">
+                        <input type="file" accept=".json" id="entityFromFile" on-read-file="readContent($fileContent)" />
+                    </div>
+                    <button ng-show="entityFromFile" type="reset"
+                            class="btn btn-danger"
+                            ng-click="resetForm()">
+                        Reset
+                    </button>
+                </div>
+
+            </div>
+        </form>
+        <div class="row">
+            <div class="col-md-12">
+                <button type="button" class="btn btn-success" ng-click="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6">
+        <div class="row">
+            <div class="col-sm-12" ng-show="msg.response.response">
+                <h4 style="margin-top: 0px;">Response: </h4>
+                <ul>
+                    <li>response: <code>{{msg.response.response}}</code></li>
+                    <li>resource: <code>{{msg.response.resource}}</code></li>
+                    <li>contentType: <code>{{msg.response.contentType}}</code></li>
+                    <li>entity:</li>
+                </ul>
+                <pre>{{msg.response.entity}}</pre>
+            </div>
+        </div>
+    </div>
+</div>
