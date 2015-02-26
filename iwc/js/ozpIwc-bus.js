@@ -8585,11 +8585,10 @@ ozpIwc.CommonApiBase.prototype.findNodeForServerResource=function(object,objectP
  * @method loadFromServer
  */
 ozpIwc.CommonApiBase.prototype.loadFromServer=function() {
-    var promises = [];
-    for(var i in this.endpointUrls){
-        promises.push(this.loadFromEndpoint(this.endpointUrls[i]));
-    }
-    return Promise.all(promises);
+    // Do nothing by default, resolve to prevent clashing with overridden promise implementations.
+    return new Promise(function(resolve,reject){
+        resolve();
+    });
 };
 
 /**
@@ -9700,9 +9699,18 @@ ozpIwc.initEndpoints=function(apiRoot) {
  */
 ozpIwc.DataApi = ozpIwc.util.extend(ozpIwc.CommonApiBase,function(config) {
     ozpIwc.CommonApiBase.apply(this,arguments);
+    this.endpointUrl=ozpIwc.linkRelPrefix+":user-data";
     this.endpointUrls.push(ozpIwc.linkRelPrefix+":user-data");
 });
 
+/**
+ * Loads data from the server.
+ *
+ * @method loadFromServer
+ */
+ozpIwc.DataApi.prototype.loadFromServer=function() {
+    return this.loadFromEndpoint(this.endpointUrl);
+};
 
 /**
  * Creates a DataApiValue from the given packet.
@@ -10133,6 +10141,14 @@ ozpIwc.IntentsApi = ozpIwc.util.extend(ozpIwc.CommonApiBase, function (config) {
     }
 });
 
+/**
+ * Loads data from the server.
+ *
+ * @method loadFromServer
+ */
+ozpIwc.IntentsApi.prototype.loadFromServer=function() {
+    return this.loadFromEndpoint(ozpIwc.linkRelPrefix + ":intent");
+};
 /**
  * Takes the resource of the given packet and creates an empty value in the IntentsApi. Chaining of creation is
  * accounted for (A handler requires a definition, which requires a capability).
@@ -11313,7 +11329,7 @@ ozpIwc.SystemApi.prototype.rootHandleInvoke = function(node,packetContext) {
         ];
 
         ozpIwc.util.openWindow(packetContext.packet.entity.inFlightIntentEntity.entity.url,launchParams.join("&"));
-        this.launchApplication(node,packetContext.packet.entity.inFlightIntent);
+//        this.launchApplication(node,packetContext.packet.entity.inFlightIntent);
         packetContext.replyTo({'response': "ok"});
     } else{
         packetContext.replyTo({'response': "badResource"});

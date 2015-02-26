@@ -41,7 +41,7 @@ debuggerModule.controller("apiDisplayController",["$scope","iwcClient",function(
         client.send({
             'dst': scope.api.address,
             'action': "list"
-        },function(response) {
+        },function(response,done) {
             scope.keys=response.entity.map(function(k) {
                 var key={
                     'resource': k,
@@ -51,6 +51,7 @@ debuggerModule.controller("apiDisplayController",["$scope","iwcClient",function(
                 scope.loadKey(key);
                 return key;
             });
+            done();
         });
     };
     

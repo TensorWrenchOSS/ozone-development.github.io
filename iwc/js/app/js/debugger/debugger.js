@@ -65,12 +65,13 @@ debuggerModule.factory("iwcClient",function() {
                         dst: "names.api",
                         action: "get",
                         resource: "/api"
-                    },function(reply){
+                    },function(reply,done){
                         if(reply.response === 'ok'){
                             resolve(reply.entity);
                         } else{
                             reject(reply.response);
                         }
+                        done();
                     });
 
                 }).then(function(apis) {
@@ -81,7 +82,7 @@ debuggerModule.factory("iwcClient",function() {
                                 dst: "names.api",
                                 action: "get",
                                 resource: api
-                            }, function (res) {
+                            }, function (res,done) {
                                 if (res.response === 'ok') {
                                     var name = api.replace('/api/', '');
                                     self.apiMap[name] = {
@@ -93,6 +94,7 @@ debuggerModule.factory("iwcClient",function() {
                                 } else {
                                     reject(res.response);
                                 }
+                                done();
                             });
                         }));
                     });

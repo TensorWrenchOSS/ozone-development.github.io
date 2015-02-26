@@ -45,11 +45,8 @@
                     reason: "user",
                     state: "choosing"
                 }
-            },function(reply,done) {
-                if(reply.response === "ok"){
+            }).then(function() {
                     window.close();
-                }
-                done();
             });
         }
 
@@ -88,11 +85,8 @@
                         },
                         state: "fail"
                     }
-                },function(reply,done) {
-                    if(reply.response === "ok"){
-                        window.close();
-                    }
-                    done();
+                }).then(function() {
+                    window.close();
                 });
             });
             document.getElementById("handlerList").appendChild(button);
@@ -105,17 +99,12 @@
         }
         var loc=ozpIwc.util.parseOzpUrl(m[1]);
 
-        client.send(loc,function(reply,done) {
-            if(reply.response!=="ok") {
-                failure();
-                done();
-                return;
-            }
+        client.send(loc).then(function(reply) {
             showHandlers(reply.entity.handlerChoices,reply);
             showCancel(reply);
-            done();
+        })['catch'](function(err){
+            failure();
         });
-        
     </script>
   </body>
 </html>

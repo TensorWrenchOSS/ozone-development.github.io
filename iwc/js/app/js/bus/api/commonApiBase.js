@@ -138,11 +138,10 @@ ozpIwc.CommonApiBase.prototype.findNodeForServerResource=function(object,objectP
  * @method loadFromServer
  */
 ozpIwc.CommonApiBase.prototype.loadFromServer=function() {
-    var promises = [];
-    for(var i in this.endpointUrls){
-        promises.push(this.loadFromEndpoint(this.endpointUrls[i]));
-    }
-    return Promise.all(promises);
+    // Do nothing by default, resolve to prevent clashing with overridden promise implementations.
+    return new Promise(function(resolve,reject){
+        resolve();
+    });
 };
 
 /**

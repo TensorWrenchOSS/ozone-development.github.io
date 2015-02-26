@@ -19,9 +19,18 @@
  */
 ozpIwc.DataApi = ozpIwc.util.extend(ozpIwc.CommonApiBase,function(config) {
     ozpIwc.CommonApiBase.apply(this,arguments);
+    this.endpointUrl=ozpIwc.linkRelPrefix+":user-data";
     this.endpointUrls.push(ozpIwc.linkRelPrefix+":user-data");
 });
 
+/**
+ * Loads data from the server.
+ *
+ * @method loadFromServer
+ */
+ozpIwc.DataApi.prototype.loadFromServer=function() {
+    return this.loadFromEndpoint(this.endpointUrl);
+};
 
 /**
  * Creates a DataApiValue from the given packet.

@@ -27,10 +27,10 @@ ozpIwc.Client=function(config) {
 
     /**
      * Key value store of callback functions for the client to act upon when receiving a reply via the IWC.
-     * @property replyCallbacks
+     * @property promiseCallbacks
      * @type Object
      */
-    this.replyCallbacks={};
+    this.promiseCallbacks={};
     // coerce config.peerUrl to a function
     
     var configUrl=config.peerUrl;
@@ -156,6 +156,7 @@ ozpIwc.Client=function(config) {
      * @defualt {}
      */
     this.watchMsgMap = {};
+    this.registeredCallbacks = {};
 
 
     /**
@@ -205,22 +206,44 @@ ozpIwc.Client.prototype.readLaunchParams=function(rawString) {
  * @param {ozpIwc.TransportPacket} packet
  */
 ozpIwc.Client.prototype.receive=function(packet) {
+    var handled = false;
 
-    if(packet.replyTo && this.replyCallbacks[packet.replyTo]) {
-        var cancel = false;
-        var done=function() {
-            cancel = true;
+    //Try and handle this packet as a reply message
+    if(packet.src === "$transport" || (packet.replyTo && this.promiseCallbacks[packet.replyTo])) {
+
+        var replyCancel = false;
+        var replyDone=function() {
+            replyCancel = true;
         };
-        this.replyCallbacks[packet.replyTo](packet,done);
-        if (cancel) {
-            this.cancelCallback(packet.replyTo);
+        this.promiseCallbacks[packet.replyTo](packet,replyDone);
 
+        if (replyCancel) {
+            this.cancelPromiseCallback(packet.replyTo);
+            handled = true;
+        }
+
+    }
+
+    //Try and handle this packet as callback message
+    if(!handled && packet.replyTo && this.registeredCallbacks[packet.replyTo]){
+        handled = true;
+
+        var registeredCancel = false;
+        var registeredDone=function() {
+            registeredCancel = true;
+        };
+
+        this.registeredCallbacks[packet.replyTo](packet,registeredDone);
+        if (registeredCancel) {
             if(this.watchMsgMap[packet.replyTo].action === "watch") {
                 this.api(this.watchMsgMap[packet.replyTo].dst).unwatch(this.watchMsgMap[packet.replyTo].resource);
-                delete this.watchMsgMap[packet.replyTo];
             }
+            this.cancelRegisteredCallback(packet.replyTo);
         }
-    } else {
+    }
+
+    // Otherwise trigger "receive" for someone to handle it
+    if(!handled){
         /**
          * Fired when the client receives a packet.
          * @event #receive
@@ -237,17 +260,28 @@ ozpIwc.Client.prototype.receive=function(packet) {
  * @param {Function} callback The Callback for any replies. The callback will be persisted if it returns a truth-like
  * value, canceled if it returns a false-like value.
  */
-ozpIwc.Client.prototype.send=function(fields,callback,preexistingPromise) {
-    var promise= preexistingPromise; // || new Promise();
+ozpIwc.Client.prototype.send=function(fields,callback,preexistingPromiseRes,preexistingPromiseRej) {
+    var promiseRes = preexistingPromiseRes;
+    var promiseRej = preexistingPromiseRej;
+    var promise =  new Promise(function(resolve,reject){
+
+        if(!promiseRes && !promiseRej){
+            promiseRes = resolve;
+            promiseRej = reject;
+        }
+    });
+
     if(!(this.isConnected() || fields.dst==="$transport")) {
         // when send is switched to promises, create the promise first and return it here, as well
         this.preconnectionQueue.push({
             'fields': fields,
             'callback': callback,
-            'promise': promise
+            'promiseRes': promiseRes,
+            'promiseRej': promiseRej
         });
         return promise;
     }
+
     var now=new Date().getTime();
     var id="p:"+this.msgIdSequence++; // makes the code below read better
     var packet={
@@ -261,17 +295,40 @@ ozpIwc.Client.prototype.send=function(fields,callback,preexistingPromise) {
         packet[k]=fields[k];
     }
 
+    var self = this;
+
     if(callback) {
-        this.replyCallbacks[id]=callback;
+        this.registeredCallbacks[id] = function (reply, done) {
+            if(reply.entity && reply.entity.inFlightIntent) {
+                self.intentInvocationHandling(packet.resource,reply.entity.inFlightIntent,callback);
+            } else {
+                callback(reply, done);
+            }
+        };
     }
+
+    this.promiseCallbacks[id]=function (reply,done) {
+        if (reply.src === "$transport" || /(ok).*/.test(reply.response)) {
+            done();
+            promiseRes(reply);
+        } else if (/(bad|no).*/.test(reply.response)) {
+            done();
+            promiseRej(reply);
+        } else {
+            // it was not a promise callback
+        }
+    };
+
     ozpIwc.util.safePostMessage(this.peer,packet,'*');
     this.sentBytes+=packet.length;
     this.sentPackets++;
 
     if(packet.action === "watch") {
         this.watchMsgMap[id] = packet;
+    } else if(packet.action === "unwatch" && packet.replyTo) {
+        this.cancelRegisteredCallback(packet.replyTo);
     }
-    return packet;
+    return promise;
 };
 
 /**
@@ -284,16 +341,33 @@ ozpIwc.Client.prototype.isConnected=function(){
 };
 
 /**
- * Cancel a callback registration.
- * @method cancelCallback
+ * Cancel a reply callback registration.
+ * @method cancelPromiseCallback
  * @param (String} msgId The packet replyTo ID for which the callback was registered.
  *
  * @return {Boolean} True if the cancel was successful, otherwise false.
  */
-ozpIwc.Client.prototype.cancelCallback=function(msgId) {
+ozpIwc.Client.prototype.cancelPromiseCallback=function(msgId) {
     var success=false;
     if (msgId) {
-        delete this.replyCallbacks[msgId];
+        delete this.promiseCallbacks[msgId];
+        success=true;
+    }
+    return success;
+};
+
+/**
+ * Cancel a watch callback registration.
+ * @method cancelRegisteredCallback
+ * @param (String} msgId The packet replyTo ID for which the callback was registered.
+ *
+ * @return {Boolean} True if the cancel was successful, otherwise false.
+ */
+ozpIwc.Client.prototype.cancelRegisteredCallback=function(msgId) {
+    var success=false;
+    if (msgId) {
+        delete this.registeredCallbacks[msgId];
+        delete this.watchMsgMap[msgId];
         success=true;
     }
     return success;
@@ -330,7 +404,8 @@ ozpIwc.Client.prototype.off=function(event,callback) {
  * @method disconnect
  */
 ozpIwc.Client.prototype.disconnect=function() {
-    this.replyCallbacks={};
+    this.promiseCallbacks={};
+    this.registeredCallbacks={};
     window.removeEventListener("message",this.postMessageHandler,false);
     if(this.iframe) {
         this.iframe.src = "about:blank";
@@ -369,136 +444,122 @@ ozpIwc.Client.prototype.connect=function() {
             return self.createIframePeer();
         }).then(function() {
             // start listening to the bus and ask for an address
-            this.postMessageHandler = function(event) {
-                if(event.origin !== self.peerOrigin){
+            this.postMessageHandler = function (event) {
+                if (event.origin !== self.peerOrigin) {
                     return;
                 }
                 try {
-                    var message=event.data;
+                    var message = event.data;
                     if (typeof(message) === 'string') {
-                        message=JSON.parse(event.data);
+                        message = JSON.parse(event.data);
                     }
                     self.receive(message);
-                    self.receivedBytes+=(event.data.length * 2);
+                    self.receivedBytes += (event.data.length * 2);
                     self.receivedPackets++;
-                } catch(e) {
+                } catch (e) {
                     // ignore!
                 }
             };
             // receive postmessage events
             window.addEventListener("message", this.postMessageHandler, false);
-            return new Promise(function(resolve,reject) {
-                self.send({dst:"$transport"},function(message,done) {
-                    self.address=message.dst;
+            return self.send({dst: "$transport"});
+        }).then(function(message) {
+            self.address = message.dst;
 
-                    /**
-                     * Fired when the client receives its address.
-                     * @event #gotAddress
-                     */
-                    self.events.trigger("gotAddress",self);
-                    resolve(self.address);
-                    done();
-                });
+            /**
+             * Fired when the client receives its address.
+             * @event #gotAddress
+             */
+            self.events.trigger("gotAddress", self);
+            // gather api information
+            return self.send({
+                dst: "names.api",
+                action: "get",
+                resource: "/api"
             });
-        }).then(function(){
-                // gather api information
-                return new Promise(function(resolve,reject) {
-
-                    self.send({
-                        dst: "names.api",
-                        action: "get",
-                        resource: "/api"
-                    },function(reply){
-                        if(reply.response === 'ok'){
-                           resolve(reply.entity);
-                        } else{
-                            reject(reply.response);
-                        }
-                    });
-
-                });
+        }).then(function(reply){
+            if(reply.response === 'ok'){
+               return reply.entity;
+            } else {
+                throw reply.response;
+            }
         }).then(function(apis) {
-                var promiseArray = [];
-                apis.forEach(function (api) {
-                    promiseArray.push(new Promise(function (resolve, reject) {
-                        self.send({
-                            dst: "names.api",
-                            action: "get",
-                            resource: api
-                        }, function (res) {
-                            if (res.response === 'ok') {
-                                var name = api.replace('/api/', '');
-                                self.apiMap[name] = {
-                                    'address': name,
-                                    'actions': res.entity.actions
-                                };
+            var promiseArray = [];
+            apis.forEach(function (api) {
+                var promise = self.send({
+                    dst: "names.api",
+                    action: "get",
+                    resource: api
+                }).then(function (res) {
+                    if (res.response === 'ok') {
+                        var name = api.replace('/api/', '');
+                        self.apiMap[name] = {
+                            'address': name,
+                            'actions': res.entity.actions
+                        };
 
-                                resolve();
-                            } else {
-                                reject(res.response);
-                            }
-                        });
-                    }));
+                        return;
+                    } else {
+                        throw res.response;
+                    }
                 });
-                return Promise.all(promiseArray);
-        }).then(function(){
-                for(var api in self.apiMap){
-                    var apiObj = self.apiMap[api];
-                    var apiFuncName = apiObj.address.replace('.api','');
+                promiseArray.push(promise);
+            });
+            return Promise.all(promiseArray);
+        }).then(function() {
+            for (var api in self.apiMap) {
+                var apiObj = self.apiMap[api];
+                var apiFuncName = apiObj.address.replace('.api', '');
 
-                    //prevent overriding client constructed fields
-                    if(!self.hasOwnProperty(apiFuncName)){
-                        // wrap this in a function to break the closure
-                        // on apiObj.address that would otherwise register
-                        // everything for the last api in the list
-                        /*jshint loopfunc:true*/
-                        (function(addr){
-                            self[apiFuncName] = function(){
-                                return self.api(addr);
-                            };
-                            self.apiMap[addr] = self.apiMap[addr] || {};
-                            self.apiMap[addr].functionName = apiFuncName;
-                        })(apiObj.address);
+                //prevent overriding client constructed fields
+                if (!self.hasOwnProperty(apiFuncName)) {
+                    // wrap this in a function to break the closure
+                    // on apiObj.address that would otherwise register
+                    // everything for the last api in the list
+                    /*jshint loopfunc:true*/
+                    (function (addr) {
+                        self[apiFuncName] = function () {
+                            return self.api(addr);
+                        };
+                        self.apiMap[addr] = self.apiMap[addr] || {};
+                        self.apiMap[addr].functionName = apiFuncName;
+                    })(apiObj.address);
+                }
+            }
+            // dump any queued sends, trigger that we are fully connected
+            self.preconnectionQueue.forEach(function (p) {
+                self.send(p.fields, p.callback, p.promiseRes, p.promiseRej);
+            });
+            self.preconnectionQueue = null;
+
+            if (!self.launchParams.inFlightIntent) {
+                return;
+            }
+
+            // fetch the inFlightIntent
+            var packet = {
+                dst: "intents.api",
+                resource: self.launchParams.inFlightIntent,
+                action: "get"
+            };
+            return self.send(packet);
+        }).then(function (response) {
+            if(response) {
+                self.launchedIntents.push(response);
+                if (response.response === 'ok') {
+                    for (var k in response.entity) {
+                        self.launchParams[k] = response.entity[k];
                     }
                 }
-        }).then(function() {
-                // dump any queued sends, trigger that we are fully connected
-                self.preconnectionQueue.forEach(function (p) {
-                    self.send(p.fields, p.callback, p.promise);
-                });
-                self.preconnectionQueue = null;
-
-                if (!self.launchParams.inFlightIntent) {
-                    return;
-                }
-
-                // fetch the inFlightIntent
-                var packet = {
-                    dst: "intents.api",
-                    resource: self.launchParams.inFlightIntent,
-                    action: "get"
-                };
-                return new Promise(function (resolve, reject) {
-                    self.send(packet, function (response, done) {
-                        self.launchedIntents.push(response);
-                        if (response.response === 'ok') {
-                            for (var k in response.entity) {
-                                self.launchParams[k] = response.entity[k];
-                            }
-                        }
-                        resolve();
-                        done();
-                    });
-                });
-            }).then(function() {
-                /**
-                 * Fired when the client is connected to the IWC bus.
-                 * @event #connected
-                 */
-                self.events.trigger("connected");
-            })['catch'](function(error) {
-                ozpIwc.log.log("Failed to connect to bus ",error);
-            });
+            }
+            /**
+             * Fired when the client is connected to the IWC bus.
+             * @event #connected
+             */
+            self.events.trigger("connected");
+        })['catch'](function(error) {
+            ozpIwc.log.log("Failed to connect to bus ",error);
+        });
     }
     return this.connectPromise; 
 };
@@ -535,6 +596,44 @@ ozpIwc.Client.prototype.createIframePeer=function() {
     });
 };
 
+ozpIwc.Client.prototype.intentInvocationHandling = function(resource,intentResource,callback) {
+    var self = this;
+    var res;
+    return self.send({
+        dst: "intents.api",
+        action: "get",
+        resource: intentResource
+    }).then(function (response) {
+        response.entity.handler = {
+            address: self.address,
+            resource: resource
+        };
+        response.entity.state = "running";
+
+        res = response;
+        return self.send({
+            dst: "intents.api",
+            contentType: response.contentType,
+            action: "set",
+            resource: intentResource,
+            entity: response.entity
+        });
+    }).then(function (reply) {
+        //Now run the intent
+        res.entity.reply.entity = callback(res.entity) || {};
+        // then respond to the inflight resource
+        res.entity.state = "complete";
+        res.entity.reply.contentType = res.entity.intent.type;
+        return self.send({
+            dst: "intents.api",
+            contentType: res.contentType,
+            action: "set",
+            resource: intentResource,
+            entity: res.entity
+        });
+    });
+};
+
 (function() {
     ozpIwc.Client.prototype.api=function(apiName) {
         var wrapper=this.wrapperMap[apiName];
@@ -554,46 +653,6 @@ ozpIwc.Client.prototype.createIframePeer=function() {
         return wrapper;
     };
 
-    var intentInvocationHandling = function(client,resource,intentResource,callback) {
-        return new Promise(function(resolve,reject) {
-            client.send({
-                dst: "intents.api",
-                action: "get",
-                resource: intentResource
-            }, function (response, done) {
-                response.entity.handler = {
-                    address: client.address,
-                    resource: resource
-                };
-                response.entity.state = "running";
-
-
-                client.send({
-                    dst: "intents.api",
-                    contentType: response.contentType,
-                    action: "set",
-                    resource: intentResource,
-                    entity: response.entity
-                }, function (reply, done) {
-                    //Now run the intent
-                    response.entity.reply.entity = callback(response.entity) || {};
-                    // then respond to the inflight resource
-                    response.entity.state = "complete";
-                    response.entity.reply.contentType = response.entity.intent.type;
-                    client.send({
-                        dst: "intents.api",
-                        contentType: response.contentType,
-                        action: "set",
-                        resource: intentResource,
-                        entity: response.entity
-                    });
-                    done();
-                    resolve(response);
-                });
-                done();
-            });
-        });
-    };
 
     var augment = function (dst,action,client) {
         return function (resource, fragment, otherCallback) {
@@ -602,60 +661,25 @@ ozpIwc.Client.prototype.createIframePeer=function() {
                 otherCallback = fragment;
                 fragment = {};
             }
-            return new Promise(function (resolve, reject) {
-                var packet = {
-                    'dst': dst,
-                    'action': action,
-                    'resource': resource,
-                    'entity': {}
-                };
-                for (var k in fragment) {
-                    packet[k] = fragment[k];
-                }
-                var packetResponse = false;
-                var callbackResponse = !!!otherCallback;
-                client.send(packet, function (reply,done) {
-
-                    function initialDone() {
-                        if(callbackResponse){
-                            done();
-                        } else {
-                            packetResponse = true;
-                        }
-                    }
-
-                    function callbackDone() {
-                        if(packetResponse){
-                            done();
-                        } else {
-                            callbackResponse = true;
-                        }
-                    }
-                    if (reply.response === 'ok') {
-                        resolve(reply);
-                        initialDone();
-                    } else if (/(bad|no).*/.test(reply.response)) {
-                        reject(reply);
-                        initialDone();
-                    }
-                    else if (otherCallback) {
-                        if(reply.entity && reply.entity.inFlightIntent) {
-                            intentInvocationHandling(client,resource,reply.entity.inFlightIntent,otherCallback,callbackDone);
-                        } else {
-                            otherCallback(reply, callbackDone);
-                        }
-                    }
-                });
-                if(dst === "intents.api" && action === "register"){
-                    for(var i in client.launchedIntents){
-                        var loadedResource = '/' + client.launchedIntents[i].entity.intent.type + '/' + client.launchedIntents[i].entity.intent.action;
-                        if(resource === loadedResource){
-                            intentInvocationHandling(client,resource,client.launchedIntents[i].resource,otherCallback);
-                            delete client.launchedIntents[i];
-                        }
+            var packet = {
+                'dst': dst,
+                'action': action,
+                'resource': resource,
+                'entity': {}
+            };
+            for (var k in fragment) {
+                packet[k] = fragment[k];
+            }
+            if(dst === "intents.api" && action === "register"){
+                for(var i in client.launchedIntents){
+                    var loadedResource = '/' + client.launchedIntents[i].entity.intent.type + '/' + client.launchedIntents[i].entity.intent.action;
+                    if(resource === loadedResource){
+                        client.intentInvocationHandling(resource,client.launchedIntents[i].resource,otherCallback);
+                        delete client.launchedIntents[i];
                     }
                 }
-            });
+            }
+            return client.send(packet,otherCallback);
         };
     };
 })();

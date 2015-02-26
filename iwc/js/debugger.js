@@ -8585,11 +8585,10 @@ ozpIwc.CommonApiBase.prototype.findNodeForServerResource=function(object,objectP
  * @method loadFromServer
  */
 ozpIwc.CommonApiBase.prototype.loadFromServer=function() {
-    var promises = [];
-    for(var i in this.endpointUrls){
-        promises.push(this.loadFromEndpoint(this.endpointUrls[i]));
-    }
-    return Promise.all(promises);
+    // Do nothing by default, resolve to prevent clashing with overridden promise implementations.
+    return new Promise(function(resolve,reject){
+        resolve();
+    });
 };
 
 /**
@@ -9700,9 +9699,18 @@ ozpIwc.initEndpoints=function(apiRoot) {
  */
 ozpIwc.DataApi = ozpIwc.util.extend(ozpIwc.CommonApiBase,function(config) {
     ozpIwc.CommonApiBase.apply(this,arguments);
+    this.endpointUrl=ozpIwc.linkRelPrefix+":user-data";
     this.endpointUrls.push(ozpIwc.linkRelPrefix+":user-data");
 });
 
+/**
+ * Loads data from the server.
+ *
+ * @method loadFromServer
+ */
+ozpIwc.DataApi.prototype.loadFromServer=function() {
+    return this.loadFromEndpoint(this.endpointUrl);
+};
 
 /**
  * Creates a DataApiValue from the given packet.
@@ -10133,6 +10141,14 @@ ozpIwc.IntentsApi = ozpIwc.util.extend(ozpIwc.CommonApiBase, function (config) {
     }
 });
 
+/**
+ * Loads data from the server.
+ *
+ * @method loadFromServer
+ */
+ozpIwc.IntentsApi.prototype.loadFromServer=function() {
+    return this.loadFromEndpoint(ozpIwc.linkRelPrefix + ":intent");
+};
 /**
  * Takes the resource of the given packet and creates an empty value in the IntentsApi. Chaining of creation is
  * accounted for (A handler requires a definition, which requires a capability).
@@ -11313,7 +11329,7 @@ ozpIwc.SystemApi.prototype.rootHandleInvoke = function(node,packetContext) {
         ];
 
         ozpIwc.util.openWindow(packetContext.packet.entity.inFlightIntentEntity.entity.url,launchParams.join("&"));
-        this.launchApplication(node,packetContext.packet.entity.inFlightIntent);
+//        this.launchApplication(node,packetContext.packet.entity.inFlightIntent);
         packetContext.replyTo({'response': "ok"});
     } else{
         packetContext.replyTo({'response': "badResource"});
@@ -20656,7 +20672,7 @@ return jQuery;
 }));
 
 /**
- * @license AngularJS v1.3.13
+ * @license AngularJS v1.3.14
  * (c) 2010-2014 Google, Inc. http://angularjs.org
  * License: MIT
  */
@@ -20711,7 +20727,7 @@ function minErr(module, ErrorConstructor) {
       return match;
     });
 
-    message = message + '\nhttp://errors.angularjs.org/1.3.13/' +
+    message = message + '\nhttp://errors.angularjs.org/1.3.14/' +
       (module ? module + '/' : '') + code;
     for (i = 2; i < arguments.length; i++) {
       message = message + (i == 2 ? '?' : '&') + 'p' + (i - 2) + '=' +
@@ -22778,11 +22794,11 @@ function toDebugString(obj) {
  * - `codeName` – `{string}` – Code name of the release, such as "jiggling-armfat".
  */
 var version = {
-  full: '1.3.13',    // all of these placeholder strings will be replaced by grunt's
+  full: '1.3.14',    // all of these placeholder strings will be replaced by grunt's
   major: 1,    // package task
   minor: 3,
-  dot: 13,
-  codeName: 'meticulous-riffleshuffle'
+  dot: 14,
+  codeName: 'instantaneous-browserification'
 };
 
 
@@ -38511,20 +38527,23 @@ var htmlAnchorDirective = valueFn({
  *
  * @description
  *
- * We shouldn't do this, because it will make the button enabled on Chrome/Firefox but not on IE8 and older IEs:
+ * This directive sets the `disabled` attribute on the element if the
+ * {@link guide/expression expression} inside `ngDisabled` evaluates to truthy.
+ *
+ * A special directive is necessary because we cannot use interpolation inside the `disabled`
+ * attribute.  The following example would make the button enabled on Chrome/Firefox
+ * but not on older IEs:
+ *
  * ```html
- * <div ng-init="scope = { isDisabled: false }">
- *  <button disabled="{{scope.isDisabled}}">Disabled</button>
+ * <div ng-init="isDisabled = false">
+ *  <button disabled="{{isDisabled}}">Disabled</button>
  * </div>
  * ```
  *
- * The HTML specification does not require browsers to preserve the values of boolean attributes
- * such as disabled. (Their presence means true and their absence means false.)
+ * This is because the HTML specification does not require browsers to preserve the values of
+ * boolean attributes such as `disabled` (Their presence means true and their absence means false.)
  * If we put an Angular interpolation expression into such an attribute then the
  * binding information would be lost when the browser removes the attribute.
- * The `ngDisabled` directive solves this problem for the `disabled` attribute.
- * This complementary directive is not removed by the browser and so provides
- * a permanent reliable place to store the binding information.
  *
  * @example
     <example>
@@ -38543,7 +38562,7 @@ var htmlAnchorDirective = valueFn({
  *
  * @element INPUT
  * @param {expression} ngDisabled If the {@link guide/expression expression} is truthy,
- *     then special attribute "disabled" will be set on the element
+ *     then the `disabled` attribute will be set on the element
  */
 
 
@@ -40545,7 +40564,7 @@ function numberInputType(scope, element, attr, ctrl, $sniffer, $browser) {
     return value;
   });
 
-  if (attr.min || attr.ngMin) {
+  if (isDefined(attr.min) || attr.ngMin) {
     var minVal;
     ctrl.$validators.min = function(value) {
       return ctrl.$isEmpty(value) || isUndefined(minVal) || value >= minVal;
@@ -40561,7 +40580,7 @@ function numberInputType(scope, element, attr, ctrl, $sniffer, $browser) {
     });
   }
 
-  if (attr.max || attr.ngMax) {
+  if (isDefined(attr.max) || attr.ngMax) {
     var maxVal;
     ctrl.$validators.max = function(value) {
       return ctrl.$isEmpty(value) || isUndefined(maxVal) || value <= maxVal;
@@ -43367,6 +43386,7 @@ var NgModelController = ['$scope', '$exceptionHandler', '$attrs', '$element', '$
       ngModelGet = parsedNgModel,
       ngModelSet = parsedNgModelAssign,
       pendingDebounce = null,
+      parserValid,
       ctrl = this;
 
   this.$$setOptions = function(options) {
@@ -43639,16 +43659,12 @@ var NgModelController = ['$scope', '$exceptionHandler', '$attrs', '$element', '$
     // the model although neither viewValue nor the model on the scope changed
     var modelValue = ctrl.$$rawModelValue;
 
-    // Check if the there's a parse error, so we don't unset it accidentially
-    var parserName = ctrl.$$parserName || 'parse';
-    var parserValid = ctrl.$error[parserName] ? false : undefined;
-
     var prevValid = ctrl.$valid;
     var prevModelValue = ctrl.$modelValue;
 
     var allowInvalid = ctrl.$options && ctrl.$options.allowInvalid;
 
-    ctrl.$$runValidators(parserValid, modelValue, viewValue, function(allValid) {
+    ctrl.$$runValidators(modelValue, viewValue, function(allValid) {
       // If there was no change in validity, don't update the model
       // This prevents changing an invalid modelValue to undefined
       if (!allowInvalid && prevValid !== allValid) {
@@ -43666,12 +43682,12 @@ var NgModelController = ['$scope', '$exceptionHandler', '$attrs', '$element', '$
 
   };
 
-  this.$$runValidators = function(parseValid, modelValue, viewValue, doneCallback) {
+  this.$$runValidators = function(modelValue, viewValue, doneCallback) {
     currentValidationRunId++;
     var localValidationRunId = currentValidationRunId;
 
     // check parser error
-    if (!processParseErrors(parseValid)) {
+    if (!processParseErrors()) {
       validationDone(false);
       return;
     }
@@ -43681,21 +43697,22 @@ var NgModelController = ['$scope', '$exceptionHandler', '$attrs', '$element', '$
     }
     processAsyncValidators();
 
-    function processParseErrors(parseValid) {
+    function processParseErrors() {
       var errorKey = ctrl.$$parserName || 'parse';
-      if (parseValid === undefined) {
+      if (parserValid === undefined) {
         setValidity(errorKey, null);
       } else {
-        setValidity(errorKey, parseValid);
-        if (!parseValid) {
+        if (!parserValid) {
           forEach(ctrl.$validators, function(v, name) {
             setValidity(name, null);
           });
           forEach(ctrl.$asyncValidators, function(v, name) {
             setValidity(name, null);
           });
-          return false;
         }
+        // Set the parse error last, to prevent unsetting it, should a $validators key == parserName
+        setValidity(errorKey, parserValid);
+        return parserValid;
       }
       return true;
     }
@@ -43790,7 +43807,7 @@ var NgModelController = ['$scope', '$exceptionHandler', '$attrs', '$element', '$
   this.$$parseAndValidate = function() {
     var viewValue = ctrl.$$lastCommittedViewValue;
     var modelValue = viewValue;
-    var parserValid = isUndefined(modelValue) ? undefined : true;
+    parserValid = isUndefined(modelValue) ? undefined : true;
 
     if (parserValid) {
       for (var i = 0; i < ctrl.$parsers.length; i++) {
@@ -43816,7 +43833,7 @@ var NgModelController = ['$scope', '$exceptionHandler', '$attrs', '$element', '$
 
     // Pass the $$lastCommittedViewValue here, because the cached viewValue might be out of date.
     // This can happen if e.g. $setViewValue is called from inside a parser
-    ctrl.$$runValidators(parserValid, modelValue, ctrl.$$lastCommittedViewValue, function(allValid) {
+    ctrl.$$runValidators(modelValue, ctrl.$$lastCommittedViewValue, function(allValid) {
       if (!allowInvalid) {
         // Note: Don't check ctrl.$valid here, as we could have
         // external validators (e.g. calculated on the server),
@@ -43937,6 +43954,7 @@ var NgModelController = ['$scope', '$exceptionHandler', '$attrs', '$element', '$
     // TODO(perf): why not move this to the action fn?
     if (modelValue !== ctrl.$modelValue) {
       ctrl.$modelValue = ctrl.$$rawModelValue = modelValue;
+      parserValid = undefined;
 
       var formatters = ctrl.$formatters,
           idx = formatters.length;
@@ -43949,7 +43967,7 @@ var NgModelController = ['$scope', '$exceptionHandler', '$attrs', '$element', '$
         ctrl.$viewValue = ctrl.$$lastCommittedViewValue = viewValue;
         ctrl.$render();
 
-        ctrl.$$runValidators(undefined, modelValue, viewValue, noop);
+        ctrl.$$runValidators(modelValue, viewValue, noop);
       }
     }
 
@@ -44765,6 +44783,55 @@ var ngPluralizeDirective = ['$locale', '$interpolate', function($locale, $interp
  * when keys are deleted and reinstated.
  *
  *
+ * # Tracking and Duplicates
+ *
+ * When the contents of the collection change, `ngRepeat` makes the corresponding changes to the DOM:
+ *
+ * * When an item is added, a new instance of the template is added to the DOM.
+ * * When an item is removed, its template instance is removed from the DOM.
+ * * When items are reordered, their respective templates are reordered in the DOM.
+ *
+ * By default, `ngRepeat` does not allow duplicate items in arrays. This is because when
+ * there are duplicates, it is not possible to maintain a one-to-one mapping between collection
+ * items and DOM elements.
+ *
+ * If you do need to repeat duplicate items, you can substitute the default tracking behavior
+ * with your own using the `track by` expression.
+ *
+ * For example, you may track items by the index of each item in the collection, using the
+ * special scope property `$index`:
+ * ```html
+ *    <div ng-repeat="n in [42, 42, 43, 43] track by $index">
+ *      {{n}}
+ *    </div>
+ * ```
+ *
+ * You may use arbitrary expressions in `track by`, including references to custom functions
+ * on the scope:
+ * ```html
+ *    <div ng-repeat="n in [42, 42, 43, 43] track by myTrackingFunction(n)">
+ *      {{n}}
+ *    </div>
+ * ```
+ *
+ * If you are working with objects that have an identifier property, you can track
+ * by the identifier instead of the whole object. Should you reload your data later, `ngRepeat`
+ * will not have to rebuild the DOM elements for items it has already rendered, even if the
+ * JavaScript objects in the collection have been substituted for new ones:
+ * ```html
+ *    <div ng-repeat="model in collection track by model.id">
+ *      {{model.name}}
+ *    </div>
+ * ```
+ *
+ * When no `track by` expression is provided, it is equivalent to tracking by the built-in
+ * `$id` function, which tracks items by their identity:
+ * ```html
+ *    <div ng-repeat="obj in collection track by $id(obj)">
+ *      {{obj.prop}}
+ *    </div>
+ * ```
+ *
  * # Special repeat start and end points
  * To repeat a series of elements instead of just one parent element, ngRepeat (as well as other ng directives) supports extending
  * the range of the repeater by defining explicit start and end points by using **ng-repeat-start** and **ng-repeat-end** respectively.
@@ -44832,12 +44899,12 @@ var ngPluralizeDirective = ['$locale', '$interpolate', function($locale, $interp
  *
  *     For example: `(name, age) in {'adam':10, 'amalie':12}`.
  *
- *   * `variable in expression track by tracking_expression` – You can also provide an optional tracking function
- *     which can be used to associate the objects in the collection with the DOM elements. If no tracking function
- *     is specified the ng-repeat associates elements by identity in the collection. It is an error to have
- *     more than one tracking function to resolve to the same key. (This would mean that two distinct objects are
- *     mapped to the same DOM element, which is not possible.)  Filters should be applied to the expression,
- *     before specifying a tracking expression.
+ *   * `variable in expression track by tracking_expression` – You can also provide an optional tracking expression
+ *     which can be used to associate the objects in the collection with the DOM elements. If no tracking expression
+ *     is specified, ng-repeat associates elements by identity. It is an error to have
+ *     more than one tracking expression value resolve to the same key. (This would mean that two distinct objects are
+ *     mapped to the same DOM element, which is not possible.)  If filters are used in the expression, they should be
+ *     applied before the tracking expression.
  *
  *     For example: `item in items` is equivalent to `item in items track by $id(item)`. This implies that the DOM elements
  *     will be associated by item identity in the array.
@@ -89949,12 +90016,13 @@ debuggerModule.factory("iwcClient",function() {
                         dst: "names.api",
                         action: "get",
                         resource: "/api"
-                    },function(reply){
+                    },function(reply,done){
                         if(reply.response === 'ok'){
                             resolve(reply.entity);
                         } else{
                             reject(reply.response);
                         }
+                        done();
                     });
 
                 }).then(function(apis) {
@@ -89965,7 +90033,7 @@ debuggerModule.factory("iwcClient",function() {
                                 dst: "names.api",
                                 action: "get",
                                 resource: api
-                            }, function (res) {
+                            }, function (res,done) {
                                 if (res.response === 'ok') {
                                     var name = api.replace('/api/', '');
                                     self.apiMap[name] = {
@@ -89977,6 +90045,7 @@ debuggerModule.factory("iwcClient",function() {
                                 } else {
                                     reject(res.response);
                                 }
+                                done();
                             });
                         }));
                     });
@@ -90254,7 +90323,7 @@ debuggerModule.controller("ApiDisplayCtrl",["$scope", "$attrs", "iwcClient","api
         client.send({
             'dst': scope.api,
             'action': "list"
-        },function(response) {
+        },function(response,done) {
             scope.keys=response.entity.map(function(k) {
                 var key={
                     'resource': k,
@@ -90264,6 +90333,7 @@ debuggerModule.controller("ApiDisplayCtrl",["$scope", "$attrs", "iwcClient","api
                 scope.loadKey(key);
                 return key;
             });
+            done();
         });
 
         client.connect().then(function(){
@@ -90274,11 +90344,7 @@ debuggerModule.controller("ApiDisplayCtrl",["$scope", "$attrs", "iwcClient","api
 
     scope.watchKey=function(key) {
         if(key.isWatched) {
-            client.send({
-                'dst': scope.api,
-                'action': "watch",
-                'resource': key.resource
-            },function(response) {
+            client.api(scope.api).watch(key.resource,function(response) {
                 if(response.response === 'changed') {
                     scope.$evalAsync(function() {
                         key.entity=response.entity.newValue;
@@ -90286,8 +90352,9 @@ debuggerModule.controller("ApiDisplayCtrl",["$scope", "$attrs", "iwcClient","api
                         key.contentType=response.contentType;
                     });
                 }
-                return key.isWatched;
             });
+        } else {
+            client.api(scope.api).unwatch(key.resource);
         }
     };
 
@@ -90792,85 +90859,6 @@ debuggerModule.directive('visTimeline', function() {
     };
 });
 
-
-/* global debuggerModule */
-debuggerModule.controller("apiDisplayController",["$scope","iwcClient",function(scope,client) {
-    scope.keys=[];
-    scope.query = function() {
-				scope.refresh();
-    };
-    scope.loadKey = function (key) {
-            client.send({
-                    'dst': scope.api.address,
-                    'action': "get",
-                    'resource': key.resource
-            }, function (response, done) {
-                    for (var i in response) {
-                            key[i] = response[i];
-                    }
-                    key.isLoaded = true;
-                    done();
-            });
-            client.send({
-                    'dst': scope.api.address,
-                    'action': "list",
-                    'resource': key.resource
-            }, function (response, done) {
-                    if (response.response === "ok") {
-                            key.children = response.entity;
-                    } else {
-                            key.children = "Not Supported: " + response.response;
-                    }
-                    done();
-            });
-    };
-    scope.performAction = function(action,key) {
-        client.send({
-            'dst': scope.api.address,
-            'action': action,
-            'resource': key.resource
-        });
-    };
-
-    scope.refresh=function() {
-        client.send({
-            'dst': scope.api.address,
-            'action': "list"
-        },function(response) {
-            scope.keys=response.entity.map(function(k) {
-                var key={
-                    'resource': k,
-                    'isLoaded':false,
-                    'isWatched':false
-                };
-                scope.loadKey(key);
-                return key;
-            });
-        });
-    };
-    
-
-    
-    scope.watchKey=function(key) {
-        if(key.isWatched) {
-            client.send({
-                'dst': scope.api.address,
-                'action': "watch",
-                'resource': key.resource
-            },function(response) {
-                if(response.response === 'changed') {
-                    scope.$evalAsync(function() {
-                        key.entity=response.entity.newValue;
-                        key.permissions=response.permissions;
-                        key.contentType=response.contentType;
-                    });
-                }
-                return key.isWatched;
-            });
-        }
-    };
-    scope.refresh();
-}]);
 
 /* global debuggerModule */
 

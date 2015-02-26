@@ -191,7 +191,7 @@ ozpIwc.SystemApi.prototype.rootHandleInvoke = function(node,packetContext) {
         ];
 
         ozpIwc.util.openWindow(packetContext.packet.entity.inFlightIntentEntity.entity.url,launchParams.join("&"));
-        this.launchApplication(node,packetContext.packet.entity.inFlightIntent);
+//        this.launchApplication(node,packetContext.packet.entity.inFlightIntent);
         packetContext.replyTo({'response': "ok"});
     } else{
         packetContext.replyTo({'response': "badResource"});
