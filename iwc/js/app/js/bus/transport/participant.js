@@ -8,7 +8,7 @@
  * @constructor
  * @mixes ozpIwc.security.Actor
  * @property {String} address The assigned address to this address.
- * @property {ozpIwc.security.Subject} securityAttributes The security attributes for this participant.
+ * @property {ozpIwc.policyAuth.SecurityAttribute} permissions The security attributes for this participant.
  */
 ozpIwc.Participant=function() {
 
@@ -23,11 +23,11 @@ ozpIwc.Participant=function() {
 
     /**
      * A key value store of the security attributes assigned to the participant.
-     * @property securityAttributes
+     * @property permissions
      * @type Object
      * @default {}
      */
-	this.securityAttributes={};
+	this.permissions= new ozpIwc.policyAuth.SecurityAttribute();
 
     /**
      * The message id assigned to the next packet if a packet msgId is not specified.
@@ -35,30 +35,29 @@ ozpIwc.Participant=function() {
      * @type {Number}
      */
     this.msgId=0;
-    var fakeMeter=new ozpIwc.metricTypes.Meter();
 
     /**
      * A Metrics meter for packets sent from the participant.
      * @property sentPacketsmeter
      * @type ozpIwc.metricTypes.Meter
      */
-    this.sentPacketsMeter=fakeMeter;
+    this.sentPacketsMeter=new ozpIwc.metricTypes.Meter();
 
     /**
      * A Metrics meter for packets received by the participant.
      * @property receivedPacketMeter
      * @type ozpIwc.metricTypes.Meter
      */
-    this.receivedPacketsMeter=fakeMeter;
+    this.receivedPacketsMeter=new ozpIwc.metricTypes.Meter();
 
     /**
      * A Metrics meter for packets sent to the participant that did not pass authorization.
      * @property forbiddenPacketMeter
      * @type ozpIwc.metricTypes.Meter
      */
-    this.forbiddenPacketsMeter=fakeMeter;
-    this.latencyInTimer=fakeMeter;
-    this.latencyOutTimer=fakeMeter;
+    this.forbiddenPacketsMeter=new ozpIwc.metricTypes.Meter();
+    this.latencyInTimer=new ozpIwc.metricTypes.Meter();
+    this.latencyOutTimer=new ozpIwc.metricTypes.Meter();
 
     /**
      * The type of the participant.
@@ -94,9 +93,9 @@ ozpIwc.Participant=function() {
         self.send = function(originalPacket,callback) {
             var packet=this.fixPacket(originalPacket);
             if(callback) {
-                this.replyCallbacks[packet.msgId]=callback;
+                self.replyCallbacks[packet.msgId]=callback;
             }
-            ozpIwc.Participant.prototype.send.call(this,packet);
+            ozpIwc.Participant.prototype.send.call(self,packet);
 
             return packet;
         };
@@ -114,22 +113,43 @@ ozpIwc.Participant=function() {
  */
 ozpIwc.Participant.prototype.receiveFromRouter=function(packetContext) {
     var self = this;
-    ozpIwc.authorization.isPermitted({
-        'subject': this.securityAttributes,
-        'object': packetContext.packet.permissions
-    })
-        .success(function(){
-            self.receivedPacketsMeter.mark();
-            if(packetContext.packet.time) {
-                self.latencyInTimer.mark(ozpIwc.util.now() - packetContext.packet.time);
-            }
 
-            self.receiveFromRouterImpl(packetContext);
-        })
-        .failure(function() {
-            /** @todo do we send a "denied" message to the destination?  drop?  who knows? */
-            self.forbiddenPacketsMeter.mark();
-        });
+    var request = {
+        'subject': this.permissions.getAll(),
+        'resource': {'ozp:iwc:receiveAs': packetContext.packet.dst},
+        'action': {'ozp:iwc:action': 'receiveAs'},
+        'policies': ozpIwc.authorization.policySets.receiveAsSet
+    };
+
+    var onError = function(err){
+        self.forbiddenPacketsMeter.mark();
+        /** @todo do we send a "denied" message to the destination?  drop?  who knows? */
+        ozpIwc.metrics.counter("transport.packets.forbidden").inc();
+        console.error("failure");
+    };
+
+    ozpIwc.authorization.isPermitted(request,this)
+        .success(function() {
+            ozpIwc.authorization.formatCategory(packetContext.packet.permissions)
+                .success(function(permissions) {
+                    var request = {
+                        'subject': self.permissions.getAll(),
+                        'resource':permissions || {},
+                        'action': {'ozp:iwc:action': 'read'},
+                        'policies': ozpIwc.authorization.policySets.readSet
+                    };
+
+                    ozpIwc.authorization.isPermitted(request, self)
+                        .success(function (resolution) {
+                            self.receivedPacketsMeter.mark();
+                            if(packetContext.packet.time) {
+                                self.latencyInTimer.mark(ozpIwc.util.now() - packetContext.packet.time);
+                            }
+
+                            self.receiveFromRouterImpl(packetContext);
+                        }).failure(onError);
+                }).failure(onError);
+        }).failure(onError);
 };
 
 /**
@@ -158,7 +178,6 @@ ozpIwc.Participant.prototype.receiveFromRouterImpl = function (packetContext) {
 ozpIwc.Participant.prototype.connectToRouter=function(router,address) {
     this.address=address;
     this.router=router;
-    this.securityAttributes.rawAddress=address;
     this.msgId=0;
     if(this.name) {
         this.metricRoot="participants."+ this.name +"." + this.address.split(".").reverse().join(".");
@@ -175,8 +194,9 @@ ozpIwc.Participant.prototype.connectToRouter=function(router,address) {
     this.heartBeatStatus.address=this.address;
     this.heartBeatStatus.name=this.name;
     this.heartBeatStatus.type=this.participantType || this.constructor.name;
-    this.joinEventChannel();
+
     this.events.trigger("connectedToRouter");
+    this.joinEventChannel();
 };
 
 /**
@@ -211,14 +231,24 @@ ozpIwc.Participant.prototype.fixPacket=function(packet) {
  * @returns {ozpIwc.TransportPacket}
  */
 ozpIwc.Participant.prototype.send=function(packet) {
-    packet=this.fixPacket(packet);
-    
-    this.sentPacketsMeter.mark();
-    if(packet.time) {
-        this.latencyOutTimer.mark(ozpIwc.util.now() - packet.time);
-    }
-
-    this.router.send(packet,this);
+    var self = this;
+    var request = {
+        'subject': this.permissions.getAll(),
+        'resource': {'ozp:iwc:sendAs': packet.src},
+        'action': {'ozp:iwc:action': 'sendAs'},
+        'policies': ozpIwc.authorization.policySets.sendAsSet
+    };
+    packet = self.fixPacket(packet);
+    ozpIwc.authorization.isPermitted(request,self)
+        .success(function(resolution) {
+            self.sentPacketsMeter.mark();
+            if(packet.time) {
+                self.latencyOutTimer.mark(ozpIwc.util.now() - packet.time);
+            }
+            self.router.send(packet, self);
+        }).failure(function(e){
+            console.error("Participant Failed to send a packet:",e);
+        });
     return packet;
 };
 

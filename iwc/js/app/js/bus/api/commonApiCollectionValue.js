@@ -87,7 +87,7 @@ ozpIwc.CommonApiCollectionValue.prototype.serialize=function() {
     serverData.entity=this.entity;
     serverData.pattern=this.pattern;
     serverData.contentType=this.contentType;
-    serverData.permissions=this.permissions;
+    serverData.permissions=this.permissions.getAll();
     serverData.version=this.version;
     serverData.watchers=this.watchers;
     return serverData;

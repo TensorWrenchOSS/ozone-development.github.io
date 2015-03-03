@@ -2875,6 +2875,35 @@ ozpIwc.util.clone=function(value) {
 	}
 };
 
+/**
+ * Non serializable cloning. Used to include prototype functions in the cloned object by creating a new instance
+ * and copying over any attributes.
+ * @method protoClone
+ * @param {Object|Array} obj
+ * @returns {*|Array.<T>|string|Blob}
+ */
+ozpIwc.util.protoClone = function(obj) {
+
+    if (obj instanceof Array) {
+        return obj.slice();
+    }
+
+    // Handle Object
+    if (obj instanceof Object) {
+        var clone = new obj.constructor();
+        for(var i in obj){
+
+            if(obj.hasOwnProperty(i)){
+                //recurse if needed
+                clone[i] = ozpIwc.util.protoClone(obj[i]);
+            } else{
+                clone[i] = obj[i];
+            }
+        }
+        return clone;
+    }
+    return obj;
+};
 
 /**
  * A regex method to parse query parameters.
@@ -2956,6 +2985,113 @@ ozpIwc.util.isIWCPacket=function(packet) {
     } else {
         return true;
     }
+};
+
+/**
+ * Returns true if the the given document node is a direct descendant of the parent node.
+ * @method isDirectDescendant
+ * @param parent
+ * @param child
+ * @returns {boolean}
+ */
+ozpIwc.util.isDirectDescendant = function(child,parent){
+    if (child.parentNode === parent) {
+        return true;
+    }
+    return false;
+};
+
+/**
+ *
+ * @param {Object} config
+ * @param {Array<String>} config.reqAttrs
+ * @param {Array<String>} config.optAttrs
+ * @param {Array<String>} config.reqNodes
+ * @param {Array<String>} config.optNodes
+ */
+ozpIwc.util.elementParser = function(config){
+    config = config || {};
+
+    config.reqAttrs = config.reqAttrs || [];
+    config.optAttrs = config.optAttrs || [];
+    config.reqNodes = config.reqNodes || [];
+    config.optNodes = config.optNodes || [];
+
+    var element = config.element || {};
+
+    var findings = {
+        attrs: {},
+        nodes: {}
+    };
+    config.reqAttrs.forEach(function(attr){
+        var attribute = element.getAttribute(attr);
+        if(attribute){
+//            console.log('Found attribute of policy,(',attr,',',attribute,')');
+            findings.attrs[attr] = attribute;
+        } else {
+            console.error('Required attribute not found,(',attr,')');
+        }
+
+    });
+
+    config.optAttrs.forEach(function(attr){
+        var attribute = element.getAttribute(attr);
+        if(attribute){
+//            console.log('Found attribute of policy,(',attr,',',attribute,')');
+            findings.attrs[attr] = attribute;
+        }
+
+    });
+
+    config.reqNodes.forEach(function(tag){
+        var nodes = element.getElementsByTagName(tag);
+        findings.nodes[tag] = findings.nodes[tag] || [];
+        for(var i in nodes){
+            if(ozpIwc.util.isDirectDescendant(nodes[i],element)){
+//                console.log('Found node of policy: ', nodes[i]);
+                findings.nodes[tag].push(nodes[i]);
+            }
+        }
+        if(findings.nodes[tag].length <= 0) {
+            console.error('Required node not found,(',tag,')');
+        }
+    });
+    config.optNodes.forEach(function(tag){
+        var nodes = element.getElementsByTagName(tag);
+        for(var i in nodes){
+            if(ozpIwc.util.isDirectDescendant(nodes[i],element)){
+//                console.log('Found node of policy: ', nodes[i]);
+                findings.nodes[tag] = findings.nodes[tag] || [];
+                findings.nodes[tag].push(nodes[i]);
+            }
+        }
+    });
+    return findings;
+};
+
+ozpIwc.util.camelCased = function(string){
+    return string.charAt(0).toLowerCase() + string.substring(1);
+};
+
+/**
+ * Shortened call for returning a resolving promise (cleans up promise chaining)
+ * @param {*} obj any valid javascript to resolve with.
+ * @returns {Promise}
+ */
+ozpIwc.util.resolveWith = function(obj){
+    return new Promise(function(resolve,reject){
+        resolve(obj);
+    });
+};
+/**
+ * Shortened call for returning a rejecting promise (cleans up promise chaining)
+ * @param {*} obj any valid javascript to reject with.
+ * @returns {Promise}
+ */
+ozpIwc.util.rejectWith = function(obj){
+    return new Promise(function(resolve,reject){
+        reject(obj);
+    });
 };
 /*
  * The MIT License (MIT) Copyright (c) 2012 Mike Ihbe
@@ -4116,14 +4252,26 @@ ozpIwc.util=ozpIwc.util || {};
  */
 ozpIwc.util.ajax = function (config) {
     return new Promise(function(resolve,reject) {
+        var writeMethods = ["PUT", "POST", "PATCH"];
         var request = new XMLHttpRequest();
-        request.withCredentials = true;
         request.open(config.method, config.href, true);
+        request.withCredentials = true;
+        var setContentType = true;
+
         if (Array.isArray(config.headers)) {
             config.headers.forEach(function(header) {
+                if(header.name ==="Content-Type"){
+                    setContentType = false;
+                }
                 request.setRequestHeader(header.name, header.value);
             });
         }
+        //IE9 does not default the Content-Type. Set it if it wasn't passed in.
+        if(writeMethods.indexOf(config.method) >= 0 && setContentType){
+            request.setRequestHeader("Content-Type", "text/plain;charset=UTF-8");
+        }
+
+        /*
         /*
          * Setting username and password as params to open() (and setting request.withCredentials = true)
          * per the API does not work in FF. setting them explicitly in the Authorization header works
@@ -4139,12 +4287,17 @@ ozpIwc.util.ajax = function (config) {
                 });
             }
             catch (e) {
-                if(this.status === 204 && !this.responseText){
+                if(this.status === 200 && this.responseXML){
                     resolve({
-                        "response": {},
+                        "response": this.responseXML,
                         "header":  ozpIwc.util.ajaxResponseHeaderToJSON(this.getAllResponseHeaders())
                     });
-                } else {
+                } else if(this.status === 204 && !this.responseText) {
+                    resolve({
+                        "response": {},
+                        "header": ozpIwc.util.ajaxResponseHeaderToJSON(this.getAllResponseHeaders())
+                    });
+                }  else {
                     reject(this);
                 }
             }
@@ -4283,6 +4436,55 @@ ozpIwc.AsyncAction.prototype.success=function(callback,self) {
 ozpIwc.AsyncAction.prototype.failure=function(callback,self) {
 	return this.when("failure",callback,self);
 };
+
+/**
+ * Returns an async action that resolves when all async Actions are resolved with their resolved values (if applies).
+ * @method all
+ * @param asyncActions
+ */
+ozpIwc.AsyncAction.all = function(asyncActions) {
+    var returnAction = new ozpIwc.AsyncAction();
+    var count = asyncActions.length;
+    var self = this;
+    var results = [];
+
+
+    //Register a callback for each action's "success"
+    asyncActions.forEach(function(action,index){
+        // If its not an asyncAction, pass it through as a result.
+        if(!self.isAnAction(action)){
+            results[index] = action;
+            if(--count === 0) {
+                returnAction.resolve('success',results);
+            }
+        }else {
+            action
+                .success(function (result) {
+                    results[index] = result;
+                    //once all actions resolved, intermediateAction resolve
+                    if (--count === 0) {
+                        returnAction.resolve('success', results);
+                    }
+                }, self)
+                .failure(function (err) {
+                    //fail the returnAction if any fail.
+                    returnAction.resolve('failure', err);
+                }, self);
+        }
+    });
+
+    return returnAction;
+};
+
+/**
+ * Returns true if the object is an AsyncAction, otherwise false.
+ * @method isAnAction
+ * @param {*} action
+ * @returns {Boolean}
+ */
+ozpIwc.AsyncAction.isAnAction = function(action){
+    return ozpIwc.AsyncAction.prototype.isPrototypeOf(action);
+};
 /**
  * @submodule bus.util
  */
@@ -4325,7 +4527,8 @@ ozpIwc.log=ozpIwc.log || {
         if(level.severity > ozpIwc.log.threshold) {
             return;
         }
-        window.console.log.apply(window.console,["["+level.name+"] "].concat(args));
+        var log = Function.prototype.bind.call(window.console.log, window.console);
+        log.apply(window.console,["["+level.name+"] "].concat(args));
     },
     
     /**
@@ -4678,6 +4881,622 @@ ozpIwc.util.alert = function (message, errorObject) {
     }
 };
 
+ozpIwc = ozpIwc || {};
+ozpIwc.policyAuth = ozpIwc.policyAuth || {};
+
+/**
+ * A security attribute constructor for policyAuth use. Structured to be common to both bus-internal and api needs.
+ * @class SecurityAttribute
+ * @namespace ozpIwc.policyAuth
+ * @param config
+ * @constructor
+ */
+ozpIwc.policyAuth.SecurityAttribute = function(config){
+    config = config || {};
+    this.attributes =  config.attributes ||  {};
+    this.comparator = config.comparator || this.comparator;
+};
+
+/**
+ * Adds a value to the security attribute if it does not already exist. Constructs the attribute object if it does not
+ * exist
+ *
+ * @method pushIfNotExist
+ * @param id
+ * @param val
+ */
+ozpIwc.policyAuth.SecurityAttribute.prototype.pushIfNotExist = function(id, val, comp) {
+    comp = comp || this.comparator;
+    if(!val){
+        return;
+    }
+    var value = Array.isArray(val) ? val : [val];
+    if (!this.attributes[id]) {
+        this.attributes[id] = [];
+        this.attributes[id] = this.attributes[id].concat(value);
+    } else {
+        for (var i in this.attributes[id]) {
+            for (var j in value) {
+                if (!comp(this.attributes[id][i], value[j])) {
+                    this.attributes[id].push(val);
+                }
+            }
+        }
+    }
+};
+
+/**
+ * Clears the attributes given to an id.
+ * @param id
+ */
+ozpIwc.policyAuth.SecurityAttribute.prototype.clear = function(id){
+    delete this.attributes[id];
+};
+
+/**
+ * Clears all attributes.
+ * @method clear
+ */
+ozpIwc.policyAuth.SecurityAttribute.prototype.clearAll = function(){
+    this.attributes = {};
+};
+
+/**
+ * Returns an object containing all of the attributes.
+ * @returns {Object}
+ */
+ozpIwc.policyAuth.SecurityAttribute.prototype.getAll = function(){
+    return this.attributes;
+};
+
+/**
+ *
+ * Determines the equality of an object against a securityAttribute value.
+ * @method comparator
+ * @param a
+ * @param b
+ * @returns {boolean}
+ */
+ozpIwc.policyAuth.SecurityAttribute.prototype.comparator = function(a, b) {
+    return a === b;
+};
+ozpIwc = ozpIwc || {};
+
+ozpIwc.policyAuth = ozpIwc.policyAuth || {};
+
+/**
+ * System entity that evaluates applicable policy and renders an authorization decision.
+ * @class PDP
+ * @namespace ozpIwc.policyAuth
+ *
+ * @param {Object} config
+ * @param {ozpIwc.policyAuth.PRP} config.prp Policy Repository Point for the PDP to gather policies from.
+ * @param {ozpIwc.policyAuth.PIP} config.pip Policy Information Point for the PDP to gather attributes from.
+ * @constructor
+ */
+ozpIwc.policyAuth.PDP = function(config){
+    config=config || {};
+
+    /**
+     * Policy Repository Point
+     * @property prp
+     * @type {ozpIwc.policyAuth.PRP}
+     * @default new ozpIwc.policyAuth.PRP()
+     */
+    this.prp = config.prp ||  new ozpIwc.policyAuth.PRP();
+
+
+    /**
+     * Policy Information Point
+     * @property pip
+     * @type {ozpIwc.policyAuth.PIP}
+     * @default new ozpIwc.policyAuth.PIP()
+     */
+    this.pip = config.pip || new ozpIwc.policyAuth.PIP();
+
+    this.policySets = config.policySets ||
+    {
+        'connectSet': ["policy://ozpIwc/connect"],
+        'apiSet': ["policy://policy/apiNode"],
+        'readSet': ["policy://policy/read"],
+        'receiveAsSet': ["policy://policy/receiveAs"],
+        'sendAsSet': ["policy://policy/sendAs"]
+    };
+};
+
+
+/**
+ * @method isPermitted(request)
+ * @param {Object | String} [request.subject]       The subject attributes or id performing the action.
+ * @param {Object | String} [request.resource]      The resource attributes or id that is being acted upon.
+ * @param {Object | String} [request.action]        The action attributes.  A string should be interpreted as the
+ *                                                  value of the “action-id” attribute.
+ * @param {Array<String>} [request.policies]        A list of URIs applicable to this decision.
+ * @param {String} [request. combiningAlgorithm]    Only supports “deny-overrides”
+ * @param {Object} [contextHolder]                  An object that holds 'securityAttribute' attributes to populate the
+ *                                                  PIP cache with for request/policy use.
+ * @returns {ozpIwc.AsyncAction} will resolve with 'success' if the policy gives a "Permit".
+ *                                    rejects else wise. the async success will receive:
+ * ```{
+ *      'result': <String>,
+ *      'request': <Object> // a copy of the request passed in,
+ *      'formattedRequest': <Object> // a copy of the formatted request (for PDP user caching)
+ *    }```
+ */
+ozpIwc.policyAuth.PDP.prototype.isPermitted = function(request){
+    var asyncAction = new ozpIwc.AsyncAction();
+
+    var self = this;
+    //If there is no request information, its a trivial "Permit"
+    if(!request){
+        return asyncAction.resolve('success',{
+                'result':"Permit"
+            });
+    }
+
+
+    var onError = function(err){
+        asyncAction.resolve('failure',err);
+    };
+    //Format the request
+    this.formatRequest(request)
+        .success(function(formattedRequest){
+
+            // Get the policies from the PRP
+            self.prp.getPolicies(formattedRequest.policies)
+                .success(function(policies){
+
+                    var result = ozpIwc.policyAuth.PolicyCombining[formattedRequest.combiningAlgorithm](policies,formattedRequest.category);
+                    var response = {
+                        'result':result,
+                        'request': request,
+                        'formattedRequest': formattedRequest
+                    };
+                    if(result === "Permit"){
+                       asyncAction.resolve('success',response);
+                    } else {
+                        onError(response);
+                    }
+                }).failure(onError);
+        }).failure(onError);
+    return asyncAction;
+};
+
+
+ozpIwc.policyAuth.PDP.prototype.formatAttributes = function(attributes,pip){
+    attributes = Array.isArray(attributes) ? attributes : [attributes];
+    var asyncAction = new ozpIwc.AsyncAction();
+    pip = pip || this.pip;
+    var asyncs = [];
+    for(var i in attributes){
+        asyncs.push(this.formatAttribute(attributes[i],pip));
+    }
+    ozpIwc.AsyncAction.all(asyncs).success(function(attrs){
+        var retObj = {};
+        for(var i in attrs){
+            if(Object.keys(attrs[i]).length > 0) {
+                for (var j in attrs[i]) {
+                    retObj[j] = attrs[i][j];
+                }
+            }
+        }
+        asyncAction.resolve("success",retObj);
+    });
+    return asyncAction;
+};
+
+
+
+
+    /**
+ * Takes a URN, array of urns, object, array of objects, or array of any combination and fetches/formats to the
+ * necessary structure to be used by a request of policy's category object.
+ *
+ * @method formatAttribute
+ * @param {String|Object|Array<String|Object>}attribute The attribute to format
+ * @param {ozpIwc.policyAuth.PIP} [pip] Policy information point, uses ozpIwc.authorization.pip by default.
+ * @returns {ozpIwc.AsyncAction} returns an async action that will resolve with an object of the formatted attributes.
+ *                               each attribute is ID indexed in the object, such that the formatting of id
+ *                               `ozp:iwc:node` which has attributes `a` and `b`would resolve as follows:
+ *                  ```
+ *                  {
+ *                      'ozp:iwc:node': {
+ *                          'attributeValues': ['a','b']
+ *                       }
+ *                  }
+ *                  ```
+ *
+ */
+ozpIwc.policyAuth.PDP.prototype.formatAttribute = function(attribute,pip){
+    var asyncAction = new ozpIwc.AsyncAction();
+    pip = pip || this.pip;
+    if(!attribute){
+        return asyncAction.resolve('success');
+    }
+
+
+    if(!attribute){
+        //do nothing and return an empty object.
+        asyncAction.resolve('success', {});
+
+    }else if(typeof attribute === "string") {
+        // If its a string, use it as a key and fetch its attrs from PIP
+        pip.getAttributes(attribute)
+            .success(function(attr){
+                //TODO check if is an array or string (APPLY RECURSION!)
+                asyncAction.resolve("success",attr);
+            });
+
+    } else if(Array.isArray(attribute)){
+        // If its an array, its multiple actions. Wrap as needed
+        return this.formatAttributes(attribute,pip);
+
+    } else if(typeof attribute === "object"){
+        // If its an object, make sure each key's value is an array.
+        var keys = Object.keys(attribute);
+        for (var i in keys) {
+            var tmp = attribute[keys[i]];
+            if (['string', 'number', 'boolean'].indexOf(typeof attribute[keys[i]]) >= 0) {
+                attribute[keys[i]] =  [tmp];
+            }
+            attribute[keys[i]] = attribute[keys[i]] || [];
+        }
+        asyncAction.resolve("success",attribute);
+    }
+    return asyncAction;
+};
+
+
+
+/**
+ * Formats an action to be used by a request or policy. Actions are not gathered from the Policy Information Point.
+ * Rather they are string values explaining the operation to be permitted. To comply with XACML, these strings are
+ * wrapped in objects for easier comparison
+ *
+ * @method formatAction
+ * @param {String|Object|Array<String|Object>} action
+ * @returns {Object} An object of formatted actions indexed by the ozp action id `ozp:action:id`.
+ *                   An example output for actions ['read','write'] is as follows:
+ *      ```
+ *      {
+ *          'ozp:iwc:action': {
+ *              'attributeValue': ['read', 'write']
+ *          }
+ *      }
+ *      ```
+ *
+ */
+ozpIwc.policyAuth.PDP.prototype.formatAction = function(action){
+
+    var formatted =  [];
+
+    var objectHandler = function(object,formatted){
+        var values;
+        // We only care about attributeValues
+        if(object['ozp:iwc:action']){
+            values = object['ozp:iwc:action'];
+        }
+        if(Array.isArray(values)) {
+                return arrayHandler(values,formatted);
+        } else if(['string', 'number', 'boolean'].indexOf(typeof values) >= 0){
+            if(formatted.indexOf(values) < 0){
+                formatted.push(values);
+            }
+        }
+    };
+    var arrayHandler = function(array,formatted){
+        for(var i in array){
+            if(typeof array[i] === 'string') {
+                if (formatted.indexOf(array[i]) < 0) {
+                    formatted.push(array[i]);
+                }
+            } else if(Array.isArray(array[i])){
+                arrayHandler(array[i],formatted);
+            } else if(typeof array[i] === 'object') {
+                objectHandler(array[i],formatted);
+            }
+        }
+    };
+
+    if(!action){
+        //do nothing and return an empty array
+    }else if(typeof action === "string"){
+        // If its a string, its a single action.
+        formatted.push(action);
+    } else if(Array.isArray(action)){
+        arrayHandler(action,formatted);
+    } else if(typeof action === 'object'){
+        objectHandler(action,formatted);
+    }
+
+    return {'ozp:iwc:action': formatted};
+};
+
+/**
+ * Takes a request object and applies any context needed from the PIP.
+ *
+ * @method formatRequest
+ * @param {Object}          request
+ * @param {String|Array<String>|Object}    request.subject URN(s) of attribute to gather, or formatted subject object
+ * @param {String|Array<String>Object}     request.resource URN(s) of attribute to gather, or formatted resource object
+ * @param {String|Array<String>Object}     request.action URN(s) of attribute to gather, or formatted action object
+ * @param {String}                         request.combiningAlgorithm URN of combining algorithm
+ * @param {Array<String|ozpIwc.policyAuth.Policy>}   request.policies either a URN or a formatted policy
+ * @param {ozpIwc.policyAuth.PIP} [pip] custom policy information point for attribute gathering.
+ * @returns {ozpIwc.AsyncAction}  will resolve when all attribute formatting completes.
+ *                    The resolution will pass a formatted
+ *                      structured as so:
+ *                    ```{
+ *                      'category':{
+ *                          "urn:oasis:names:tc:xacml:1.0:subject-category:access-subject": {
+ *                              <AttributeId>: {
+ *                                  "attributeValues": Array<Primitive>
+ *                              }
+ *                          },
+ *                          "urn:oasis:names:tc:xacml:3.0:attribute-category:resource": {
+ *                              <AttributeId>: {
+ *                                  "attributeValues": Array<Primitive>
+ *                              }
+ *                          },
+ *                          "urn:oasis:names:tc:xacml:3.0:attribute-category:action": {
+ *                              "ozp:iwc:action": {
+ *                                  "attributeValues": Array<String>
+ *                              }
+ *                          }
+ *                       },
+ *                      'combiningAlgorithm': request.combiningAlgorithm,
+ *                      'policies': request.policies
+ *                     }```
+ */
+ozpIwc.policyAuth.PDP.prototype.formatRequest = function(request,pip){
+    var asyncAction = new ozpIwc.AsyncAction();
+    pip = pip || this.pip;
+    request = request || {};
+    request.subject = request.subject || {};
+    request.resource = request.resource || {};
+    request.action = request.action || {};
+    request.combiningAlgorithm = request.combiningAlgorithm || this.defaultCombiningAlgorithm;
+    var asyncs = [];
+
+    var subjectAsync = this.formatAttribute(request.subject,pip);
+    var resourceAsync = this.formatAttribute(request.resource,pip);
+    var actions = this.formatAction(request.action);
+
+    asyncs.push(subjectAsync,resourceAsync,actions);
+
+    ozpIwc.AsyncAction.all(asyncs)
+        .success(function(gatheredAttributes){
+            var sub = gatheredAttributes[0];
+            var res = gatheredAttributes[1];
+            var act = gatheredAttributes[2];
+            asyncAction.resolve('success',{
+                'category':{
+                    "subject": sub,
+                    "resource": res,
+                    "action": act
+                },
+                'combiningAlgorithm': request.combiningAlgorithm,
+                'policies': request.policies
+            });
+        }).failure(function(err){
+            asyncAction.resolve('failure',err);
+        });
+    return asyncAction;
+};
+
+/**
+ * The URN of the default combining algorithm to use when basing a decision on multiple policies.
+ * @property defaultCombiningAlgorithm
+ * @type {String}
+ * @default "urn:oasis:names:tc:xacml:3.0:policy-combining-algorithm:deny-overrides"
+ */
+ozpIwc.policyAuth.PDP.prototype.defaultCombiningAlgorithm = "deny-overrides";
+
+/**
+ * Formats a category object. If needed the attribute data is gathered from the PIP.
+ *
+ * @method formatCategory
+ * @param {String|Array<String>|Object} category the category (subject,resource,action) to format
+ * @param {String} categoryId the category name used to map to its corresponding attributeId (see PDP.mappedID)
+ * @param {ozpIwc.policyAuth.PIP} [pip] custom policy information point for attribute gathering.
+ * @returns {ozpIwc.AsyncAction}  will resolve with a category object formatted as so:
+ *      ```
+ *      {
+ *          <AttributeId>: {
+ *              'attributeValue': {Array<Primative>}
+ *          }
+ *      }
+ *      ```
+ *
+ */
+ozpIwc.policyAuth.PDP.prototype.formatCategory = function(category,pip){
+    var asyncAction = new ozpIwc.AsyncAction();
+    if(!category){
+        return asyncAction.resolve('success');
+    }
+
+    pip = pip || this.pip;
+
+    this.formatAttribute(category,pip)
+        .success(function(attributes){
+            for(var i in attributes['ozp:iwc:permissions']){
+                attributes[i] = attributes['ozp:iwc:permissions'][i];
+            }
+            delete attributes['ozp:iwc:permissions'];
+            asyncAction.resolve('success',attributes);
+        }).failure(function(err){
+            asyncAction.resolve('failure',err);
+        });
+    return asyncAction;
+};
+
+/**
+ *
+ * Category context handling for policy objects.
+ * Takes object key-indexed categories for a policy
+ * and returns an object key-indexed listing of formatted. Each category is keyed by its XACML URN. currently only
+ * subject,resource, and action categories are supported.
+ *
+ * @method formatCategories
+ * @param {Object} categoryObj An object of categories to format.
+ * @param {Object|String|Array<String|Object>}[categoryObj[<categoryId>]] A category to format
+ * @param {ozpIwc.policyAuth.PIP} [pip] custom policy information point for attribute gathering.
+ * @returns {ozpIwc.AsyncAction} will resolve an object of categories be structured as so:
+ * ```
+ * {
+ *   '<categoryId>' : {
+ *      <AttributeId>:{
+ *          'attributeValue' : Array<Primitive>
+ *      },
+ *      <AttributeId>:{
+ *          'attributeValue' : Array<Primitive>
+ *      }
+ *   },
+ *   '<categoryId>': {...},
+ *   ...
+ * }
+ * ```
+ */
+ozpIwc.policyAuth.PDP.prototype.formatCategories = function(categoryObj,pip){
+    var asyncAction = new ozpIwc.AsyncAction();
+    pip = pip || this.pip;
+    var categoryAsyncs = [];
+    var categoryIndexing = {};
+    for(var i in categoryObj){
+        categoryAsyncs.push(this.formatCategory(categoryObj[i],pip));
+        categoryIndexing[i] = categoryAsyncs.length - 1;
+    }
+    ozpIwc.AsyncAction.all(categoryAsyncs)
+        .success(function(categories){
+            var map = {};
+            var keys = Object.keys(categoryIndexing);
+            for(var i in keys){
+                map[keys[i]] = categories[categoryIndexing[keys[i]]] || {};
+            }
+            asyncAction.resolve('success',map);
+        }).failure(function(err){
+            asyncAction.resolve('failure',err);
+        });
+    return asyncAction;
+};
+
+ozpIwc = ozpIwc || {};
+
+
+ozpIwc.policyAuth = ozpIwc.policyAuth || {};
+
+/**
+ * Policy Information Point
+ *
+ * @param config
+ * @param {Object} config.attributes
+ * @constructor
+ */
+ozpIwc.policyAuth.PIP = ozpIwc.util.extend(ozpIwc.policyAuth.SecurityAttribute,function(config) {
+    ozpIwc.policyAuth.SecurityAttribute.apply(this,arguments);
+});
+
+
+/**
+ * Returns an asyncAction that will resolve with the attributes stored at the given URN.
+ *
+ * @method getAttributes(id)
+ * @param {String} [subjectId] – The authenticated identity to get attributes for.
+ * @returns {ozpIwc.AsyncAction} – Resolves an object of the attributes of the subject.
+ * @example URN "ozp:storage:myAttrs" may contain "ozp:iwc:loginTime" and "ozp:iwc:name".
+ * getAttributes("ozp:storage:myAttrs") would resolve with the following:
+ * ```
+ * {
+ *      'ozp:iwc:loginTime' : {
+ *         'attributeValue': Array<Primative>
+ *     },
+ *      'ozp:iwc:name' : {
+ *         'attributeValue': Array<Primative>
+ *     }
+ * }
+ * ```
+ */
+ozpIwc.policyAuth.PIP.prototype.getAttributes = function(id){
+    var asyncAction = new ozpIwc.AsyncAction();
+    var self = this;
+
+    if(this.attributes[id]) {
+        return asyncAction.resolve('success', self.attributes[id]);
+    } else {
+        ozpIwc.util.ajax({
+            href: id,
+            method: "GET"
+        }).then(function(data){
+            if(typeof data !== "object") {
+                return asyncAction.resolve('failure',"Invalid data loaded from the remote PIP");
+            }
+            self.attributes[id] = {};
+            for(var i in data){
+                self.attributes[id][i] = Array.isArray(data[i] ) ? data[i]  : [data[i] ];
+            }
+            asyncAction.resolve('success', self.attributes[id]);
+        })['catch'](function(err){
+            asyncAction.resolve('failure',err);
+        });
+        return asyncAction;
+    }
+
+};
+/**
+ * Sets the desired attributes in the cache at the specified URN.
+ *
+ * @method grantAttributes(subjectId,attributes)
+ * @param {String} [subjectId] – The recipient of attributes.
+ * @param {object} [attributes] – The attributes to grant (replacing previous values, if applicable)
+ */
+ozpIwc.policyAuth.PIP.prototype.grantAttributes = function(subjectId,attributes){
+    var attrs = {};
+    for(var i in attributes){
+        attrs[i] = Array.isArray(attributes[i]) ? attributes[i] : [attributes[i]];
+    }
+    this.attributes[subjectId] = attrs;
+};
+
+/**
+ * Merges the attributes stored at the parentId urn into the given subject. All merge conflicts take the parent
+ * attribute. Will resolve with the subject when completed.
+ *
+ * @method grantParent(subjectId,parentSubjectId)
+ * @param {String} [subjectId] – The recipient of attributes.
+ * @param {String} [parentSubjectId] – The subject to inherit attributes from.
+ * @returns {ozpIwc.AsyncAction} resolves with the subject and its granted attributes merged in.
+ */
+ozpIwc.policyAuth.PIP.prototype.grantParent = function (subjectId,parentId){
+    var asyncAction = new ozpIwc.AsyncAction();
+    this.attributes[subjectId] = this.attributes[subjectId] || {};
+    var self = this;
+
+    if(self.attributes[parentId]){
+        for(var i in self.attributes[parentId]){
+            self.attributes[subjectId][i] = self.attributes[subjectId][i] || [];
+            for(var j in self.attributes[parentId][i]) {
+                if (self.attributes[subjectId][i].indexOf(self.attributes[parentId][i][j]) < 0) {
+                    self.attributes[subjectId][i].push(self.attributes[parentId][i][j]);
+                }
+            }
+        }
+        return asyncAction.resolve('success',self.attributes[subjectId]);
+
+    } else {
+        self.getAttributes(parentId)
+            .success(function(attributes){
+                for(var i in attributes){
+                    if(self.attributes[subjectId].indexOf(attributes[i]) < 0) {
+                        self.attributes[subjectId].push(attributes[i]);
+                    }
+                }
+                asyncAction.resolve('success',self.attributes[subjectId]);
+            }).failure(function(err){
+                asyncAction.resolve('failure',err);
+            });
+        return asyncAction;
+    }
+};
 
 /**
  * Classes related to security aspects of the IWC.
@@ -4687,10 +5506,10 @@ ozpIwc.util.alert = function (message, errorObject) {
 
 /**
  * Attribute Based Access Control policies.
- * @class abacPolicies
+ * @class ozpIwcPolicies
  * @static
  */
-ozpIwc.abacPolicies={};
+ozpIwc.ozpIwcPolicies={};
 
 /**
  * Returns `permit` when the request's object exists and is empty.
@@ -4701,11 +5520,11 @@ ozpIwc.abacPolicies={};
  *
  * @returns {String}
  */
-ozpIwc.abacPolicies.permitWhenObjectHasNoAttributes=function(request) {
+ozpIwc.ozpIwcPolicies.permitWhenObjectHasNoAttributes=function(request) {
     if(request.object && Object.keys(request.object).length===0) {
-        return "permit";
+        return "Permit";
     }
-    return "undetermined";
+    return "Undetermined";
 };
 /**
  * Returns `permit` when the request's subject contains all of the request's object.
@@ -4716,16 +5535,16 @@ ozpIwc.abacPolicies.permitWhenObjectHasNoAttributes=function(request) {
  *
  * @returns {String}
  */
-ozpIwc.abacPolicies.subjectHasAllObjectAttributes=function(request) {
+ozpIwc.ozpIwcPolicies.subjectHasAllObjectAttributes=function(request) {
     // if no object permissions, then it's trivially true
     if(!request.object) {
-        return "permit";
+        return "Permit";
     }
     var subject = request.subject || {};
     if(ozpIwc.util.objectContainsAll(subject,request.object,this.implies)) {
-        return "permit";
+        return "Permit";
     }
-    return "deny";
+    return "Deny";
 };
 
 /**
@@ -4735,158 +5554,34 @@ ozpIwc.abacPolicies.subjectHasAllObjectAttributes=function(request) {
  * @method permitAll
  * @returns {String}
  */
-ozpIwc.abacPolicies.permitAll=function() {
-    return "permit";
+ozpIwc.ozpIwcPolicies.permitAll=function() {
+    return "Permit";
 };
 
 
 /**
- * @submodule bus.security
- */
-
-/** @typedef {string} ozpIwc.security.Role */
-
-/** @typedef {string} ozpIwc.security.Permission */
-
-/** @typedef { ozpIwc.security.Role[] } ozpIwc.security.Subject */
-
-/** 
- * @typedef {object} ozpIwc.security.Actor 
- * @property {ozpIwc.security.Subject} securityAttributes
- */
-
-
-/**
- * @TODO (DOC)
- * @class BasicAuthentication
- * @constructor
- * @namespace ozpIwc
- */
-ozpIwc.BasicAuthentication=function() {
-
-    /**
-     * @property roles
-     * @type Object
-     * @default {}
-     */
-	this.roles={};
-    var self = this;
-    ozpIwc.metrics.gauge('security.authentication.roles').set(function() {
-        return self.getRoleCount();
-    });
-};
-
-/**
- * Returns the number of roles currently defined.
+ * Returns `Deny` for any scenario.
  *
- * @method getRoleCount
- *
- * @returns {number} the number of roles defined
+ * @static
+ * @method denyAll
+ * @returns {String}
  */
-ozpIwc.BasicAuthentication.prototype.getRoleCount=function() {
-    if (!this.roles || !Object.keys(this.roles)) {
-        return 0;
-    }
-    return Object.keys(this.roles).length;
-};
-
-/**
- * Returns the authenticated subject for the given credentials.
- * 
- * <p>The preAuthenticatedSubject allows an existing subject to augment their
- * roles using credentials.  For example, PostMessageParticipants are
- * assigned a role equal to their origin, since the browser authoritatively
- * determines that.  The security module can then add additional roles based
- * upon configuration.
- *
- * @method login
- * @param {ozpIwc.security.Credentials} credentials
- * @param {ozpIwc.security.Subject} [preAuthenticatedSubject] The pre-authenticated
- *   subject that is presenting these credentials.
- *
- * @returns {ozpIwc.AsyncAction} If the credentials are authenticated, the success handler receives
- *     the subject.
- */
-ozpIwc.BasicAuthentication.prototype.login=function(credentials,preAuthenticatedSubject) {
-	if(!credentials) {
-		throw "Must supply credentials for login";
-	}
-	var action=new ozpIwc.AsyncAction();
-	
-	preAuthenticatedSubject=preAuthenticatedSubject || [];
-	return action.resolve("success",preAuthenticatedSubject);
+ozpIwc.ozpIwcPolicies.denyAll=function() {
+    return "Deny";
 };
 
 
-/**
- * @submodule bus.security
- */
-
-/** @typedef {String} ozpIwc.security.Role */
-/** @typedef {String} ozpIwc.security.Permission */
-/** @typedef { ozpIwc.security.Role[] } ozpIwc.security.Subject */
-/** 
- * @typedef {object} ozpIwc.security.Actor 
- * @property {ozpIwc.security.Subject} securityAttributes
- */
-
-
-/** 
- * A simple Attribute-Based Access Control implementation
- * @todo Permissions are local to each peer.  Does this need to be synced?
- * 
- * @class BasicAuthorization
- * @constructor
- *
- * @namespace ozpIwc
- */
-ozpIwc.BasicAuthorization=function(config) {
-    config=config || {};
-
-    /**
-     * @property roles
-     * @type Object
-     */
-	this.roles={};
-
-    /**
-     * @property policies
-     * @type {auth.policies|*|*[]|ozpIwc.BasicAuthorization.policies|BasicAuthorization.policies}
-     */
-    this.policies= config.policies || [
-//        ozpIwc.abacPolicies.permitAll
-        ozpIwc.abacPolicies.permitWhenObjectHasNoAttributes,
-        ozpIwc.abacPolicies.subjectHasAllObjectAttributes
-    ];
-
-    var self = this;
-    ozpIwc.metrics.gauge('security.authorization.roles').set(function() {
-        return self.getRoleCount();
-    });
-};
-/**
- * Returns the number of roles currently defined.
- *
- * @method getRoleCount
- *
- * @returns {Number} the number of roles defined
- */
-ozpIwc.BasicAuthorization.prototype.getRoleCount=function() {
-    if (!this.roles || !Object.keys(this.roles)) {
-        return 0;
-    }
-    return Object.keys(this.roles).length;
-};
 
 /**
- *
+ * Applies trivial logic to determing a subject's containing of object values
+ * @static
  * @method implies
  * @param {Array} subjectVal
  * @param {Array} objectVal
  *
  * @returns {Boolean}
  */
-ozpIwc.BasicAuthorization.prototype.implies=function(subjectVal,objectVal) {
+ozpIwc.ozpIwcPolicies.implies=function(subjectVal,objectVal) {
     // no object value is trivially true
     if(objectVal===undefined || objectVal === null) {
         return true;
@@ -4895,7 +5590,7 @@ ozpIwc.BasicAuthorization.prototype.implies=function(subjectVal,objectVal) {
     if(subjectVal===undefined || subjectVal === null) {
         return false;
     }
-    
+
     // convert both to arrays, if necessary
     subjectVal=Array.isArray(subjectVal)?subjectVal:[subjectVal];
     objectVal=Array.isArray(objectVal)?objectVal:[objectVal];
@@ -4904,37 +5599,321 @@ ozpIwc.BasicAuthorization.prototype.implies=function(subjectVal,objectVal) {
     return ozpIwc.util.arrayContainsAll(subjectVal,objectVal);
 };
 
+/**
+ * Determines if a request should be permitted by comparing its action to the requested policies action. Then testing
+ * if the request subject passes all of the request resources.
+ * @method defaultPolicy
+ * @param request
+ * @param action
+ * @returns {string} NotApplicable, Deny, or Permit
+ */
+ozpIwc.ozpIwcPolicies.defaultPolicy = function(request,action){
+    action = Array.isArray(action) ? action : [action];
+    if(!ozpIwc.util.arrayContainsAll(action,request.action['ozp:iwc:action'])) {
+        return "NotApplicable";
+    } else if(!ozpIwc.util.objectContainsAll(request.subject,request.resource,ozpIwc.ozpIwcPolicies.implies)) {
+        return "Deny";
+    } else {
+        return "Permit";
+    }
+};
+
+ozpIwc.ozpIwcPolicies.defaultPolicies = {};
 
 /**
- * Confirms that the subject has all of the permissions requested.
- *
- * @method isPermitted
- * @param {object} request
- *
- * @returns {ozpIwc.AsyncAction}
+ * Allows origins to connect that are included in the hard coded whitelist.
+ * @method '/policy/connect'
+ * @param request
+ * @returns {string}
  */
-ozpIwc.BasicAuthorization.prototype.isPermitted=function(request) {
-	var action=new ozpIwc.AsyncAction();
-	
-    var result=this.policies.some(function(policy) {
-        return policy.call(this,request)==="permit";
-    },this);
-    
-    
-    if(result) {
-        return action.resolve("success");
+ozpIwc.ozpIwcPolicies.defaultPolicies['policy://ozpIwc/connect'] = function(request){
+    var policyActions = ['connect'];
+
+    if(!ozpIwc.util.arrayContainsAll(policyActions,request.action['ozp:iwc:action'])){
+        return "NotApplicable";
     } else {
-		return action.resolve('failure');
+        return "Permit";
     }
+};
+
+/**
+ * Applies the sendAs policy requirements to a default policy. The given request must have an action of 'sendAs'.
+ * @method '/policy/sendAs'
+ * @param request
+ * @param {Object} request.subject
+ * @param {Object} request.resource
+ * @returns {string}
+ */
+ozpIwc.ozpIwcPolicies.defaultPolicies['policy://policy/sendAs'] = function(request){
+    return ozpIwc.ozpIwcPolicies.defaultPolicy(request,'sendAs');
+};
+
+/**
+ * Applies the receiveAs policy requirements to a default policy. The given request must have an action of 'receiveAs'.
+ * @method '/policy/sendAs'
+ * @param request
+ * @param {Object} request.subject
+ * @param {Object} request.resource
+ * @returns {string}
+ */
+ozpIwc.ozpIwcPolicies.defaultPolicies['policy://policy/receiveAs'] = function(request){
+    return ozpIwc.ozpIwcPolicies.defaultPolicy(request,'receiveAs');
+};
+
+/**
+ * Applies the read policy requirements to a default policy. The given request must have an action of 'read'.
+ * @method '/policy/sendAs'
+ * @param request
+ * @param {Object} request.subject
+ * @param {Object} request.resource
+ * @returns {string}
+ */
+ozpIwc.ozpIwcPolicies.defaultPolicies['policy://policy/read'] = function(request){
+    return ozpIwc.ozpIwcPolicies.defaultPolicy(request,'read');
+};
+
+/**
+ * Applies the api access policy requirements to a default policy. The given request must have an action of 'access'.
+ * @method '/policy/sendAs'
+ * @param request
+ * @param {Object} request.subject
+ * @param {Object} request.resource
+ * @returns {string}
+ */
+ozpIwc.ozpIwcPolicies.defaultPolicies['policy://policy/apiNode'] = function(request){
+    return ozpIwc.ozpIwcPolicies.defaultPolicy(request,'access');
+};
+
+ozpIwc = ozpIwc || {};
+ozpIwc.policyAuth = ozpIwc.policyAuth || {};
+ozpIwc.policyAuth.PolicyCombining = ozpIwc.policyAuth.PolicyCombining || {};
+
+
+/**
+ *
+ *
+ * @method urn:oasis:names:tc:xacml:3.0:policy-combining-algorithm:deny-overrides
+ */
+ozpIwc.policyAuth.PolicyCombining['deny-overrides'] =
+        function(policies,request){
+    var atLeastOneErrorD,
+        atLeastOneErrorP,
+        atLeastOneErrorDP,
+        atLeastOnePermit = false;
+
+    for(var i in policies){
+        var decision = policies[i](request);
+        switch(decision){
+            case "Deny":
+                return "Deny";
+            case "Permit":
+                atLeastOnePermit = true;
+                break;
+            case "NotApplicable":
+                continue;
+            case "Indeterminate{D}":
+                atLeastOneErrorD = true;
+                break;
+            case "Indeterminate{P}":
+                atLeastOneErrorP = true;
+                break;
+            case "Indeterminate{DP}":
+                atLeastOneErrorDP = true;
+                break;
+            default:
+                continue;
+        }
+    }
+
+    if(atLeastOneErrorDP){
+        return "Indeterminate{DP}";
+    } else if(atLeastOneErrorD && (atLeastOneErrorP || atLeastOnePermit)){
+        return "Indeterminate{DP}";
+    } else if(atLeastOneErrorD){
+        return "Indeterminate{D}";
+    } else if(atLeastOnePermit) {
+        return "Permit";
+    } else if(atLeastOneErrorP){
+        return "Indeterminate{P}";
+    }
+
+    return "NotApplicable";
+
 };
 
 
 /**
- * The instantiated authorization object.
- * @type {ozpIwc.BasicAuthorization}
- * @todo Should this be with defaultWiring?
+ * @method urn:oasis:names:tc:xacml:3.0:policy-combining-algorithm:permit-overrides
  */
-ozpIwc.authorization=new ozpIwc.BasicAuthorization();
+ozpIwc.policyAuth.PolicyCombining['permit-overrides'] =
+        function(){
+
+};
+
+/**
+ * @method urn:oasis:names:tc:xacml:1.0:policy-combining-algorithm:first-applicable
+ */
+ozpIwc.policyAuth.PolicyCombining['first-applicable'] =
+        function(){
+
+};
+
+/**
+ * @method urn:oasis:names:tc:xacml:1.0:policy-combining-algorithm:only-one-applicable
+ */
+ozpIwc.policyAuth.PolicyCombining['only-one-applicable'] =
+        function(){
+
+};
+
+/**
+ * @method urn:oasis:names:tc:xacml:3.0:rule-combining-algorithm:ordered-deny-overrides
+ */
+ozpIwc.policyAuth.PolicyCombining['ordered-deny-overrides'] =
+        function(){
+
+};
+
+/**
+ * @method urn:oasis:names:tc:xacml:3.0:policy-combining-algorithm:ordered-permit-overrides
+ */
+ozpIwc.policyAuth.PolicyCombining['ordered-permit-overrides'] =
+        function(){
+
+};
+
+/**
+ * @method urn:oasis:names:tc:xacml:3.0:policy-combining-algorithm:deny-unless-permit
+ */
+ozpIwc.policyAuth.PolicyCombining['deny-unless-permit'] =
+        function(){
+
+};
+
+/**
+ * @method urn:oasis:names:tc:xacml:3.0:policy-combining-algorithm:permit-unless-deny
+ */
+ozpIwc.policyAuth.PolicyCombining['permit-unless-deny'] =
+        function(){
+
+};
+ozpIwc = ozpIwc || {};
+
+
+ozpIwc.policyAuth = ozpIwc.policyAuth || {};
+
+/**
+ * Policy Repository Point
+ *
+ * @param config
+ * @param {Object} config.policyCache
+ * @constructor
+ */
+ozpIwc.policyAuth.PRP = function(config){
+    config = config || {};
+
+    this.persistentPolicies = config.persistentPolicies || [];
+    this.policyCache = config.policyCache || ozpIwc.ozpIwcPolicies.defaultPolicies;
+
+
+};
+
+
+/**
+ * Gathers policies by their URN. These policies may need formatting by the formatPolicies function to gather any
+ * attribute data needed for the policy evaluation.
+ * If a policy cannot be found, it is labeled as a "denyAll" policy and placed in the cache. Thus, making any permission
+ * check using said policy always deny.
+ *
+ * @method getPolicy(policyURIs)
+ * @param {String | Array<String> } [policyURIs] The subject attributes or id performing the action.
+ * @param {String} [combiningAlgorithm] Defaults to “deny-overrides”.
+ * @return {ozpIwc.AsyncAction} will resolve with an array of policy data.
+ */
+ozpIwc.policyAuth.PRP.prototype.getPolicies = function(policyURIs){
+    var asyncAction = new ozpIwc.AsyncAction();
+    policyURIs = policyURIs || [];
+    policyURIs = Array.isArray(policyURIs)? policyURIs : [policyURIs];
+    var policies = [];
+
+    var policiesToGather = this.persistentPolicies.concat(policyURIs);
+    for(var i in policiesToGather){
+        if(this.policyCache[policiesToGather[i]]){
+            policies.push(ozpIwc.util.clone(this.policyCache[policiesToGather[i]]));
+        } else {
+            var async = this.fetchPolicy(policiesToGather[i]);
+
+            //Push the policy fetch to the array, when it resolves its value (policy) will be part of the array
+            policies.push(async);
+        }
+    }
+
+    // If there are no policies to check against, assume trivial and permit
+    if(policies.length === 0){
+        return asyncAction.resolve('success',[ozpIwc.ozpIwcPolicies.permitAll]);
+    }
+
+    return ozpIwc.AsyncAction.all(policies);
+};
+
+
+
+/**
+ * The URN of the default combining algorithm to use when basing a decision on multiple rules in a policy.
+ * @TODO not used.
+ * @property defaultCombiningAlgorithm
+ * @type {String}
+ * @default 'urn:oasis:names:tc:xacml:3.0:rule-combining-algorithm:deny-overrides'
+ */
+ozpIwc.policyAuth.PRP.prototype.defaultCombiningAlgorithm =
+    'urn:oasis:names:tc:xacml:3.0:rule-combining-algorithm:deny-overrides';
+
+/**
+ * Fetches the requested policy and stores a copy of it in the cache. Returns a denyAll if policy is unobtainable.
+ * @method fetchPolicy
+ * @param {String} policyURI the uri to gather the policy from
+ * @returns {AsyncAction} will resolve with the gathered policy constructed as an ozpIwc.policyAuth.Policy.
+ */
+ozpIwc.policyAuth.PRP.prototype.fetchPolicy = function(policyURI){
+    var asyncAction = new ozpIwc.AsyncAction();
+    var self = this;
+    ozpIwc.util.ajax({
+        'method': "GET",
+        'href': policyURI
+    }).then(function(data){
+        self.policyCache[policyURI] = self.formatPolicy(data.response);
+        asyncAction.resolve('success',ozpIwc.util.clone(self.policyCache[policyURI]));
+    })['catch'](function(e){
+        //Note: failure resolves success because we force a denyAll policy.
+        asyncAction.resolve('success',self.getDenyall(policyURI));
+    });
+    return asyncAction;
+};
+
+/**
+ * Turns JSON data in to ozpIwc.policyAuth.Policy
+ * @method formatPolicy
+ * @param data
+ * @returns {ozpIwc.policyAuth.Policy}
+ */
+ozpIwc.policyAuth.PRP.prototype.formatPolicy = function(data){
+    return new ozpIwc.policyAuth.Policy(data);
+};
+
+/**
+ * Returns a policy that will always deny any request. Said policy is stored in the cache under the given URN
+ * @param urn
+ * @returns {ozpIwc.policyAuth.Policy} a denyAll policy
+ */
+ozpIwc.policyAuth.PRP.prototype.getDenyall = function(urn){
+    if(this.policyCache[urn]){
+        return this.policyCache[urn];
+    } else {
+        this.policyCache[urn] = ozpIwc.ozpIwcPolicies.denyAll;
+        return this.policyCache[urn];
+    }
+};
+
 /** @namespace **/
 
 /**
@@ -5930,7 +6909,7 @@ ozpIwc.Peer.prototype.shutdown=function() {
  * @constructor
  * @mixes ozpIwc.security.Actor
  * @property {String} address The assigned address to this address.
- * @property {ozpIwc.security.Subject} securityAttributes The security attributes for this participant.
+ * @property {ozpIwc.policyAuth.SecurityAttribute} permissions The security attributes for this participant.
  */
 ozpIwc.Participant=function() {
 
@@ -5945,11 +6924,11 @@ ozpIwc.Participant=function() {
 
     /**
      * A key value store of the security attributes assigned to the participant.
-     * @property securityAttributes
+     * @property permissions
      * @type Object
      * @default {}
      */
-	this.securityAttributes={};
+	this.permissions= new ozpIwc.policyAuth.SecurityAttribute();
 
     /**
      * The message id assigned to the next packet if a packet msgId is not specified.
@@ -5957,30 +6936,29 @@ ozpIwc.Participant=function() {
      * @type {Number}
      */
     this.msgId=0;
-    var fakeMeter=new ozpIwc.metricTypes.Meter();
 
     /**
      * A Metrics meter for packets sent from the participant.
      * @property sentPacketsmeter
      * @type ozpIwc.metricTypes.Meter
      */
-    this.sentPacketsMeter=fakeMeter;
+    this.sentPacketsMeter=new ozpIwc.metricTypes.Meter();
 
     /**
      * A Metrics meter for packets received by the participant.
      * @property receivedPacketMeter
      * @type ozpIwc.metricTypes.Meter
      */
-    this.receivedPacketsMeter=fakeMeter;
+    this.receivedPacketsMeter=new ozpIwc.metricTypes.Meter();
 
     /**
      * A Metrics meter for packets sent to the participant that did not pass authorization.
      * @property forbiddenPacketMeter
      * @type ozpIwc.metricTypes.Meter
      */
-    this.forbiddenPacketsMeter=fakeMeter;
-    this.latencyInTimer=fakeMeter;
-    this.latencyOutTimer=fakeMeter;
+    this.forbiddenPacketsMeter=new ozpIwc.metricTypes.Meter();
+    this.latencyInTimer=new ozpIwc.metricTypes.Meter();
+    this.latencyOutTimer=new ozpIwc.metricTypes.Meter();
 
     /**
      * The type of the participant.
@@ -6016,9 +6994,9 @@ ozpIwc.Participant=function() {
         self.send = function(originalPacket,callback) {
             var packet=this.fixPacket(originalPacket);
             if(callback) {
-                this.replyCallbacks[packet.msgId]=callback;
+                self.replyCallbacks[packet.msgId]=callback;
             }
-            ozpIwc.Participant.prototype.send.call(this,packet);
+            ozpIwc.Participant.prototype.send.call(self,packet);
 
             return packet;
         };
@@ -6036,22 +7014,43 @@ ozpIwc.Participant=function() {
  */
 ozpIwc.Participant.prototype.receiveFromRouter=function(packetContext) {
     var self = this;
-    ozpIwc.authorization.isPermitted({
-        'subject': this.securityAttributes,
-        'object': packetContext.packet.permissions
-    })
-        .success(function(){
-            self.receivedPacketsMeter.mark();
-            if(packetContext.packet.time) {
-                self.latencyInTimer.mark(ozpIwc.util.now() - packetContext.packet.time);
-            }
 
-            self.receiveFromRouterImpl(packetContext);
-        })
-        .failure(function() {
-            /** @todo do we send a "denied" message to the destination?  drop?  who knows? */
-            self.forbiddenPacketsMeter.mark();
-        });
+    var request = {
+        'subject': this.permissions.getAll(),
+        'resource': {'ozp:iwc:receiveAs': packetContext.packet.dst},
+        'action': {'ozp:iwc:action': 'receiveAs'},
+        'policies': ozpIwc.authorization.policySets.receiveAsSet
+    };
+
+    var onError = function(err){
+        self.forbiddenPacketsMeter.mark();
+        /** @todo do we send a "denied" message to the destination?  drop?  who knows? */
+        ozpIwc.metrics.counter("transport.packets.forbidden").inc();
+        console.error("failure");
+    };
+
+    ozpIwc.authorization.isPermitted(request,this)
+        .success(function() {
+            ozpIwc.authorization.formatCategory(packetContext.packet.permissions)
+                .success(function(permissions) {
+                    var request = {
+                        'subject': self.permissions.getAll(),
+                        'resource':permissions || {},
+                        'action': {'ozp:iwc:action': 'read'},
+                        'policies': ozpIwc.authorization.policySets.readSet
+                    };
+
+                    ozpIwc.authorization.isPermitted(request, self)
+                        .success(function (resolution) {
+                            self.receivedPacketsMeter.mark();
+                            if(packetContext.packet.time) {
+                                self.latencyInTimer.mark(ozpIwc.util.now() - packetContext.packet.time);
+                            }
+
+                            self.receiveFromRouterImpl(packetContext);
+                        }).failure(onError);
+                }).failure(onError);
+        }).failure(onError);
 };
 
 /**
@@ -6080,7 +7079,6 @@ ozpIwc.Participant.prototype.receiveFromRouterImpl = function (packetContext) {
 ozpIwc.Participant.prototype.connectToRouter=function(router,address) {
     this.address=address;
     this.router=router;
-    this.securityAttributes.rawAddress=address;
     this.msgId=0;
     if(this.name) {
         this.metricRoot="participants."+ this.name +"." + this.address.split(".").reverse().join(".");
@@ -6097,8 +7095,9 @@ ozpIwc.Participant.prototype.connectToRouter=function(router,address) {
     this.heartBeatStatus.address=this.address;
     this.heartBeatStatus.name=this.name;
     this.heartBeatStatus.type=this.participantType || this.constructor.name;
-    this.joinEventChannel();
+
     this.events.trigger("connectedToRouter");
+    this.joinEventChannel();
 };
 
 /**
@@ -6133,14 +7132,24 @@ ozpIwc.Participant.prototype.fixPacket=function(packet) {
  * @returns {ozpIwc.TransportPacket}
  */
 ozpIwc.Participant.prototype.send=function(packet) {
-    packet=this.fixPacket(packet);
-    
-    this.sentPacketsMeter.mark();
-    if(packet.time) {
-        this.latencyOutTimer.mark(ozpIwc.util.now() - packet.time);
-    }
-
-    this.router.send(packet,this);
+    var self = this;
+    var request = {
+        'subject': this.permissions.getAll(),
+        'resource': {'ozp:iwc:sendAs': packet.src},
+        'action': {'ozp:iwc:action': 'sendAs'},
+        'policies': ozpIwc.authorization.policySets.sendAsSet
+    };
+    packet = self.fixPacket(packet);
+    ozpIwc.authorization.isPermitted(request,self)
+        .success(function(resolution) {
+            self.sentPacketsMeter.mark();
+            if(packet.time) {
+                self.latencyOutTimer.mark(ozpIwc.util.now() - packet.time);
+            }
+            self.router.send(packet, self);
+        }).failure(function(e){
+            console.error("Participant Failed to send a packet:",e);
+        });
     return packet;
 };
 
@@ -6259,6 +7268,10 @@ ozpIwc.InternalParticipant=ozpIwc.util.extend(ozpIwc.Participant,function(config
 
     var self = this;
     this.on("connectedToRouter",function() {
+        self.permissions.pushIfNotExist('ozp:iwc:address', self.address);
+        self.permissions.pushIfNotExist('ozp:iwc:sendAs',self.address);
+        self.permissions.pushIfNotExist('ozp:iwc:receiveAs', self.address);
+
         ozpIwc.metrics.gauge(self.metricRoot,"registeredCallbacks").set(function() {
             return self.getCallbackCount();
         });
@@ -6582,6 +7595,9 @@ ozpIwc.Router=function(config) {
 	};
 	this.events.on("preSend",checkFormat);
 
+    if(!config.disableBus){
+        this.participants["$bus.multicast"]=new ozpIwc.MulticastParticipant("$bus.multicast");
+    }
     /**
      * @property watchdog
      * @type ozpIwc.RouterWatchdog
@@ -6652,7 +7668,7 @@ ozpIwc.Router.prototype.registerParticipant=function(participant,packet) {
     }
 
     this.participants[address] = participant;
-    participant.connectToRouter(this,address);
+     participant.connectToRouter(this,address);
     var registeredEvent=new ozpIwc.CancelableEvent({
         'packet': packet,
         'participant': participant
@@ -6696,21 +7712,8 @@ ozpIwc.Router.prototype.deliverLocal=function(packet,sendingParticipant) {
         ozpIwc.metrics.counter("transport.packets.rejected").inc();
         return;
     }
-
-    ozpIwc.authorization.isPermitted({
-        'subject':localParticipant.securityAttributes,
-        'object': packet.permissions,
-        'action': {'action': 'receive'}
-    })
-        .success(function() {
-            ozpIwc.metrics.counter("transport.packets.delivered").inc();
-            localParticipant.receiveFromRouter(packetContext);
-        })
-        .failure(function() {
-            /** @todo do we send a "denied" message to the destination?  drop?  who knows? */
-            ozpIwc.metrics.counter("transport.packets.forbidden").inc();
-        });
-
+    ozpIwc.metrics.counter("transport.packets.delivered").inc();
+    localParticipant.receiveFromRouter(packetContext);
 };
 
 
@@ -6736,6 +7739,9 @@ ozpIwc.Router.prototype.registerMulticast=function(participant,multicastGroups) 
             var registeredEvent = new ozpIwc.CancelableEvent({
                 'entity': {'group': groupName, 'address': participant.address}
             });
+            participant.permissions.pushIfNotExist('ozp:iwc:sendAs', groupName);
+            participant.permissions.pushIfNotExist('ozp:iwc:receiveAs', groupName);
+
             self.events.trigger("registeredMulticast", registeredEvent);
         } else {
             ozpIwc.log.log("no address for " +  participant.participantType + " " + participant.name + "with address " + participant.address + " for group " + groupName);
@@ -7508,12 +8514,18 @@ ozpIwc.LeaderGroupParticipant.prototype._validateState = function(state){
 ozpIwc.MulticastParticipant=ozpIwc.util.extend(ozpIwc.Participant,function(name) {
 
     /**
+     * The address of the participant.
+     * @property address
+     * @type String
+     */
+	this.address = name;
+
+    /**
      * The name of the participant.
      * @property name
      * @type String
-     * @default ""
      */
-	this.name=name;
+    this.name=name;
 
     /**
      * The type of the participant
@@ -7564,6 +8576,11 @@ ozpIwc.MulticastParticipant=ozpIwc.util.extend(ozpIwc.Participant,function(name)
     this.on("connectedToRouter",function() {
         this.namesResource="/multicast/" + this.name;
     },this);
+
+    //At creation the multicast participant knows what it can sendAs/receiveAs
+    this.permissions.pushIfNotExist('ozp:iwc:address', name);
+    this.permissions.pushIfNotExist('ozp:iwc:sendAs', name);
+    this.permissions.pushIfNotExist('ozp:iwc:receiveAs', name);
 });
 
 /**
@@ -7575,6 +8592,8 @@ ozpIwc.MulticastParticipant=ozpIwc.util.extend(ozpIwc.Participant,function(name)
  * @returns {Boolean} always false.
  */
 ozpIwc.MulticastParticipant.prototype.receiveFromRouterImpl=function(packet) {
+
+    this.receivedPacketsMeter.mark();
 	this.members.forEach(function(m) {
         // as we send to each member, update the context to make it believe that it's the only recipient
         packet.dstParticipant=m;
@@ -7646,21 +8665,16 @@ ozpIwc.PostMessageParticipant=ozpIwc.util.extend(ozpIwc.Participant,function(con
 	this.participantType="postMessageProxy";
 
     /**
-     * @property securityAttributes.origin
+     * @property permissions.attributes['ozp:iwc:origin']
      * @type String
      */
-    this.securityAttributes.origin=this.origin;
+    this.permissions.pushIfNotExist("ozp:iwc:origin",this.origin);
 
-
-    /**
-     * Fires when the participant has connected to its router.
-     * @event #connectedToRouter
-     */
     this.on("connectedToRouter",function() {
-        this.securityAttributes.sendAs=this.address;
-        this.securityAttributes.receiveAs=this.address;
+        this.permissions.pushIfNotExist('ozp:iwc:address', this.address);
+        this.permissions.pushIfNotExist('ozp:iwc:sendAs', this.address);
+        this.permissions.pushIfNotExist('ozp:iwc:receiveAs', this.address);
     },this);
-
     /**
      * @property heartBeatStatus.origin
      * @type String
@@ -7675,19 +8689,7 @@ ozpIwc.PostMessageParticipant=ozpIwc.util.extend(ozpIwc.Participant,function(con
  * @param {ozpIwc.TransportPacketContext} packetContext
  */
 ozpIwc.PostMessageParticipant.prototype.receiveFromRouterImpl=function(packetContext) {
-    var self = this;
-    return ozpIwc.authorization.isPermitted({
-        'subject': this.securityAttributes,
-        'object':  {
-            receiveAs: packetContext.packet.dst
-        }
-    })
-        .success(function(){
-            self.sendToRecipient(packetContext.packet);
-        })
-        .failure(function(){
-            ozpIwc.metrics.counter("transport.packets.forbidden").inc();
-        });
+    this.sendToRecipient(packetContext.packet);
 };
 
 /**
@@ -7752,31 +8754,6 @@ ozpIwc.PostMessageParticipant.prototype.forwardFromPostMessage=function(packet,e
 		this.router.send(packet,this);
 	}
 };
-
-/**
- * Sends a packet to this participants router.  Calls fixPacket before doing so.
- *
- * @method send
- * @param {ozpIwc.TransportPacket} packet
- * @returns {ozpIwc.TransportPacket}
-*/
-ozpIwc.PostMessageParticipant.prototype.send=function(packet) {
-    packet=this.fixPacket(packet);
-    var self = this;
-    return ozpIwc.authorization.isPermitted({
-        'subject': this.securityAttributes,
-        'object': {
-            sendAs: packet.src
-        }
-    })
-        .success(function(){
-            self.router.send(packet,this);
-        })
-        .failure(function(){
-            ozpIwc.metrics.counter("transport.packets.forbidden").inc();
-        });
-};
-
 
 /**
  * @TODO (DOC)
@@ -7867,21 +8844,40 @@ ozpIwc.PostMessageParticipantListener.prototype.receiveFromPostMessage=function(
             return;
         }
 	}
+
+    var isPacket = function(packet){
+        if (ozpIwc.util.isIWCPacket(packet)) {
+            participant.forwardFromPostMessage(packet, event);
+        } else {
+            ozpIwc.log.log("Packet does not meet IWC Packet criteria, dropping.", packet);
+        }
+    };
+
 	// if this is a window who hasn't talked to us before, sign them up
 	if(!participant) {
-		participant=new ozpIwc.PostMessageParticipant({
-			'origin': event.origin,
-			'sourceWindow': event.source,
-			'credentials': packet.entity
-		});
-		this.router.registerParticipant(participant,packet);
-		this.participants.push(participant);
-	}
 
-    if (ozpIwc.util.isIWCPacket(packet)) {
-        participant.forwardFromPostMessage(packet, event);
-    } else {
-        ozpIwc.log.log("Packet does not meet IWC Packet criteria, dropping.", packet);
+        var self = this;
+        var request = {
+            'subject': {'ozp:iwc:origin': event.origin},
+            'action': {'ozp:iwc:action': 'connect'},
+            'policies': ozpIwc.authorization.policySets.connectSet
+        };
+        ozpIwc.authorization.isPermitted(request)
+            .success(function () {
+                participant = new ozpIwc.PostMessageParticipant({
+                    'origin': event.origin,
+                    'sourceWindow': event.source,
+                    'credentials': packet.entity
+                });
+                self.router.registerParticipant(participant, packet);
+                self.participants.push(participant);
+                isPacket(packet);
+
+            }).failure(function (err) {
+                console.error("Failed to connect. Could not authorize:", err);
+            });
+	} else{
+        isPacket(packet);
     }
 
 };
@@ -8077,7 +9073,10 @@ ozpIwc.CommonApiValue = function(config) {
      * @type Object
      * @default {}
      */
-	this.permissions=config.permissions || {};
+	this.permissions=new ozpIwc.policyAuth.SecurityAttribute();
+    for(var i in config.permissions){
+        this.permissions.pushIfNotExist(i, config.permissions[i]);
+    }
 
     /**
      * @property version
@@ -8111,7 +9110,14 @@ ozpIwc.CommonApiValue = function(config) {
  */
 ozpIwc.CommonApiValue.prototype.set=function(packet) {
 	if(this.isValidContentType(packet.contentType)) {
-		this.permissions=packet.permissions || this.permissions;
+
+        if(!Array.isArray(packet.permissions)){
+            for(var i in packet.permissions) {
+                //If a permission was passed, wipe its value and set it to the new value;
+                this.permissions.clear(i);
+                this.permissions.pushIfNotExist(i,packet.permissions[i]);
+            }
+        }
 		this.contentType=packet.contentType;
 		this.entity=packet.entity;
 		this.version++;
@@ -8170,7 +9176,7 @@ ozpIwc.CommonApiValue.prototype.eachWatcher=function(callback,self) {
 ozpIwc.CommonApiValue.prototype.deleteData=function() {
 	this.entity=undefined;
 	this.contentType=undefined;
-	this.permissions=[];
+    this.permissions.clearAll();
 	this.version=0;
     this.deleted=true;
 };
@@ -8186,7 +9192,7 @@ ozpIwc.CommonApiValue.prototype.toPacket=function(base) {
 	base = base || {};
 	base.entity=ozpIwc.util.clone(this.entity);
 	base.contentType=this.contentType;
-	base.permissions=ozpIwc.util.clone(this.permissions);
+	base.permissions=ozpIwc.util.clone(this.permissions.getAll());
 	base.eTag=this.version;
 	base.resource=this.resource;
 	return base;
@@ -8279,7 +9285,9 @@ ozpIwc.CommonApiValue.prototype.deserialize=function(serverData) {
 // we need the persistent data to conform with the structure of non persistent data.
     this.entity= clone.entity || {};
     this.contentType=clone.contentType || this.contentType;
-    this.permissions=clone.permissions || this.permissions;
+    for(var i in clone.permissions){
+        this.permissions.pushIfNotExist(i, clone.permissions[i]);
+    }
     this.version=clone.version || this.version;
     this.watchers = serverData.watchers || this.watchers;
 };
@@ -8294,7 +9302,7 @@ ozpIwc.CommonApiValue.prototype.serialize=function() {
     var serverData = {};
     serverData.entity=this.entity;
     serverData.contentType=this.contentType;
-    serverData.permissions=this.permissions;
+    serverData.permissions=this.permissions.getAll();
     serverData.version=this.version;
     serverData.watchers=this.watchers;
     return serverData;
@@ -8389,7 +9397,7 @@ ozpIwc.CommonApiCollectionValue.prototype.serialize=function() {
     serverData.entity=this.entity;
     serverData.pattern=this.pattern;
     serverData.contentType=this.contentType;
-    serverData.permissions=this.permissions;
+    serverData.permissions=this.permissions.getAll();
     serverData.version=this.version;
     serverData.watchers=this.watchers;
     return serverData;
@@ -8804,8 +9812,8 @@ ozpIwc.CommonApiBase.prototype.makeValue=function(/*packet*/) {
  * @todo make the packetContext have the srcSubject inside of it
  *
  * @method isPermitted
- * @param {ozpIwc.CommonApiValue} node The node of the api that permission is being checked against
  * @param {ozpIwc.TransportPacketContext} packetContext The packet of which permission is in question.
+ * @param {ozpIwc.CommonApiValue} node The node of the api that permission is being checked against
  *
  * @returns {ozpIwc.AsyncAction} An asynchronous response, the response will call either success or failure depending on
  * the result of the check.
@@ -8820,16 +9828,31 @@ ozpIwc.CommonApiBase.prototype.makeValue=function(/*packet*/) {
  *      });
  * ```
  */
-ozpIwc.CommonApiBase.prototype.isPermitted=function(node,packetContext) {
-    var subject=packetContext.srcSubject || {
-        'rawAddress':packetContext.packet.src
-    };
+ozpIwc.CommonApiBase.prototype.isPermitted=function(packetContext,node) {
+    var asyncAction = new ozpIwc.AsyncAction();
 
-    return ozpIwc.authorization.isPermitted({
-        'subject': subject,
-        'object': node.permissions,
-        'action': {'action':packetContext.action}
-    });
+    ozpIwc.authorization.formatCategory(packetContext.packet.permissions)
+        .success(function(permissions) {
+            var request = {
+                'subject': node.permissions.getAll(),
+                'resource': permissions || {},
+                'action': {'ozp:iwc:action': 'access'},
+                'policies': ozpIwc.authorization.policySets.apiSet
+            };
+
+            ozpIwc.authorization.isPermitted(request, node)
+                .success(function (resolution) {
+                        asyncAction.resolve("success",resolution);
+                }).failure(function (err) {
+                    console.error("Api could not perform action:", err);
+                    asyncAction.resolve("failure",err);
+                });
+        }).failure(function(err){
+            console.error("Api could not format permission check on packet", err);
+            asyncAction.resolve("failure",err);
+        });
+
+    return asyncAction;
 };
 
 
@@ -8853,7 +9876,7 @@ ozpIwc.CommonApiBase.prototype.notifyWatchers=function(node,changes) {
             'replyTo' : watcher.msgId,
             'response': 'changed',
             'resource': node.resource,
-            'permissions': node.permissions,
+            'permissions': node.permissions.getAll(),
             'entity': changes
         };
 
@@ -8973,7 +9996,7 @@ ozpIwc.CommonApiBase.prototype.routePacket=function(packetContext) {
         this.validateResource(node,packetContext);
         node=this.findOrMakeValue(packetContext.packet);
 
-        this.isPermitted(node,packetContext)
+        this.isPermitted(packetContext,node)
             .success(function() {
                 errorWrap(function() {
                     this.validatePreconditions(node,packetContext);
@@ -8981,14 +10004,15 @@ ozpIwc.CommonApiBase.prototype.routePacket=function(packetContext) {
                     handler.call(this,node,packetContext);
                     this.notifyWatchers(node, node.changesSince(snapshot));
 
-                    // update all the collection values
+                // update all the collection values
                     this.dynamicNodes.forEach(function(resource) {
                         this.updateDynamicNode(this.data[resource]);
                     },this);
                 });
             },this)
-            .failure(function() {
+            .failure(function(err) {
                 packetContext.replyTo({'response':'noPerm'});
+                console.log("failure");
             });
     });
 };
@@ -10079,7 +11103,7 @@ ozpIwc.DataApiValue.prototype.serialize=function() {
 	serverData.entity=this.entity;
     serverData.children = this.children;
 	serverData.contentType=this.contentType;
-	serverData.permissions=this.permissions;
+	serverData.permissions=this.permissions.getAll();
 	serverData.version=this.version;
 	serverData.self=this.self;
     serverData.watchers =this.watchers;
@@ -10242,7 +11266,7 @@ ozpIwc.IntentsApi.prototype.handleRegister = function (node, packetContext) {
     // save the new child
     var childNode=this.findOrMakeValue({'resource':key});
     var clone = ozpIwc.util.clone(childNode);
-
+    clone.permissions = childNode.permissions.getAll();
     packetContext.packet.entity.invokeIntent = packetContext.packet.entity.invokeIntent || {};
     packetContext.packet.entity.invokeIntent.dst = packetContext.packet.src;
     packetContext.packet.entity.invokeIntent.replyTo = packetContext.packet.msgId;
@@ -10279,7 +11303,7 @@ ozpIwc.IntentsApi.prototype.handleBroadcast = function (node, packetContext) {
 
         var inflightPacket = self.makeIntentInvocation(node,packetContext);
 
-        var updateInFlightEntity = ozpIwc.util.clone(inflightPacket);
+        var updateInFlightEntity =inflightPacket.toPacket();
         updateInFlightEntity.entity.handlerChosen = {
             'resource' : handler.resource,
             'reason' : "broadcast"
@@ -10315,7 +11339,7 @@ ozpIwc.IntentsApi.prototype.handleInvoke = function (node, packetContext) {
     var inflightPacket = this.makeIntentInvocation(node,packetContext);
 
     if(handlerNodes.length === 1) {
-        var updateInFlightEntity = ozpIwc.util.clone(inflightPacket);
+        var updateInFlightEntity = inflightPacket.toPacket();
         updateInFlightEntity.entity.handlerChosen = {
             'resource' : handlerNodes[0].resource,
             'reason' : "onlyOne"
@@ -10714,7 +11738,9 @@ ozpIwc.IntentsApiDefinitionValue.prototype.deserialize=function(serverData) {
     this.pattern.toJSON = RegExp.prototype.toString;
 
     this.contentType=clone.contentType || this.contentType;
-    this.permissions=clone.permissions || this.permissions;
+    for(var i in clone.permissions){
+        this.permissions.pushIfNotExist(i, clone.permissions[i]);
+    }
     this.version=clone.version || this.version;
     this.watchers = clone.watchers || this.watchers;
 };
@@ -10730,7 +11756,7 @@ ozpIwc.IntentsApiDefinitionValue.prototype.serialize=function() {
     serverData.entity=this.entity;
     serverData.pattern=this.pattern;
     serverData.contentType=this.contentType;
-    serverData.permissions=this.permissions;
+    serverData.permissions=this.permissions.getAll();
     serverData.version=this.version;
     serverData.watchers=this.watchers;
     return serverData;
@@ -10813,7 +11839,9 @@ ozpIwc.IntentsApiInFlightIntent = ozpIwc.util.extend(ozpIwc.CommonApiValue, func
     ozpIwc.CommonApiValue.apply(this, arguments);
     this.resource = config.resource;
     this.invokePacket=config.invokePacket;
-    this.permissions=config.invokePacket.permissions;
+    //for (var i in config.invokePacket.permissions) {
+    //    this.permissions.pushIfNotExist(i,config.invokePacket.permissions[i]);
+    //}
     this.entity={
         'intent': {
             'type': config.type,
@@ -11186,15 +12214,12 @@ ozpIwc.SystemApi.prototype.loadFromServer=function() {
     return new Promise(function(resolve, reject) {
         self.loadFromEndpoint(ozpIwc.linkRelPrefix + ":application", headers)
             .then(function() {
-                self.loadFromEndpoint(ozpIwc.linkRelPrefix + ":user")
-                    .then(function() {
-                        self.loadFromEndpoint(ozpIwc.linkRelPrefix + ":system")
-                            .then(function() {
-                                resolve("system.api load complete");
-                            });
-                    });
-            })
-            ['catch'](function(error) {
+                return self.loadFromEndpoint(ozpIwc.linkRelPrefix + ":user");
+            }).then(function() {
+                return self.loadFromEndpoint(ozpIwc.linkRelPrefix + ":system");
+            }).then(function() {
+                resolve("system.api load complete");
+            })['catch'](function(error) {
                 reject(error);
             });
     });
@@ -11386,18 +12411,24 @@ var ozpIwc=ozpIwc || {};
 ozpIwc.version = "0.2";
 ozpIwc.ELECTION_TIMEOUT = 1000;
 ozpIwc.apiRootUrl = ozpIwc.apiRootUrl || "/api";
+ozpIwc.policyRootUrl = ozpIwc.policyRootUrl || "/policy";
 ozpIwc.basicAuthUsername= ozpIwc.basicAuthUsername || '';
 ozpIwc.basicAuthPassword= ozpIwc.basicAuthPassword || '';
 ozpIwc.linkRelPrefix = ozpIwc.linkRelPrefix || "ozp";
+ozpIwc.authorization = new ozpIwc.policyAuth.PDP({
+    'pip': new ozpIwc.policyAuth.PIP(),
+    'prp': new ozpIwc.policyAuth.PRP(),
+    'setsEndpoint': ozpIwc.policyRootUrl
+});
+
 if(typeof ozpIwc.enableDefault === "undefined" || ozpIwc.enableDefault) {
     ozpIwc.initEndpoints(ozpIwc.apiRootUrl);
+
 
     ozpIwc.defaultPeer = new ozpIwc.Peer();
     ozpIwc.defaultLocalStorageLink = new ozpIwc.KeyBroadcastLocalStorageLink({
         peer: ozpIwc.defaultPeer
     });
-
-    ozpIwc.authorization = new ozpIwc.BasicAuthorization();
 
     ozpIwc.heartBeatFrequency = 10000; // 10 seconds
     ozpIwc.defaultRouter = new ozpIwc.Router({
@@ -90286,13 +91317,13 @@ debuggerModule.controller("ApiDisplayCtrl",["$scope", "$attrs", "iwcClient","api
                         key.children = "Not Supported: " + response.response;
                     }
                     if(!scope.$$phase) { scope.$apply(); }
-                }).catch(function (error) {
+                })["catch"](function (error) {
                     console.log('Error in loadKey: ' + JSON.stringify(error));
                 });
             } else {
                 if(!scope.$$phase) { scope.$apply(); }
             }
-        }).catch(function (error) {
+        })["catch"](function (error) {
             console.log('Error in loadKey: ' + JSON.stringify(error));
         });
     };
@@ -90386,7 +91417,7 @@ debuggerModule.controller("ApiDisplayCtrl",["$scope", "$attrs", "iwcClient","api
                 scope.msg.response = reply;
                 scope.msg.response.entity = JSON.stringify(reply.entity, null, 2);
                 scope.$apply();
-            }).catch(function (error) {
+            })["catch"](function (error) {
                 console.log('error: ' + JSON.stringify(error));
             });
         }
@@ -90533,9 +91564,8 @@ debuggerModule.controller('WebtopCtrl', ["$scope", "$http", "iwcClient", functio
     scope.appListings = [];
     return apps.reduce(function (previous, current) {
             return previous.then(function () {
-              var promise = saveAppData(current, scope.appListings);
-              return promise;
-            }).catch(function (error) {
+              return saveAppData(current, scope.appListings);
+            })["catch"](function (error) {
               console.log('should not have happened: ' + error);
             });
           }, Promise.resolve()).then(function () {
@@ -90552,13 +91582,9 @@ debuggerModule.controller('WebtopCtrl', ["$scope", "$http", "iwcClient", functio
     return client.api(dst)
       .set(resource, {"entity": entity})
       .then(function (response) {
-        if (response) {
-          console.log('updated OK');
-          return true;
-        } else {
-          console.log('update failed');
-          return false;
-        }
+            console.log('updated OK');
+        })["catch"](function(err) {
+          console.log('update failed',err);
       });
   }
 
@@ -90574,17 +91600,15 @@ debuggerModule.controller('WebtopCtrl', ["$scope", "$http", "iwcClient", functio
     console.log('getting dashboard json data...');
     http.get('data/dashboard-data.json').success(function(data) {
       console.log(data);
-      setData('data.api', dashboardDataResource, data).then(function() {
-        scope.refresh();
-      });
+      setData('data.api', dashboardDataResource, data)
+          .then(scope.refresh);
     });
   };
 
   scope.clearDashboardData = function() {
     var data = {};
-    setData('data.api', dashboardDataResource, data).then(function() {
-        scope.refresh();
-      });
+    setData('data.api', dashboardDataResource, data)
+        .then(scope.refresh);
   };
 
   // initialization
@@ -90625,33 +91649,27 @@ debuggerModule.controller("MyAppsCtrl",["$scope","iwcClient",function(scope,clie
 
   function saveAppData(appResource) {
     return client.api("system.api").get(appResource).then(function(response) {
-      if (response.response === "ok") {
-          scope.appListings.push(response.entity);
-        } else {
-          console.log("Not Supported: " + response.response);
-        }
+        scope.appListings.push(response.entity);
+    })["catch"](function(err){
+          console.log("Not Supported: " + err.response);
     });
   }
 
     function getApplicationResources() {
       return client.api('system.api').get('/application').then(function (response) {
-        if (response.response === "ok") {
           return response.entity;
-        } else {
-          return console.log("Not Supported: " + response.response);
-        }
+      })["catch"](function(err){
+          return console.log("Not Supported: " + err.response);
       });
     }
 
     function getUserInfo() {
       return client.api('system.api').get('/user').then(function (response) {
-        if (response.response === "ok") {
           scope.username = response.entity.username;
           scope.userRole = response.entity.highestRole;
           return response.entity;
-        } else {
-          return console.log("Not Supported: " + response.response);
-        }
+      })["catch"](function(err){
+          return console.log("Not Supported: " + err.response);
       });
     }
 
@@ -90662,9 +91680,8 @@ debuggerModule.controller("MyAppsCtrl",["$scope","iwcClient",function(scope,clie
         scope.appListings = [];
         return apps.reduce(function (previous, current) {
           return previous.then(function () {
-            var promise = saveAppData(current);
-            return promise;
-          }).catch(function (error) {
+            return saveAppData(current);
+          })["catch"](function (error) {
             console.log('should not have happened: ' + error);
           });
         }, Promise.resolve()).then(function () {
@@ -91318,8 +92335,68 @@ debuggerModule.directive( "metrics", [function() {
 debuggerModule.controller("packetLogController",["$scope",function(scope) {
     scope.logging=false;
     scope.viewFilter="";
+    scope.viewFilterValidation="";
     scope.packets=[];
     scope.maxShown=50;
+    scope.filterError="";
+    scope.selectedPacket=null;
+    scope.setSelectedPacket=function(p) {
+        scope.selectedPacket=p;
+    };
+        
+    var filterFunction=function() {
+        return true;
+    };
+    
+    /* jshint evil:true */
+    var createFilterFunction=function(filter) {
+        if(!filter) { filter="true";}
+        var f=new Function("srcPeer","sequence","data","return ("+filter+");");
+        try {
+            f("123456",123,{});
+            return f;
+        }catch (e) {
+            if(e instanceof TypeError) {
+                // likely an data field that is null/undefined, so let it slide
+                return f;
+            } else {
+                throw e;
+            }
+        }        
+    };
+
+    
+    scope.updateFilter=function(filter){
+        try {
+            scope.filterError="";
+            scope.viewFilterValidation="hasSuccess";
+            filterFunction=createFilterFunction(filter);
+        } catch (e) {
+            scope.filterError=e.message;
+            scope.viewFilterValidation="has-error";
+        }
+    };
+    
+    scope.$watch("viewFilter",function() {
+        try {
+            scope.filterError="";
+            scope.viewFilterValidation="hasSuccess";
+            createFilterFunction(scope.viewFilter);
+        } catch (e) {
+            console.log("Filter error ",e);
+            scope.filterError=e.message;
+            scope.viewFilterValidation="has-error";
+        }      
+    });
+    scope.logicalFilter=function() {
+        return function(p) { 
+            try { return filterFunction(p.srcPeer,p.sequence,p.data); }
+            catch(e) {
+                return false;
+            }
+        };
+        
+    };
 
     var logPacket=function(msg) {        
         if(!scope.logging) {

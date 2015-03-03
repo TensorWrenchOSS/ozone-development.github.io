@@ -48,15 +48,12 @@ ozpIwc.SystemApi.prototype.loadFromServer=function() {
     return new Promise(function(resolve, reject) {
         self.loadFromEndpoint(ozpIwc.linkRelPrefix + ":application", headers)
             .then(function() {
-                self.loadFromEndpoint(ozpIwc.linkRelPrefix + ":user")
-                    .then(function() {
-                        self.loadFromEndpoint(ozpIwc.linkRelPrefix + ":system")
-                            .then(function() {
-                                resolve("system.api load complete");
-                            });
-                    });
-            })
-            ['catch'](function(error) {
+                return self.loadFromEndpoint(ozpIwc.linkRelPrefix + ":user");
+            }).then(function() {
+                return self.loadFromEndpoint(ozpIwc.linkRelPrefix + ":system");
+            }).then(function() {
+                resolve("system.api load complete");
+            })['catch'](function(error) {
                 reject(error);
             });
     });

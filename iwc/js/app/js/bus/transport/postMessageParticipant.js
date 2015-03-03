@@ -50,21 +50,16 @@ ozpIwc.PostMessageParticipant=ozpIwc.util.extend(ozpIwc.Participant,function(con
 	this.participantType="postMessageProxy";
 
     /**
-     * @property securityAttributes.origin
+     * @property permissions.attributes['ozp:iwc:origin']
      * @type String
      */
-    this.securityAttributes.origin=this.origin;
+    this.permissions.pushIfNotExist("ozp:iwc:origin",this.origin);
 
-
-    /**
-     * Fires when the participant has connected to its router.
-     * @event #connectedToRouter
-     */
     this.on("connectedToRouter",function() {
-        this.securityAttributes.sendAs=this.address;
-        this.securityAttributes.receiveAs=this.address;
+        this.permissions.pushIfNotExist('ozp:iwc:address', this.address);
+        this.permissions.pushIfNotExist('ozp:iwc:sendAs', this.address);
+        this.permissions.pushIfNotExist('ozp:iwc:receiveAs', this.address);
     },this);
-
     /**
      * @property heartBeatStatus.origin
      * @type String
@@ -79,19 +74,7 @@ ozpIwc.PostMessageParticipant=ozpIwc.util.extend(ozpIwc.Participant,function(con
  * @param {ozpIwc.TransportPacketContext} packetContext
  */
 ozpIwc.PostMessageParticipant.prototype.receiveFromRouterImpl=function(packetContext) {
-    var self = this;
-    return ozpIwc.authorization.isPermitted({
-        'subject': this.securityAttributes,
-        'object':  {
-            receiveAs: packetContext.packet.dst
-        }
-    })
-        .success(function(){
-            self.sendToRecipient(packetContext.packet);
-        })
-        .failure(function(){
-            ozpIwc.metrics.counter("transport.packets.forbidden").inc();
-        });
+    this.sendToRecipient(packetContext.packet);
 };
 
 /**
@@ -156,31 +139,6 @@ ozpIwc.PostMessageParticipant.prototype.forwardFromPostMessage=function(packet,e
 		this.router.send(packet,this);
 	}
 };
-
-/**
- * Sends a packet to this participants router.  Calls fixPacket before doing so.
- *
- * @method send
- * @param {ozpIwc.TransportPacket} packet
- * @returns {ozpIwc.TransportPacket}
-*/
-ozpIwc.PostMessageParticipant.prototype.send=function(packet) {
-    packet=this.fixPacket(packet);
-    var self = this;
-    return ozpIwc.authorization.isPermitted({
-        'subject': this.securityAttributes,
-        'object': {
-            sendAs: packet.src
-        }
-    })
-        .success(function(){
-            self.router.send(packet,this);
-        })
-        .failure(function(){
-            ozpIwc.metrics.counter("transport.packets.forbidden").inc();
-        });
-};
-
 
 /**
  * @TODO (DOC)
@@ -271,21 +229,40 @@ ozpIwc.PostMessageParticipantListener.prototype.receiveFromPostMessage=function(
             return;
         }
 	}
+
+    var isPacket = function(packet){
+        if (ozpIwc.util.isIWCPacket(packet)) {
+            participant.forwardFromPostMessage(packet, event);
+        } else {
+            ozpIwc.log.log("Packet does not meet IWC Packet criteria, dropping.", packet);
+        }
+    };
+
 	// if this is a window who hasn't talked to us before, sign them up
 	if(!participant) {
-		participant=new ozpIwc.PostMessageParticipant({
-			'origin': event.origin,
-			'sourceWindow': event.source,
-			'credentials': packet.entity
-		});
-		this.router.registerParticipant(participant,packet);
-		this.participants.push(participant);
-	}
 
-    if (ozpIwc.util.isIWCPacket(packet)) {
-        participant.forwardFromPostMessage(packet, event);
-    } else {
-        ozpIwc.log.log("Packet does not meet IWC Packet criteria, dropping.", packet);
+        var self = this;
+        var request = {
+            'subject': {'ozp:iwc:origin': event.origin},
+            'action': {'ozp:iwc:action': 'connect'},
+            'policies': ozpIwc.authorization.policySets.connectSet
+        };
+        ozpIwc.authorization.isPermitted(request)
+            .success(function () {
+                participant = new ozpIwc.PostMessageParticipant({
+                    'origin': event.origin,
+                    'sourceWindow': event.source,
+                    'credentials': packet.entity
+                });
+                self.router.registerParticipant(participant, packet);
+                self.participants.push(participant);
+                isPacket(packet);
+
+            }).failure(function (err) {
+                console.error("Failed to connect. Could not authorize:", err);
+            });
+	} else{
+        isPacket(packet);
     }
 
 };

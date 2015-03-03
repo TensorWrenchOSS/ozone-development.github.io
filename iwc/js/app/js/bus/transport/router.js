@@ -233,6 +233,9 @@ ozpIwc.Router=function(config) {
 	};
 	this.events.on("preSend",checkFormat);
 
+    if(!config.disableBus){
+        this.participants["$bus.multicast"]=new ozpIwc.MulticastParticipant("$bus.multicast");
+    }
     /**
      * @property watchdog
      * @type ozpIwc.RouterWatchdog
@@ -303,7 +306,7 @@ ozpIwc.Router.prototype.registerParticipant=function(participant,packet) {
     }
 
     this.participants[address] = participant;
-    participant.connectToRouter(this,address);
+     participant.connectToRouter(this,address);
     var registeredEvent=new ozpIwc.CancelableEvent({
         'packet': packet,
         'participant': participant
@@ -347,21 +350,8 @@ ozpIwc.Router.prototype.deliverLocal=function(packet,sendingParticipant) {
         ozpIwc.metrics.counter("transport.packets.rejected").inc();
         return;
     }
-
-    ozpIwc.authorization.isPermitted({
-        'subject':localParticipant.securityAttributes,
-        'object': packet.permissions,
-        'action': {'action': 'receive'}
-    })
-        .success(function() {
-            ozpIwc.metrics.counter("transport.packets.delivered").inc();
-            localParticipant.receiveFromRouter(packetContext);
-        })
-        .failure(function() {
-            /** @todo do we send a "denied" message to the destination?  drop?  who knows? */
-            ozpIwc.metrics.counter("transport.packets.forbidden").inc();
-        });
-
+    ozpIwc.metrics.counter("transport.packets.delivered").inc();
+    localParticipant.receiveFromRouter(packetContext);
 };
 
 
@@ -387,6 +377,9 @@ ozpIwc.Router.prototype.registerMulticast=function(participant,multicastGroups) 
             var registeredEvent = new ozpIwc.CancelableEvent({
                 'entity': {'group': groupName, 'address': participant.address}
             });
+            participant.permissions.pushIfNotExist('ozp:iwc:sendAs', groupName);
+            participant.permissions.pushIfNotExist('ozp:iwc:receiveAs', groupName);
+
             self.events.trigger("registeredMulticast", registeredEvent);
         } else {
             ozpIwc.log.log("no address for " +  participant.participantType + " " + participant.name + "with address " + participant.address + " for group " + groupName);

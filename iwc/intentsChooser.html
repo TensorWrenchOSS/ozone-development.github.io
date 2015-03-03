@@ -27,15 +27,15 @@
       <div id="cancelButton"></div>
 
       <script type="text/javascript">
-        var client=new ozpIwc.InternalParticipant({'name':"intentsChooser"});
-        ozpIwc.defaultRouter.registerParticipant(client);
+        var participant=new ozpIwc.InternalParticipant({'name':"intentsChooser"});
+        ozpIwc.defaultRouter.registerParticipant(participant);
 
         function failure(msg) {
             document.getElementById("handlerList").textContent=msg;
         }
 
         function handleSelection(handler,intentInvocation){
-            client.send({
+            participant.send({
                 dst: "intents.api",
                 action: "set",
                 contentType: intentInvocation.contentType,
@@ -45,8 +45,8 @@
                     reason: "user",
                     state: "choosing"
                 }
-            }).then(function() {
-                    window.close();
+            },function(reply){
+                window.close();
             });
         }
 
@@ -73,7 +73,7 @@
             button.appendChild(document.createTextNode("Cancel"));
             button.addEventListener("click",function(evt) {
                 evt.preventDefault();
-                client.send({
+                participant.send({
                     dst: "intents.api",
                     action: "set",
                     contentType: intentInvocation.contentType,
@@ -85,7 +85,7 @@
                         },
                         state: "fail"
                     }
-                }).then(function() {
+                },function(reply){
                     window.close();
                 });
             });
@@ -99,11 +99,13 @@
         }
         var loc=ozpIwc.util.parseOzpUrl(m[1]);
 
-        client.send(loc).then(function(reply) {
-            showHandlers(reply.entity.handlerChoices,reply);
-            showCancel(reply);
-        })['catch'](function(err){
-            failure();
+        participant.send(loc,function(reply) {
+            if (/(ok).*/.test(reply.response)) {
+                showHandlers(reply.entity.handlerChoices|| [], reply);
+                showCancel(reply);
+            } else {
+                failure();
+            }
         });
     </script>
   </body>

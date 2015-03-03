@@ -15,12 +15,18 @@
 ozpIwc.MulticastParticipant=ozpIwc.util.extend(ozpIwc.Participant,function(name) {
 
     /**
+     * The address of the participant.
+     * @property address
+     * @type String
+     */
+	this.address = name;
+
+    /**
      * The name of the participant.
      * @property name
      * @type String
-     * @default ""
      */
-	this.name=name;
+    this.name=name;
 
     /**
      * The type of the participant
@@ -71,6 +77,11 @@ ozpIwc.MulticastParticipant=ozpIwc.util.extend(ozpIwc.Participant,function(name)
     this.on("connectedToRouter",function() {
         this.namesResource="/multicast/" + this.name;
     },this);
+
+    //At creation the multicast participant knows what it can sendAs/receiveAs
+    this.permissions.pushIfNotExist('ozp:iwc:address', name);
+    this.permissions.pushIfNotExist('ozp:iwc:sendAs', name);
+    this.permissions.pushIfNotExist('ozp:iwc:receiveAs', name);
 });
 
 /**
@@ -82,6 +93,8 @@ ozpIwc.MulticastParticipant=ozpIwc.util.extend(ozpIwc.Participant,function(name)
  * @returns {Boolean} always false.
  */
 ozpIwc.MulticastParticipant.prototype.receiveFromRouterImpl=function(packet) {
+
+    this.receivedPacketsMeter.mark();
 	this.members.forEach(function(m) {
         // as we send to each member, update the context to make it believe that it's the only recipient
         packet.dstParticipant=m;

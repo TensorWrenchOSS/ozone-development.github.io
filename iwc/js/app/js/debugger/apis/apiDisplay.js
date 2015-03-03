@@ -34,13 +34,13 @@ debuggerModule.controller("ApiDisplayCtrl",["$scope", "$attrs", "iwcClient","api
                         key.children = "Not Supported: " + response.response;
                     }
                     if(!scope.$$phase) { scope.$apply(); }
-                }).catch(function (error) {
+                })["catch"](function (error) {
                     console.log('Error in loadKey: ' + JSON.stringify(error));
                 });
             } else {
                 if(!scope.$$phase) { scope.$apply(); }
             }
-        }).catch(function (error) {
+        })["catch"](function (error) {
             console.log('Error in loadKey: ' + JSON.stringify(error));
         });
     };
@@ -134,7 +134,7 @@ debuggerModule.controller("ApiDisplayCtrl",["$scope", "$attrs", "iwcClient","api
                 scope.msg.response = reply;
                 scope.msg.response.entity = JSON.stringify(reply.entity, null, 2);
                 scope.$apply();
-            }).catch(function (error) {
+            })["catch"](function (error) {
                 console.log('error: ' + JSON.stringify(error));
             });
         }

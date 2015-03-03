@@ -21,7 +21,9 @@ ozpIwc.IntentsApiInFlightIntent = ozpIwc.util.extend(ozpIwc.CommonApiValue, func
     ozpIwc.CommonApiValue.apply(this, arguments);
     this.resource = config.resource;
     this.invokePacket=config.invokePacket;
-    this.permissions=config.invokePacket.permissions;
+    //for (var i in config.invokePacket.permissions) {
+    //    this.permissions.pushIfNotExist(i,config.invokePacket.permissions[i]);
+    //}
     this.entity={
         'intent': {
             'type': config.type,

@@ -94,3 +94,52 @@ ozpIwc.AsyncAction.prototype.success=function(callback,self) {
 ozpIwc.AsyncAction.prototype.failure=function(callback,self) {
 	return this.when("failure",callback,self);
 };
+
+/**
+ * Returns an async action that resolves when all async Actions are resolved with their resolved values (if applies).
+ * @method all
+ * @param asyncActions
+ */
+ozpIwc.AsyncAction.all = function(asyncActions) {
+    var returnAction = new ozpIwc.AsyncAction();
+    var count = asyncActions.length;
+    var self = this;
+    var results = [];
+
+
+    //Register a callback for each action's "success"
+    asyncActions.forEach(function(action,index){
+        // If its not an asyncAction, pass it through as a result.
+        if(!self.isAnAction(action)){
+            results[index] = action;
+            if(--count === 0) {
+                returnAction.resolve('success',results);
+            }
+        }else {
+            action
+                .success(function (result) {
+                    results[index] = result;
+                    //once all actions resolved, intermediateAction resolve
+                    if (--count === 0) {
+                        returnAction.resolve('success', results);
+                    }
+                }, self)
+                .failure(function (err) {
+                    //fail the returnAction if any fail.
+                    returnAction.resolve('failure', err);
+                }, self);
+        }
+    });
+
+    return returnAction;
+};
+
+/**
+ * Returns true if the object is an AsyncAction, otherwise false.
+ * @method isAnAction
+ * @param {*} action
+ * @returns {Boolean}
+ */
+ozpIwc.AsyncAction.isAnAction = function(action){
+    return ozpIwc.AsyncAction.prototype.isPrototypeOf(action);
+};

@@ -50,7 +50,10 @@ ozpIwc.CommonApiValue = function(config) {
      * @type Object
      * @default {}
      */
-	this.permissions=config.permissions || {};
+	this.permissions=new ozpIwc.policyAuth.SecurityAttribute();
+    for(var i in config.permissions){
+        this.permissions.pushIfNotExist(i, config.permissions[i]);
+    }
 
     /**
      * @property version
@@ -84,7 +87,14 @@ ozpIwc.CommonApiValue = function(config) {
  */
 ozpIwc.CommonApiValue.prototype.set=function(packet) {
 	if(this.isValidContentType(packet.contentType)) {
-		this.permissions=packet.permissions || this.permissions;
+
+        if(!Array.isArray(packet.permissions)){
+            for(var i in packet.permissions) {
+                //If a permission was passed, wipe its value and set it to the new value;
+                this.permissions.clear(i);
+                this.permissions.pushIfNotExist(i,packet.permissions[i]);
+            }
+        }
 		this.contentType=packet.contentType;
 		this.entity=packet.entity;
 		this.version++;
@@ -143,7 +153,7 @@ ozpIwc.CommonApiValue.prototype.eachWatcher=function(callback,self) {
 ozpIwc.CommonApiValue.prototype.deleteData=function() {
 	this.entity=undefined;
 	this.contentType=undefined;
-	this.permissions=[];
+    this.permissions.clearAll();
 	this.version=0;
     this.deleted=true;
 };
@@ -159,7 +169,7 @@ ozpIwc.CommonApiValue.prototype.toPacket=function(base) {
 	base = base || {};
 	base.entity=ozpIwc.util.clone(this.entity);
 	base.contentType=this.contentType;
-	base.permissions=ozpIwc.util.clone(this.permissions);
+	base.permissions=ozpIwc.util.clone(this.permissions.getAll());
 	base.eTag=this.version;
 	base.resource=this.resource;
 	return base;
@@ -252,7 +262,9 @@ ozpIwc.CommonApiValue.prototype.deserialize=function(serverData) {
 // we need the persistent data to conform with the structure of non persistent data.
     this.entity= clone.entity || {};
     this.contentType=clone.contentType || this.contentType;
-    this.permissions=clone.permissions || this.permissions;
+    for(var i in clone.permissions){
+        this.permissions.pushIfNotExist(i, clone.permissions[i]);
+    }
     this.version=clone.version || this.version;
     this.watchers = serverData.watchers || this.watchers;
 };
@@ -267,7 +279,7 @@ ozpIwc.CommonApiValue.prototype.serialize=function() {
     var serverData = {};
     serverData.entity=this.entity;
     serverData.contentType=this.contentType;
-    serverData.permissions=this.permissions;
+    serverData.permissions=this.permissions.getAll();
     serverData.version=this.version;
     serverData.watchers=this.watchers;
     return serverData;

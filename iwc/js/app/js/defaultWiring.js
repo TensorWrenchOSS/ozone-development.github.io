@@ -2,18 +2,24 @@ var ozpIwc=ozpIwc || {};
 ozpIwc.version = "0.2";
 ozpIwc.ELECTION_TIMEOUT = 1000;
 ozpIwc.apiRootUrl = ozpIwc.apiRootUrl || "/api";
+ozpIwc.policyRootUrl = ozpIwc.policyRootUrl || "/policy";
 ozpIwc.basicAuthUsername= ozpIwc.basicAuthUsername || '';
 ozpIwc.basicAuthPassword= ozpIwc.basicAuthPassword || '';
 ozpIwc.linkRelPrefix = ozpIwc.linkRelPrefix || "ozp";
+ozpIwc.authorization = new ozpIwc.policyAuth.PDP({
+    'pip': new ozpIwc.policyAuth.PIP(),
+    'prp': new ozpIwc.policyAuth.PRP(),
+    'setsEndpoint': ozpIwc.policyRootUrl
+});
+
 if(typeof ozpIwc.enableDefault === "undefined" || ozpIwc.enableDefault) {
     ozpIwc.initEndpoints(ozpIwc.apiRootUrl);
+
 
     ozpIwc.defaultPeer = new ozpIwc.Peer();
     ozpIwc.defaultLocalStorageLink = new ozpIwc.KeyBroadcastLocalStorageLink({
         peer: ozpIwc.defaultPeer
     });
-
-    ozpIwc.authorization = new ozpIwc.BasicAuthorization();
 
     ozpIwc.heartBeatFrequency = 10000; // 10 seconds
     ozpIwc.defaultRouter = new ozpIwc.Router({

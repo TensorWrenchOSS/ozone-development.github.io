@@ -3,33 +3,27 @@ debuggerModule.controller("MyAppsCtrl",["$scope","iwcClient",function(scope,clie
 
   function saveAppData(appResource) {
     return client.api("system.api").get(appResource).then(function(response) {
-      if (response.response === "ok") {
-          scope.appListings.push(response.entity);
-        } else {
-          console.log("Not Supported: " + response.response);
-        }
+        scope.appListings.push(response.entity);
+    })["catch"](function(err){
+          console.log("Not Supported: " + err.response);
     });
   }
 
     function getApplicationResources() {
       return client.api('system.api').get('/application').then(function (response) {
-        if (response.response === "ok") {
           return response.entity;
-        } else {
-          return console.log("Not Supported: " + response.response);
-        }
+      })["catch"](function(err){
+          return console.log("Not Supported: " + err.response);
       });
     }
 
     function getUserInfo() {
       return client.api('system.api').get('/user').then(function (response) {
-        if (response.response === "ok") {
           scope.username = response.entity.username;
           scope.userRole = response.entity.highestRole;
           return response.entity;
-        } else {
-          return console.log("Not Supported: " + response.response);
-        }
+      })["catch"](function(err){
+          return console.log("Not Supported: " + err.response);
       });
     }
 
@@ -40,9 +34,8 @@ debuggerModule.controller("MyAppsCtrl",["$scope","iwcClient",function(scope,clie
         scope.appListings = [];
         return apps.reduce(function (previous, current) {
           return previous.then(function () {
-            var promise = saveAppData(current);
-            return promise;
-          }).catch(function (error) {
+            return saveAppData(current);
+          })["catch"](function (error) {
             console.log('should not have happened: ' + error);
           });
         }, Promise.resolve()).then(function () {

@@ -75,9 +75,8 @@ debuggerModule.controller('WebtopCtrl', ["$scope", "$http", "iwcClient", functio
     scope.appListings = [];
     return apps.reduce(function (previous, current) {
             return previous.then(function () {
-              var promise = saveAppData(current, scope.appListings);
-              return promise;
-            }).catch(function (error) {
+              return saveAppData(current, scope.appListings);
+            })["catch"](function (error) {
               console.log('should not have happened: ' + error);
             });
           }, Promise.resolve()).then(function () {
@@ -94,13 +93,9 @@ debuggerModule.controller('WebtopCtrl', ["$scope", "$http", "iwcClient", functio
     return client.api(dst)
       .set(resource, {"entity": entity})
       .then(function (response) {
-        if (response) {
-          console.log('updated OK');
-          return true;
-        } else {
-          console.log('update failed');
-          return false;
-        }
+            console.log('updated OK');
+        })["catch"](function(err) {
+          console.log('update failed',err);
       });
   }
 
@@ -116,17 +111,15 @@ debuggerModule.controller('WebtopCtrl', ["$scope", "$http", "iwcClient", functio
     console.log('getting dashboard json data...');
     http.get('data/dashboard-data.json').success(function(data) {
       console.log(data);
-      setData('data.api', dashboardDataResource, data).then(function() {
-        scope.refresh();
-      });
+      setData('data.api', dashboardDataResource, data)
+          .then(scope.refresh);
     });
   };
 
   scope.clearDashboardData = function() {
     var data = {};
-    setData('data.api', dashboardDataResource, data).then(function() {
-        scope.refresh();
-      });
+    setData('data.api', dashboardDataResource, data)
+        .then(scope.refresh);
   };
 
   // initialization

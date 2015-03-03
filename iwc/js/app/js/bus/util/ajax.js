@@ -28,14 +28,26 @@ ozpIwc.util=ozpIwc.util || {};
  */
 ozpIwc.util.ajax = function (config) {
     return new Promise(function(resolve,reject) {
+        var writeMethods = ["PUT", "POST", "PATCH"];
         var request = new XMLHttpRequest();
-        request.withCredentials = true;
         request.open(config.method, config.href, true);
+        request.withCredentials = true;
+        var setContentType = true;
+
         if (Array.isArray(config.headers)) {
             config.headers.forEach(function(header) {
+                if(header.name ==="Content-Type"){
+                    setContentType = false;
+                }
                 request.setRequestHeader(header.name, header.value);
             });
         }
+        //IE9 does not default the Content-Type. Set it if it wasn't passed in.
+        if(writeMethods.indexOf(config.method) >= 0 && setContentType){
+            request.setRequestHeader("Content-Type", "text/plain;charset=UTF-8");
+        }
+
+        /*
         /*
          * Setting username and password as params to open() (and setting request.withCredentials = true)
          * per the API does not work in FF. setting them explicitly in the Authorization header works
@@ -51,12 +63,17 @@ ozpIwc.util.ajax = function (config) {
                 });
             }
             catch (e) {
-                if(this.status === 204 && !this.responseText){
+                if(this.status === 200 && this.responseXML){
                     resolve({
-                        "response": {},
+                        "response": this.responseXML,
                         "header":  ozpIwc.util.ajaxResponseHeaderToJSON(this.getAllResponseHeaders())
                     });
-                } else {
+                } else if(this.status === 204 && !this.responseText) {
+                    resolve({
+                        "response": {},
+                        "header": ozpIwc.util.ajaxResponseHeaderToJSON(this.getAllResponseHeaders())
+                    });
+                }  else {
                     reject(this);
                 }
             }

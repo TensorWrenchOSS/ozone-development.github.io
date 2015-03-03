@@ -2875,6 +2875,35 @@ ozpIwc.util.clone=function(value) {
 	}
 };
 
+/**
+ * Non serializable cloning. Used to include prototype functions in the cloned object by creating a new instance
+ * and copying over any attributes.
+ * @method protoClone
+ * @param {Object|Array} obj
+ * @returns {*|Array.<T>|string|Blob}
+ */
+ozpIwc.util.protoClone = function(obj) {
+
+    if (obj instanceof Array) {
+        return obj.slice();
+    }
+
+    // Handle Object
+    if (obj instanceof Object) {
+        var clone = new obj.constructor();
+        for(var i in obj){
+
+            if(obj.hasOwnProperty(i)){
+                //recurse if needed
+                clone[i] = ozpIwc.util.protoClone(obj[i]);
+            } else{
+                clone[i] = obj[i];
+            }
+        }
+        return clone;
+    }
+    return obj;
+};
 
 /**
  * A regex method to parse query parameters.
@@ -2956,6 +2985,113 @@ ozpIwc.util.isIWCPacket=function(packet) {
     } else {
         return true;
     }
+};
+
+/**
+ * Returns true if the the given document node is a direct descendant of the parent node.
+ * @method isDirectDescendant
+ * @param parent
+ * @param child
+ * @returns {boolean}
+ */
+ozpIwc.util.isDirectDescendant = function(child,parent){
+    if (child.parentNode === parent) {
+        return true;
+    }
+    return false;
+};
+
+/**
+ *
+ * @param {Object} config
+ * @param {Array<String>} config.reqAttrs
+ * @param {Array<String>} config.optAttrs
+ * @param {Array<String>} config.reqNodes
+ * @param {Array<String>} config.optNodes
+ */
+ozpIwc.util.elementParser = function(config){
+    config = config || {};
+
+    config.reqAttrs = config.reqAttrs || [];
+    config.optAttrs = config.optAttrs || [];
+    config.reqNodes = config.reqNodes || [];
+    config.optNodes = config.optNodes || [];
+
+    var element = config.element || {};
+
+    var findings = {
+        attrs: {},
+        nodes: {}
+    };
+    config.reqAttrs.forEach(function(attr){
+        var attribute = element.getAttribute(attr);
+        if(attribute){
+//            console.log('Found attribute of policy,(',attr,',',attribute,')');
+            findings.attrs[attr] = attribute;
+        } else {
+            console.error('Required attribute not found,(',attr,')');
+        }
+
+    });
+
+    config.optAttrs.forEach(function(attr){
+        var attribute = element.getAttribute(attr);
+        if(attribute){
+//            console.log('Found attribute of policy,(',attr,',',attribute,')');
+            findings.attrs[attr] = attribute;
+        }
+
+    });
+
+    config.reqNodes.forEach(function(tag){
+        var nodes = element.getElementsByTagName(tag);
+        findings.nodes[tag] = findings.nodes[tag] || [];
+        for(var i in nodes){
+            if(ozpIwc.util.isDirectDescendant(nodes[i],element)){
+//                console.log('Found node of policy: ', nodes[i]);
+                findings.nodes[tag].push(nodes[i]);
+            }
+        }
+        if(findings.nodes[tag].length <= 0) {
+            console.error('Required node not found,(',tag,')');
+        }
+    });
+    config.optNodes.forEach(function(tag){
+        var nodes = element.getElementsByTagName(tag);
+        for(var i in nodes){
+            if(ozpIwc.util.isDirectDescendant(nodes[i],element)){
+//                console.log('Found node of policy: ', nodes[i]);
+                findings.nodes[tag] = findings.nodes[tag] || [];
+                findings.nodes[tag].push(nodes[i]);
+            }
+        }
+    });
+    return findings;
+};
+
+ozpIwc.util.camelCased = function(string){
+    return string.charAt(0).toLowerCase() + string.substring(1);
+};
+
+/**
+ * Shortened call for returning a resolving promise (cleans up promise chaining)
+ * @param {*} obj any valid javascript to resolve with.
+ * @returns {Promise}
+ */
+ozpIwc.util.resolveWith = function(obj){
+    return new Promise(function(resolve,reject){
+        resolve(obj);
+    });
+};
+/**
+ * Shortened call for returning a rejecting promise (cleans up promise chaining)
+ * @param {*} obj any valid javascript to reject with.
+ * @returns {Promise}
+ */
+ozpIwc.util.rejectWith = function(obj){
+    return new Promise(function(resolve,reject){
+        reject(obj);
+    });
 };
 /*
  * The MIT License (MIT) Copyright (c) 2012 Mike Ihbe
