@@ -33,6 +33,10 @@ ozpIwc.NamesApi = ozpIwc.util.extend(ozpIwc.CommonApiBase, function(config) {
      * @default 3
      */
     this.heartbeatDropCount = config.heartbeatDropCount || 3;
+
+
+    this.apiMap = config.apiMap || ozpIwc.apiMap || {};
+
     // map the alias "/me" to "/address/{packet.src}" upon receiving the packet
     this.on("receive", function (packetContext) {
         var packet = packetContext.packet;
@@ -61,35 +65,18 @@ ozpIwc.NamesApi = ozpIwc.util.extend(ozpIwc.CommonApiBase, function(config) {
         pattern: /^\/api\/.*$/,
         contentType: "application/vnd.ozp-iwc-api-list-v1+json"
     }));
-    //temporary injector code. Remove when api loader is implemented
-    var packet = {
-        resource: '/api/data.api',
-        entity: {'actions': ['get', 'set', 'delete', 'watch', 'unwatch', 'addChild', 'removeChild', 'list']},
-        contentType: 'application/vnd.ozp-iwc-api-v1+json'
-    };
-    var node=this.findOrMakeValue(packet);
-    node.set(packet);
-    packet = {
-        resource: '/api/intents.api',
-        entity: {'actions': ['get','set','delete','watch','unwatch','register','invoke','broadcast', 'list']},
-        contentType: 'application/vnd.ozp-iwc-api-v1+json'
-    };
-    node=this.findOrMakeValue(packet);
-    node.set(packet);
-    packet = {
-        resource: '/api/names.api',
-        entity: {'actions': ['get','set','delete','watch','unwatch', 'list']},
-        contentType: 'application/vnd.ozp-iwc-api-v1+json'
-    };
-    node=this.findOrMakeValue(packet);
-    node.set(packet);
-    packet = {
-        resource: '/api/system.api',
-        entity: { 'actions': ['get','set','delete','watch','unwatch', 'list', 'launch']},
-        contentType: 'application/vnd.ozp-iwc-api-v1+json'
-    };
-    node=this.findOrMakeValue(packet);
-    node.set(packet);
+
+    for(var key in this.apiMap){
+        var api = this.apiMap[key];
+        var packet = {
+            resource: '/api/' + api.address,
+            entity: {'actions': api.actions},
+            contentType: 'application/vnd.ozp-iwc-api-v1+json'
+        };
+        var node=this.findOrMakeValue(packet);
+        node.set(packet);
+    }
+
     var self = this;
     this.dynamicNodes.forEach(function(resource) {
         self.updateDynamicNode(self.data[resource]);

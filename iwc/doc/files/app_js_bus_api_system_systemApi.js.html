@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>app/js/bus/api/system/systemApi.js - ozpIwc</title>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
+    <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
+    <link rel="shortcut icon" type="image/png" href="../assets/favicon.png">
+    <script src="http://yui.yahooapis.com/combo?3.9.1/build/yui/yui-min.js"></script>
+</head>
+<body class="yui3-skin-sam">
+
+<div id="doc">
+    <div id="hd" class="yui3-g header">
+        <div class="yui3-u-3-4">
+            
+                <h1><img src="../assets/css/logo.png" title="ozpIwc"></h1>
+            
+        </div>
+        <div class="yui3-u-1-4 version">
+            <em>API Docs for: 0.2.2</em>
+        </div>
+    </div>
+    <div id="bd" class="yui3-g">
+
+        <div class="yui3-u-1-4">
+            <div id="docs-sidebar" class="sidebar apidocs">
+                <div id="api-list">
+    <h2 class="off-left">APIs</h2>
+    <div id="api-tabview" class="tabview">
+        <ul class="tabs">
+            <li><a href="#api-classes">Classes</a></li>
+            <li><a href="#api-modules">Modules</a></li>
+        </ul>
+
+        <div id="api-tabview-filter">
+            <input type="search" id="api-filter" placeholder="Type to filter APIs">
+        </div>
+
+        <div id="api-tabview-panel">
+            <ul id="api-classes" class="apis classes">
+            
+                <li><a href="../classes/ozpIwc.ApiError.html">ozpIwc.ApiError</a></li>
+            
+                <li><a href="../classes/ozpIwc.AsyncAction.html">ozpIwc.AsyncAction</a></li>
+            
+                <li><a href="../classes/ozpIwc.CancelableEvent.html">ozpIwc.CancelableEvent</a></li>
+            
+                <li><a href="../classes/ozpIwc.Client.html">ozpIwc.Client</a></li>
+            
+                <li><a href="../classes/ozpIwc.CommonApiBase.html">ozpIwc.CommonApiBase</a></li>
+            
+                <li><a href="../classes/ozpIwc.CommonApiCollectionValue.html">ozpIwc.CommonApiCollectionValue</a></li>
+            
+                <li><a href="../classes/ozpIwc.CommonApiValue.html">ozpIwc.CommonApiValue</a></li>
+            
+                <li><a href="../classes/ozpIwc.DataApi.html">ozpIwc.DataApi</a></li>
+            
+                <li><a href="../classes/ozpIwc.DataApiValue.html">ozpIwc.DataApiValue</a></li>
+            
+                <li><a href="../classes/ozpIwc.Endpoint.html">ozpIwc.Endpoint</a></li>
+            
+                <li><a href="../classes/ozpIwc.EndpointRegistry.html">ozpIwc.EndpointRegistry</a></li>
+            
+                <li><a href="../classes/ozpIwc.Event.html">ozpIwc.Event</a></li>
+            
+                <li><a href="../classes/ozpIwc.FragmentPacket.html">ozpIwc.FragmentPacket</a></li>
+            
+                <li><a href="../classes/ozpIwc.FragmentStore.html">ozpIwc.FragmentStore</a></li>
+            
+                <li><a href="../classes/ozpIwc.IntentsApi.html">ozpIwc.IntentsApi</a></li>
+            
+                <li><a href="../classes/ozpIwc.IntentsApiDefinitionValue.html">ozpIwc.IntentsApiDefinitionValue</a></li>
+            
+                <li><a href="../classes/ozpIwc.IntentsApiHandlerValue.html">ozpIwc.IntentsApiHandlerValue</a></li>
+            
+                <li><a href="../classes/ozpIwc.IntentsApiTypeValue.html">ozpIwc.IntentsApiTypeValue</a></li>
+            
+                <li><a href="../classes/ozpIwc.InternalParticipant.html">ozpIwc.InternalParticipant</a></li>
+            
+                <li><a href="../classes/ozpIwc.KeyBroadcastLocalStorageLink.html">ozpIwc.KeyBroadcastLocalStorageLink</a></li>
+            
+                <li><a href="../classes/ozpIwc.LeaderGroupParticipant.html">ozpIwc.LeaderGroupParticipant</a></li>
+            
+                <li><a href="../classes/ozpIwc.LocalStorageLink.html">ozpIwc.LocalStorageLink</a></li>
+            
+                <li><a href="../classes/ozpIwc.log.html">ozpIwc.log</a></li>
+            
+                <li><a href="../classes/ozpIwc.MetricsRegistry.html">ozpIwc.MetricsRegistry</a></li>
+            
+                <li><a href="../classes/ozpIwc.metricsStats.Sample.html">ozpIwc.metricsStats.Sample</a></li>
+            
+                <li><a href="../classes/ozpIwc.metricsStats.UniformSample.html">ozpIwc.metricsStats.UniformSample</a></li>
+            
+                <li><a href="../classes/ozpIwc.metricStats.html">ozpIwc.metricStats</a></li>
+            
+                <li><a href="../classes/ozpIwc.metricStats.BinaryHeap.html">ozpIwc.metricStats.BinaryHeap</a></li>
+            
+                <li><a href="../classes/ozpIwc.metricStats.ExponentiallyDecayingSample.html">ozpIwc.metricStats.ExponentiallyDecayingSample</a></li>
+            
+                <li><a href="../classes/ozpIwc.metricTypes.BaseMetric.html">ozpIwc.metricTypes.BaseMetric</a></li>
+            
+                <li><a href="../classes/ozpIwc.metricTypes.Counter.html">ozpIwc.metricTypes.Counter</a></li>
+            
+                <li><a href="../classes/ozpIwc.metricTypes.Gauge.html">ozpIwc.metricTypes.Gauge</a></li>
+            
+                <li><a href="../classes/ozpIwc.metricTypes.Histogram.html">ozpIwc.metricTypes.Histogram</a></li>
+            
+                <li><a href="../classes/ozpIwc.metricTypes.Meter.html">ozpIwc.metricTypes.Meter</a></li>
+            
+                <li><a href="../classes/ozpIwc.MulticastParticipant.html">ozpIwc.MulticastParticipant</a></li>
+            
+                <li><a href="../classes/ozpIwc.NamesApi.html">ozpIwc.NamesApi</a></li>
+            
+                <li><a href="../classes/ozpIwc.NamesApiValue.html">ozpIwc.NamesApiValue</a></li>
+            
+                <li><a href="../classes/ozpIwc.NetworkPacket.html">ozpIwc.NetworkPacket</a></li>
+            
+                <li><a href="../classes/ozpIwc.Participant.html">ozpIwc.Participant</a></li>
+            
+                <li><a href="../classes/ozpIwc.Peer.html">ozpIwc.Peer</a></li>
+            
+                <li><a href="../classes/ozpIwc.policyAuth.PDP.html">ozpIwc.policyAuth.PDP</a></li>
+            
+                <li><a href="../classes/ozpIwc.policyAuth.SecurityAttribute.html">ozpIwc.policyAuth.SecurityAttribute</a></li>
+            
+                <li><a href="../classes/ozpIwc.PostMessageParticipant.html">ozpIwc.PostMessageParticipant</a></li>
+            
+                <li><a href="../classes/ozpIwc.PostMessageParticipantListener.html">ozpIwc.PostMessageParticipantListener</a></li>
+            
+                <li><a href="../classes/ozpIwc.Router.html">ozpIwc.Router</a></li>
+            
+                <li><a href="../classes/ozpIwc.RouterWatchdog.html">ozpIwc.RouterWatchdog</a></li>
+            
+                <li><a href="../classes/ozpIwc.SystemApi.html">ozpIwc.SystemApi</a></li>
+            
+                <li><a href="../classes/ozpIwc.SystemApiApplicationValue.html">ozpIwc.SystemApiApplicationValue</a></li>
+            
+                <li><a href="../classes/ozpIwc.Timer.html">ozpIwc.Timer</a></li>
+            
+                <li><a href="../classes/ozpIwc.TransportPacket.html">ozpIwc.TransportPacket</a></li>
+            
+                <li><a href="../classes/ozpIwc.TransportPacketContext.html">ozpIwc.TransportPacketContext</a></li>
+            
+                <li><a href="../classes/ozpIwc.util.html">ozpIwc.util</a></li>
+            
+                <li><a href="../classes/ozpIwcPolicies.html">ozpIwcPolicies</a></li>
+            
+            </ul>
+
+            <ul id="api-modules" class="apis modules">
+            
+                <li><a href="../modules/bus.html">bus</a></li>
+            
+                <li><a href="../modules/bus.api.html">bus.api</a></li>
+            
+                <li><a href="../modules/bus.api.Type.html">bus.api.Type</a></li>
+            
+                <li><a href="../modules/bus.api.Value.html">bus.api.Value</a></li>
+            
+                <li><a href="../modules/bus.network.html">bus.network</a></li>
+            
+                <li><a href="../modules/bus.network.packets.html">bus.network.packets</a></li>
+            
+                <li><a href="../modules/bus.security.html">bus.security</a></li>
+            
+                <li><a href="../modules/bus.transport.html">bus.transport</a></li>
+            
+                <li><a href="../modules/bus.util.html">bus.util</a></li>
+            
+                <li><a href="../modules/client.html">client</a></li>
+            
+                <li><a href="../modules/common.html">common</a></li>
+            
+                <li><a href="../modules/metrics.html">metrics</a></li>
+            
+                <li><a href="../modules/metrics.statistics.html">metrics.statistics</a></li>
+            
+                <li><a href="../modules/metrics.types.html">metrics.types</a></li>
+            
+            </ul>
+        </div>
+    </div>
+</div>
+
+            </div>
+        </div>
+        <div class="yui3-u-3-4">
+                <div id="api-options">
+        Show:
+        <label for="api-show-inherited">
+            <input type="checkbox" id="api-show-inherited" checked>
+            Inherited
+        </label>
+
+        <label for="api-show-protected">
+            <input type="checkbox" id="api-show-protected">
+            Protected
+        </label>
+
+        <label for="api-show-private">
+            <input type="checkbox" id="api-show-private">
+            Private
+        </label>
+        <label for="api-show-deprecated">
+            <input type="checkbox" id="api-show-deprecated">
+            Deprecated
+        </label>
+
+    </div>
+
+
+            <div class="apidocs">
+                <div id="docs-main">
+                    <div class="content">
+                        <h1 class="file-heading">File: app/js/bus/api/system/systemApi.js</h1>
+
+<div class="file">
+    <pre class="code prettyprint linenums">
+/**
+ * @submodule bus.api.Type
+ */
+
+/**
+ * The System Api. Provides reference data of registered applications, versions, and information about the current user
+ * through the IWC. Subclasses the {{#crossLink &quot;ozpIwc.CommonApiBase&quot;}}{{/crossLink}}. Utilizes the following value
+ * classes which subclass the {{#crossLink &quot;ozpIwc.CommonApiValue&quot;}}{{/crossLink}}:
+ *  - {{#crossLink &quot;ozpIwc.SystemApiApplicationValue&quot;}}{{/crossLink}}
+ *  - {{#crossLink &quot;ozpIwc.SystemApiMailboxValue&quot;}}{{/crossLink}}
+ *
+ * @class SystemApi
+ * @namespace ozpIwc
+ * @extends ozpIwc.CommonApiBase
+ * @constructor
+ *
+ * @type {Function}
+ * @param {Object} config
+ */
+ozpIwc.SystemApi = ozpIwc.util.extend(ozpIwc.CommonApiBase,function(config) {
+    ozpIwc.CommonApiBase.apply(this,arguments);
+    this.endpointUrls.push(
+        ozpIwc.linkRelPrefix+&quot;:application&quot;,
+        ozpIwc.linkRelPrefix+&quot;:user&quot;,
+        ozpIwc.linkRelPrefix+&quot;:system&quot;);
+
+
+    this.addDynamicNode(new ozpIwc.CommonApiCollectionValue({
+        resource: &quot;/application&quot;,
+        pattern: /^\/application\/.*$/,
+        contentType: &quot;application/vnd.ozp-iwc-application-list-v1+json&quot;
+    }));
+    this.on(&quot;changedNode&quot;,this.updateIntents,this);
+
+});
+
+/**
+ * Loads data from the server.
+ *
+ * @method loadFromServer
+ */
+ozpIwc.SystemApi.prototype.loadFromServer=function() {
+
+    var self=this;
+    var headers = [
+        {name: &quot;Accept&quot;, value: &quot;application/vnd.ozp-application-v1+json&quot;}
+    ];
+    return new Promise(function(resolve, reject) {
+        self.loadFromEndpoint(ozpIwc.linkRelPrefix + &quot;:application&quot;, headers)
+            .then(function() {
+                return self.loadFromEndpoint(ozpIwc.linkRelPrefix + &quot;:user&quot;);
+            }).then(function() {
+                return self.loadFromEndpoint(ozpIwc.linkRelPrefix + &quot;:system&quot;);
+            }).then(function() {
+                resolve(&quot;system.api load complete&quot;);
+            })[&#x27;catch&#x27;](function(error) {
+                reject(error);
+            });
+    });
+};
+
+/**
+ * Update all intents registered to the given System Api node.
+ *
+ * @method updateIntents
+ * @param {ozpIwc.SystemApiApplicationValue} node
+ * @param {?} changes @TODO unused.
+ */
+ozpIwc.SystemApi.prototype.updateIntents=function(node,changes) {
+    if(!node.getIntentsRegistrations) {
+        return;
+    }
+    var intents=node.getIntentsRegistrations();
+    if(!intents) {
+        return;
+    }
+    intents.forEach(function(i) {
+        var icon = i.icon || (node.entity &amp;&amp; node.entity.icons &amp;&amp; node.entity.icons.small) ? node.entity.icons.small : &#x27;&#x27;;
+        var label = i.label || node.entity.name;
+        this.participant.send({
+            &#x27;dst&#x27; : &quot;intents.api&quot;,
+            &#x27;src&#x27; : &quot;system.api&quot;,
+            &#x27;action&#x27;: &quot;set&quot;,
+            &#x27;resource&#x27;: &quot;/&quot;+i.type+&quot;/&quot;+i.action+&quot;/system.api&quot;+node.resource.replace(/\//g,&#x27;.&#x27;),
+            &#x27;contentType&#x27;: &quot;application/vnd.ozp-iwc-intent-handler-v1+json&quot;,
+            &#x27;entity&#x27;: {
+                &#x27;type&#x27;: i.type,
+                &#x27;action&#x27;: i.action,
+                &#x27;icon&#x27;: icon,
+                &#x27;label&#x27;: label,
+                &#x27;_links&#x27;: node.entity._links,
+                &#x27;invokeIntent&#x27;: {
+                    &#x27;action&#x27; : &#x27;invoke&#x27;,
+                    &#x27;resource&#x27; : node.resource
+                }
+            }
+        });
+    },this);
+
+};
+
+/**
+ * Creates a System Api Application or Mailbox value from the given packet.
+ *
+ * @method makeValue
+ * @param {ozpIwc.TransportPacket} packet
+ * @returns {ozpIwc.SystemApiMailboxValue|ozpIwc.SystemApiApplicationValue}
+ */
+ozpIwc.SystemApi.prototype.makeValue = function(packet){
+        switch (packet.contentType) {
+            case &quot;application/vnd.ozp-application-v1+json&quot;:
+                var launchDefinition = &quot;/system&quot; + packet.resource;
+                packet.entity = packet.entity || {};
+                packet.entity.launchDefinition = packet.entity.launchDefinition || launchDefinition;
+
+                var app = new ozpIwc.SystemApiApplicationValue({
+                    resource: packet.resource,
+                    entity: packet.entity,
+                    contentType: packet.contentType,
+                    systemApi: this
+                });
+                return app;
+            default:
+                return new ozpIwc.CommonApiValue(packet);
+        }
+};
+
+/**
+ * Handles System api requests with an action of &quot;set&quot;
+ * @method handleSet
+ */
+ozpIwc.SystemApi.prototype.handleSet = function(node,packetContext) {
+    packetContext.replyTo({
+        &#x27;response&#x27;: &#x27;badAction&#x27;,
+        &#x27;entity&#x27;: {
+            &#x27;action&#x27;: packetContext.packet.action,
+            &#x27;originalRequest&#x27; : packetContext.packet
+        }
+    });
+};
+
+/**
+ * Handles System api requests with an action of &quot;delete&quot;
+ *
+ * @method handleDelete
+ */
+ozpIwc.SystemApi.prototype.handleDelete = function(node,packetContext) {
+    packetContext.replyTo({
+        &#x27;response&#x27;: &#x27;badAction&#x27;,
+        &#x27;entity&#x27;: {
+            &#x27;action&#x27;: packetContext.packet.action,
+            &#x27;originalRequest&#x27; : packetContext.packet
+        }
+    });
+};
+
+/**
+ * Handles System api requests with an action of &quot;launch&quot;
+ *
+ * @method handleLaunch
+ */
+ozpIwc.SystemApi.prototype.handleLaunch = function(node,packetContext) {
+
+    this.participant.send({
+        dst: &quot;intents.api&quot;,
+        contentType: &quot;application/vnd.ozp-iwc-intent-handler-v1+json&quot;,
+        action: &quot;invoke&quot;,
+        resource: &quot;/application/vnd.ozp-iwc-launch-data-v1+json/run&quot;,
+        entity: {
+            &quot;url&quot;: node.entity.launchUrls.default,
+            &quot;applicationId&quot;: node.resource,
+            &quot;launchData&quot;: packetContext.packet.entity
+        }
+    });
+    packetContext.replyTo({&#x27;response&#x27;: &quot;ok&quot;});
+};
+
+/**
+ * Handles System api requests with an action of &quot;invoke&quot;
+ *
+ * @method handleInvoke
+ */
+ozpIwc.SystemApi.prototype.rootHandleInvoke = function(node,packetContext) {
+    if(packetContext.packet.entity &amp;&amp; packetContext.packet.entity.inFlightIntent){
+        var launchParams=[
+            &quot;ozpIwc.peer=&quot;+encodeURIComponent(ozpIwc.BUS_ROOT),
+            &quot;ozpIwc.inFlightIntent=&quot;+encodeURIComponent(packetContext.packet.entity.inFlightIntent)
+        ];
+
+        ozpIwc.util.openWindow(packetContext.packet.entity.inFlightIntentEntity.entity.url,launchParams.join(&quot;&amp;&quot;));
+//        this.launchApplication(node,packetContext.packet.entity.inFlightIntent);
+        packetContext.replyTo({&#x27;response&#x27;: &quot;ok&quot;});
+    } else{
+        packetContext.replyTo({&#x27;response&#x27;: &quot;badResource&quot;});
+    }
+
+};
+
+///**
+// * Launches the specified node&#x27;s application.
+// *
+// * @method launchApplication
+// * @param {ozpIwc.SystemApiApplicationValue} node
+// * @param {ozpIwc.SystemApiMailboxValue} mailboxNode
+// */
+//ozpIwc.SystemApi.prototype.launchApplication=function(node,intentResource) {
+//
+//};
+
+
+    </pre>
+</div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../assets/vendor/prettify/prettify-min.js"></script>
+<script>prettyPrint();</script>
+<script src="../assets/js/yui-prettify.js"></script>
+<script src="../assets/../api.js"></script>
+<script src="../assets/js/api-filter.js"></script>
+<script src="../assets/js/api-list.js"></script>
+<script src="../assets/js/api-search.js"></script>
+<script src="../assets/js/apidocs.js"></script>
+</body>
+</html>

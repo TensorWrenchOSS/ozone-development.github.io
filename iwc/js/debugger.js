@@ -2924,16 +2924,32 @@ ozpIwc.util.parseQueryParams=function(query) {
 };
 
 /**
- * Determines the origin of a given url
+ * Determines the origin of a given url.  
  * @method determineOrigin
  * @param url
  * @returns {String}
  */
+ozpIwc.util.protocolPorts={
+    "http:" : "80",
+    "https:" : "443",
+    "ws:" : "80",
+    "wss:" : "443"
+};
 ozpIwc.util.determineOrigin=function(url) {
     var a=document.createElement("a");
     a.href = url;
+    if(a.origin) {
+        return a.origin;
+    }
     var origin=a.protocol + "//" + a.hostname;
-    if(a.port) {
+    /* Internet Explorer adds the port to urls in <a> tags created by a script, even
+     * if it wasn't there to start with.  Thanks, IE!
+     * https://connect.microsoft.com/IE/feedback/details/817343/ie11-scripting-value-of-htmlanchorelement-host-differs-between-script-created-link-and-link-from-document
+     * 
+     * Other browsers seem to drop the port if it's the default, so we'll do the same.
+    */
+   
+    if(ozpIwc.util.protocolPorts[a.protocol] !== a.port) {
         origin+= ":" + a.port;
     }
     return origin;
@@ -4832,12 +4848,16 @@ ozpIwc.util.openWindow=function(url,windowName,features) {
     if(typeof windowName === "object") {
         var str="";
         for(var k in windowName) {
-            str+=k+"="+encodeURIComponent(windowName[k])+"&";
+            str+=k+"="+encodeURIComponent(windowName[k]) +"&";
         }
         windowName=str;
     }
-    
-    window.open(url,windowName,features);
+    try {
+        window.open(url, windowName, features);
+    } catch (e){
+        //fallback for IE
+        window.open(url + "?" + windowName,null,features);
+    }
 };
 
 
@@ -7026,7 +7046,7 @@ ozpIwc.Participant.prototype.receiveFromRouter=function(packetContext) {
         self.forbiddenPacketsMeter.mark();
         /** @todo do we send a "denied" message to the destination?  drop?  who knows? */
         ozpIwc.metrics.counter("transport.packets.forbidden").inc();
-        console.error("failure");
+        console.error("failure",err);
     };
 
     ozpIwc.authorization.isPermitted(request,this)
@@ -10228,6 +10248,32 @@ ozpIwc.CommonApiBase.prototype.handleGet=function(node,packetContext) {
 };
 
 /**
+ * Common handler for packet contexts with `bulkGet` actions.
+ *
+ * @method handleBulkget
+ * @param {ozpIwc.CommonApiValue} node The api node to retrieve.  (Not used, bulk get searches the api's data object instead)
+ * @param {ozpIwc.TransportPacketContext} packetContext The packet context containing the bulk get action.
+ */
+ozpIwc.CommonApiBase.prototype.handleBulkget=function(node,packetContext) {
+	// scan local data set for resource link(?) contains prefix
+	// return list of nodes of matches
+	var matchingNodes = [];
+	
+	if (this.data !== {}) {
+		for (var i in this.data) {
+			if (this.data[i].resource.indexOf(packetContext.packet.resource) === 0) {
+				matchingNodes.push(this.data[i].toPacket());
+			}
+		}
+	}
+	
+	packetContext.replyTo({
+		'response': 'ok',
+		'entity': matchingNodes
+	});
+};
+
+/**
  * Common handler for packet contexts with `set` actions.
  *
  * @method handleSet
@@ -11516,7 +11562,7 @@ ozpIwc.IntentsApi.prototype.handleInFlightChoose = function (node, packetContext
         return null;
     }
 
-    var updateNodeEntity = ozpIwc.util.clone(node);
+    var updateNodeEntity = node.serialize();
 
     updateNodeEntity.entity.handlerChosen = {
         'resource' : packetContext.packet.entity.resource,
@@ -11541,7 +11587,7 @@ ozpIwc.IntentsApi.prototype.handleInFlightChoose = function (node, packetContext
  * @param packetContext
  */
 ozpIwc.IntentsApi.prototype.handleInFlightRunning = function (node, packetContext) {
-    var updateNodeEntity = ozpIwc.util.clone(node);
+    var updateNodeEntity = node.serialize();
     updateNodeEntity.entity.state = "running";
     updateNodeEntity.entity.handler.address = packetContext.packet.entity.address;
     updateNodeEntity.entity.handler.resource = packetContext.packet.entity.resource;
@@ -11563,7 +11609,7 @@ ozpIwc.IntentsApi.prototype.handleInFlightRunning = function (node, packetContex
  */
 ozpIwc.IntentsApi.prototype.handleInFlightFail = function (node, packetContext) {
     var invokePacket = node.invokePacket;
-    var updateNodeEntity = ozpIwc.util.clone(node);
+    var updateNodeEntity = node.serialize();
 
     updateNodeEntity.entity.state = packetContext.packet.entity.state;
     updateNodeEntity.entity.reply.contentType = packetContext.packet.entity.reply.contentType;
@@ -11602,7 +11648,7 @@ ozpIwc.IntentsApi.prototype.handleInFlightFail = function (node, packetContext) 
  */
 ozpIwc.IntentsApi.prototype.handleInFlightComplete = function (node, packetContext) {
     var invokePacket = node.invokePacket;
-    var updateNodeEntity = ozpIwc.util.clone(node);
+    var updateNodeEntity = node.serialize();
 
     updateNodeEntity.entity.state = packetContext.packet.entity.state;
     updateNodeEntity.entity.reply.contentType = packetContext.packet.entity.reply.contentType;
@@ -11985,6 +12031,10 @@ ozpIwc.NamesApi = ozpIwc.util.extend(ozpIwc.CommonApiBase, function(config) {
      * @default 3
      */
     this.heartbeatDropCount = config.heartbeatDropCount || 3;
+
+
+    this.apiMap = config.apiMap || ozpIwc.apiMap || {};
+
     // map the alias "/me" to "/address/{packet.src}" upon receiving the packet
     this.on("receive", function (packetContext) {
         var packet = packetContext.packet;
@@ -12013,35 +12063,18 @@ ozpIwc.NamesApi = ozpIwc.util.extend(ozpIwc.CommonApiBase, function(config) {
         pattern: /^\/api\/.*$/,
         contentType: "application/vnd.ozp-iwc-api-list-v1+json"
     }));
-    //temporary injector code. Remove when api loader is implemented
-    var packet = {
-        resource: '/api/data.api',
-        entity: {'actions': ['get', 'set', 'delete', 'watch', 'unwatch', 'addChild', 'removeChild', 'list']},
-        contentType: 'application/vnd.ozp-iwc-api-v1+json'
-    };
-    var node=this.findOrMakeValue(packet);
-    node.set(packet);
-    packet = {
-        resource: '/api/intents.api',
-        entity: {'actions': ['get','set','delete','watch','unwatch','register','invoke','broadcast', 'list']},
-        contentType: 'application/vnd.ozp-iwc-api-v1+json'
-    };
-    node=this.findOrMakeValue(packet);
-    node.set(packet);
-    packet = {
-        resource: '/api/names.api',
-        entity: {'actions': ['get','set','delete','watch','unwatch', 'list']},
-        contentType: 'application/vnd.ozp-iwc-api-v1+json'
-    };
-    node=this.findOrMakeValue(packet);
-    node.set(packet);
-    packet = {
-        resource: '/api/system.api',
-        entity: { 'actions': ['get','set','delete','watch','unwatch', 'list', 'launch']},
-        contentType: 'application/vnd.ozp-iwc-api-v1+json'
-    };
-    node=this.findOrMakeValue(packet);
-    node.set(packet);
+
+    for(var key in this.apiMap){
+        var api = this.apiMap[key];
+        var packet = {
+            resource: '/api/' + api.address,
+            entity: {'actions': api.actions},
+            contentType: 'application/vnd.ozp-iwc-api-v1+json'
+        };
+        var node=this.findOrMakeValue(packet);
+        node.set(packet);
+    }
+
     var self = this;
     this.dynamicNodes.forEach(function(resource) {
         self.updateDynamicNode(self.data[resource]);

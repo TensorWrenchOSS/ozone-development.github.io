@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>app/js/bus/security/prp.js - ozpIwc</title>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
+    <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
+    <link rel="shortcut icon" type="image/png" href="../assets/favicon.png">
+    <script src="http://yui.yahooapis.com/combo?3.9.1/build/yui/yui-min.js"></script>
+</head>
+<body class="yui3-skin-sam">
+
+<div id="doc">
+    <div id="hd" class="yui3-g header">
+        <div class="yui3-u-3-4">
+            
+                <h1><img src="../assets/css/logo.png" title="ozpIwc"></h1>
+            
+        </div>
+        <div class="yui3-u-1-4 version">
+            <em>API Docs for: 0.2.2</em>
+        </div>
+    </div>
+    <div id="bd" class="yui3-g">
+
+        <div class="yui3-u-1-4">
+            <div id="docs-sidebar" class="sidebar apidocs">
+                <div id="api-list">
+    <h2 class="off-left">APIs</h2>
+    <div id="api-tabview" class="tabview">
+        <ul class="tabs">
+            <li><a href="#api-classes">Classes</a></li>
+            <li><a href="#api-modules">Modules</a></li>
+        </ul>
+
+        <div id="api-tabview-filter">
+            <input type="search" id="api-filter" placeholder="Type to filter APIs">
+        </div>
+
+        <div id="api-tabview-panel">
+            <ul id="api-classes" class="apis classes">
+            
+                <li><a href="../classes/ozpIwc.ApiError.html">ozpIwc.ApiError</a></li>
+            
+                <li><a href="../classes/ozpIwc.AsyncAction.html">ozpIwc.AsyncAction</a></li>
+            
+                <li><a href="../classes/ozpIwc.CancelableEvent.html">ozpIwc.CancelableEvent</a></li>
+            
+                <li><a href="../classes/ozpIwc.Client.html">ozpIwc.Client</a></li>
+            
+                <li><a href="../classes/ozpIwc.CommonApiBase.html">ozpIwc.CommonApiBase</a></li>
+            
+                <li><a href="../classes/ozpIwc.CommonApiCollectionValue.html">ozpIwc.CommonApiCollectionValue</a></li>
+            
+                <li><a href="../classes/ozpIwc.CommonApiValue.html">ozpIwc.CommonApiValue</a></li>
+            
+                <li><a href="../classes/ozpIwc.DataApi.html">ozpIwc.DataApi</a></li>
+            
+                <li><a href="../classes/ozpIwc.DataApiValue.html">ozpIwc.DataApiValue</a></li>
+            
+                <li><a href="../classes/ozpIwc.Endpoint.html">ozpIwc.Endpoint</a></li>
+            
+                <li><a href="../classes/ozpIwc.EndpointRegistry.html">ozpIwc.EndpointRegistry</a></li>
+            
+                <li><a href="../classes/ozpIwc.Event.html">ozpIwc.Event</a></li>
+            
+                <li><a href="../classes/ozpIwc.FragmentPacket.html">ozpIwc.FragmentPacket</a></li>
+            
+                <li><a href="../classes/ozpIwc.FragmentStore.html">ozpIwc.FragmentStore</a></li>
+            
+                <li><a href="../classes/ozpIwc.IntentsApi.html">ozpIwc.IntentsApi</a></li>
+            
+                <li><a href="../classes/ozpIwc.IntentsApiDefinitionValue.html">ozpIwc.IntentsApiDefinitionValue</a></li>
+            
+                <li><a href="../classes/ozpIwc.IntentsApiHandlerValue.html">ozpIwc.IntentsApiHandlerValue</a></li>
+            
+                <li><a href="../classes/ozpIwc.IntentsApiTypeValue.html">ozpIwc.IntentsApiTypeValue</a></li>
+            
+                <li><a href="../classes/ozpIwc.InternalParticipant.html">ozpIwc.InternalParticipant</a></li>
+            
+                <li><a href="../classes/ozpIwc.KeyBroadcastLocalStorageLink.html">ozpIwc.KeyBroadcastLocalStorageLink</a></li>
+            
+                <li><a href="../classes/ozpIwc.LeaderGroupParticipant.html">ozpIwc.LeaderGroupParticipant</a></li>
+            
+                <li><a href="../classes/ozpIwc.LocalStorageLink.html">ozpIwc.LocalStorageLink</a></li>
+            
+                <li><a href="../classes/ozpIwc.log.html">ozpIwc.log</a></li>
+            
+                <li><a href="../classes/ozpIwc.MetricsRegistry.html">ozpIwc.MetricsRegistry</a></li>
+            
+                <li><a href="../classes/ozpIwc.metricsStats.Sample.html">ozpIwc.metricsStats.Sample</a></li>
+            
+                <li><a href="../classes/ozpIwc.metricsStats.UniformSample.html">ozpIwc.metricsStats.UniformSample</a></li>
+            
+                <li><a href="../classes/ozpIwc.metricStats.html">ozpIwc.metricStats</a></li>
+            
+                <li><a href="../classes/ozpIwc.metricStats.BinaryHeap.html">ozpIwc.metricStats.BinaryHeap</a></li>
+            
+                <li><a href="../classes/ozpIwc.metricStats.ExponentiallyDecayingSample.html">ozpIwc.metricStats.ExponentiallyDecayingSample</a></li>
+            
+                <li><a href="../classes/ozpIwc.metricTypes.BaseMetric.html">ozpIwc.metricTypes.BaseMetric</a></li>
+            
+                <li><a href="../classes/ozpIwc.metricTypes.Counter.html">ozpIwc.metricTypes.Counter</a></li>
+            
+                <li><a href="../classes/ozpIwc.metricTypes.Gauge.html">ozpIwc.metricTypes.Gauge</a></li>
+            
+                <li><a href="../classes/ozpIwc.metricTypes.Histogram.html">ozpIwc.metricTypes.Histogram</a></li>
+            
+                <li><a href="../classes/ozpIwc.metricTypes.Meter.html">ozpIwc.metricTypes.Meter</a></li>
+            
+                <li><a href="../classes/ozpIwc.MulticastParticipant.html">ozpIwc.MulticastParticipant</a></li>
+            
+                <li><a href="../classes/ozpIwc.NamesApi.html">ozpIwc.NamesApi</a></li>
+            
+                <li><a href="../classes/ozpIwc.NamesApiValue.html">ozpIwc.NamesApiValue</a></li>
+            
+                <li><a href="../classes/ozpIwc.NetworkPacket.html">ozpIwc.NetworkPacket</a></li>
+            
+                <li><a href="../classes/ozpIwc.Participant.html">ozpIwc.Participant</a></li>
+            
+                <li><a href="../classes/ozpIwc.Peer.html">ozpIwc.Peer</a></li>
+            
+                <li><a href="../classes/ozpIwc.policyAuth.PDP.html">ozpIwc.policyAuth.PDP</a></li>
+            
+                <li><a href="../classes/ozpIwc.policyAuth.SecurityAttribute.html">ozpIwc.policyAuth.SecurityAttribute</a></li>
+            
+                <li><a href="../classes/ozpIwc.PostMessageParticipant.html">ozpIwc.PostMessageParticipant</a></li>
+            
+                <li><a href="../classes/ozpIwc.PostMessageParticipantListener.html">ozpIwc.PostMessageParticipantListener</a></li>
+            
+                <li><a href="../classes/ozpIwc.Router.html">ozpIwc.Router</a></li>
+            
+                <li><a href="../classes/ozpIwc.RouterWatchdog.html">ozpIwc.RouterWatchdog</a></li>
+            
+                <li><a href="../classes/ozpIwc.SystemApi.html">ozpIwc.SystemApi</a></li>
+            
+                <li><a href="../classes/ozpIwc.SystemApiApplicationValue.html">ozpIwc.SystemApiApplicationValue</a></li>
+            
+                <li><a href="../classes/ozpIwc.Timer.html">ozpIwc.Timer</a></li>
+            
+                <li><a href="../classes/ozpIwc.TransportPacket.html">ozpIwc.TransportPacket</a></li>
+            
+                <li><a href="../classes/ozpIwc.TransportPacketContext.html">ozpIwc.TransportPacketContext</a></li>
+            
+                <li><a href="../classes/ozpIwc.util.html">ozpIwc.util</a></li>
+            
+                <li><a href="../classes/ozpIwcPolicies.html">ozpIwcPolicies</a></li>
+            
+            </ul>
+
+            <ul id="api-modules" class="apis modules">
+            
+                <li><a href="../modules/bus.html">bus</a></li>
+            
+                <li><a href="../modules/bus.api.html">bus.api</a></li>
+            
+                <li><a href="../modules/bus.api.Type.html">bus.api.Type</a></li>
+            
+                <li><a href="../modules/bus.api.Value.html">bus.api.Value</a></li>
+            
+                <li><a href="../modules/bus.network.html">bus.network</a></li>
+            
+                <li><a href="../modules/bus.network.packets.html">bus.network.packets</a></li>
+            
+                <li><a href="../modules/bus.security.html">bus.security</a></li>
+            
+                <li><a href="../modules/bus.transport.html">bus.transport</a></li>
+            
+                <li><a href="../modules/bus.util.html">bus.util</a></li>
+            
+                <li><a href="../modules/client.html">client</a></li>
+            
+                <li><a href="../modules/common.html">common</a></li>
+            
+                <li><a href="../modules/metrics.html">metrics</a></li>
+            
+                <li><a href="../modules/metrics.statistics.html">metrics.statistics</a></li>
+            
+                <li><a href="../modules/metrics.types.html">metrics.types</a></li>
+            
+            </ul>
+        </div>
+    </div>
+</div>
+
+            </div>
+        </div>
+        <div class="yui3-u-3-4">
+                <div id="api-options">
+        Show:
+        <label for="api-show-inherited">
+            <input type="checkbox" id="api-show-inherited" checked>
+            Inherited
+        </label>
+
+        <label for="api-show-protected">
+            <input type="checkbox" id="api-show-protected">
+            Protected
+        </label>
+
+        <label for="api-show-private">
+            <input type="checkbox" id="api-show-private">
+            Private
+        </label>
+        <label for="api-show-deprecated">
+            <input type="checkbox" id="api-show-deprecated">
+            Deprecated
+        </label>
+
+    </div>
+
+
+            <div class="apidocs">
+                <div id="docs-main">
+                    <div class="content">
+                        <h1 class="file-heading">File: app/js/bus/security/prp.js</h1>
+
+<div class="file">
+    <pre class="code prettyprint linenums">
+ozpIwc = ozpIwc || {};
+
+
+ozpIwc.policyAuth = ozpIwc.policyAuth || {};
+
+/**
+ * Policy Repository Point
+ *
+ * @param config
+ * @param {Object} config.policyCache
+ * @constructor
+ */
+ozpIwc.policyAuth.PRP = function(config){
+    config = config || {};
+
+    this.persistentPolicies = config.persistentPolicies || [];
+    this.policyCache = config.policyCache || ozpIwc.ozpIwcPolicies.defaultPolicies;
+
+
+};
+
+
+/**
+ * Gathers policies by their URN. These policies may need formatting by the formatPolicies function to gather any
+ * attribute data needed for the policy evaluation.
+ * If a policy cannot be found, it is labeled as a &quot;denyAll&quot; policy and placed in the cache. Thus, making any permission
+ * check using said policy always deny.
+ *
+ * @method getPolicy(policyURIs)
+ * @param {String | Array&lt;String&gt; } [policyURIs] The subject attributes or id performing the action.
+ * @param {String} [combiningAlgorithm] Defaults to “deny-overrides”.
+ * @return {ozpIwc.AsyncAction} will resolve with an array of policy data.
+ */
+ozpIwc.policyAuth.PRP.prototype.getPolicies = function(policyURIs){
+    var asyncAction = new ozpIwc.AsyncAction();
+    policyURIs = policyURIs || [];
+    policyURIs = Array.isArray(policyURIs)? policyURIs : [policyURIs];
+    var policies = [];
+
+    var policiesToGather = this.persistentPolicies.concat(policyURIs);
+    for(var i in policiesToGather){
+        if(this.policyCache[policiesToGather[i]]){
+            policies.push(ozpIwc.util.clone(this.policyCache[policiesToGather[i]]));
+        } else {
+            var async = this.fetchPolicy(policiesToGather[i]);
+
+            //Push the policy fetch to the array, when it resolves its value (policy) will be part of the array
+            policies.push(async);
+        }
+    }
+
+    // If there are no policies to check against, assume trivial and permit
+    if(policies.length === 0){
+        return asyncAction.resolve(&#x27;success&#x27;,[ozpIwc.ozpIwcPolicies.permitAll]);
+    }
+
+    return ozpIwc.AsyncAction.all(policies);
+};
+
+
+
+/**
+ * The URN of the default combining algorithm to use when basing a decision on multiple rules in a policy.
+ * @TODO not used.
+ * @property defaultCombiningAlgorithm
+ * @type {String}
+ * @default &#x27;urn:oasis:names:tc:xacml:3.0:rule-combining-algorithm:deny-overrides&#x27;
+ */
+ozpIwc.policyAuth.PRP.prototype.defaultCombiningAlgorithm =
+    &#x27;urn:oasis:names:tc:xacml:3.0:rule-combining-algorithm:deny-overrides&#x27;;
+
+/**
+ * Fetches the requested policy and stores a copy of it in the cache. Returns a denyAll if policy is unobtainable.
+ * @method fetchPolicy
+ * @param {String} policyURI the uri to gather the policy from
+ * @returns {AsyncAction} will resolve with the gathered policy constructed as an ozpIwc.policyAuth.Policy.
+ */
+ozpIwc.policyAuth.PRP.prototype.fetchPolicy = function(policyURI){
+    var asyncAction = new ozpIwc.AsyncAction();
+    var self = this;
+    ozpIwc.util.ajax({
+        &#x27;method&#x27;: &quot;GET&quot;,
+        &#x27;href&#x27;: policyURI
+    }).then(function(data){
+        self.policyCache[policyURI] = self.formatPolicy(data.response);
+        asyncAction.resolve(&#x27;success&#x27;,ozpIwc.util.clone(self.policyCache[policyURI]));
+    })[&#x27;catch&#x27;](function(e){
+        //Note: failure resolves success because we force a denyAll policy.
+        asyncAction.resolve(&#x27;success&#x27;,self.getDenyall(policyURI));
+    });
+    return asyncAction;
+};
+
+/**
+ * Turns JSON data in to ozpIwc.policyAuth.Policy
+ * @method formatPolicy
+ * @param data
+ * @returns {ozpIwc.policyAuth.Policy}
+ */
+ozpIwc.policyAuth.PRP.prototype.formatPolicy = function(data){
+    return new ozpIwc.policyAuth.Policy(data);
+};
+
+/**
+ * Returns a policy that will always deny any request. Said policy is stored in the cache under the given URN
+ * @param urn
+ * @returns {ozpIwc.policyAuth.Policy} a denyAll policy
+ */
+ozpIwc.policyAuth.PRP.prototype.getDenyall = function(urn){
+    if(this.policyCache[urn]){
+        return this.policyCache[urn];
+    } else {
+        this.policyCache[urn] = ozpIwc.ozpIwcPolicies.denyAll;
+        return this.policyCache[urn];
+    }
+};
+
+    </pre>
+</div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../assets/vendor/prettify/prettify-min.js"></script>
+<script>prettyPrint();</script>
+<script src="../assets/js/yui-prettify.js"></script>
+<script src="../assets/../api.js"></script>
+<script src="../assets/js/api-filter.js"></script>
+<script src="../assets/js/api-list.js"></script>
+<script src="../assets/js/api-search.js"></script>
+<script src="../assets/js/apidocs.js"></script>
+</body>
+</html>

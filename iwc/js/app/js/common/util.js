@@ -173,16 +173,32 @@ ozpIwc.util.parseQueryParams=function(query) {
 };
 
 /**
- * Determines the origin of a given url
+ * Determines the origin of a given url.  
  * @method determineOrigin
  * @param url
  * @returns {String}
  */
+ozpIwc.util.protocolPorts={
+    "http:" : "80",
+    "https:" : "443",
+    "ws:" : "80",
+    "wss:" : "443"
+};
 ozpIwc.util.determineOrigin=function(url) {
     var a=document.createElement("a");
     a.href = url;
+    if(a.origin) {
+        return a.origin;
+    }
     var origin=a.protocol + "//" + a.hostname;
-    if(a.port) {
+    /* Internet Explorer adds the port to urls in <a> tags created by a script, even
+     * if it wasn't there to start with.  Thanks, IE!
+     * https://connect.microsoft.com/IE/feedback/details/817343/ie11-scripting-value-of-htmlanchorelement-host-differs-between-script-created-link-and-link-from-document
+     * 
+     * Other browsers seem to drop the port if it's the default, so we'll do the same.
+    */
+   
+    if(ozpIwc.util.protocolPorts[a.protocol] !== a.port) {
         origin+= ":" + a.port;
     }
     return origin;

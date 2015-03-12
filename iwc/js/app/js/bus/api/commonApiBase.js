@@ -773,6 +773,32 @@ ozpIwc.CommonApiBase.prototype.handleGet=function(node,packetContext) {
 };
 
 /**
+ * Common handler for packet contexts with `bulkGet` actions.
+ *
+ * @method handleBulkget
+ * @param {ozpIwc.CommonApiValue} node The api node to retrieve.  (Not used, bulk get searches the api's data object instead)
+ * @param {ozpIwc.TransportPacketContext} packetContext The packet context containing the bulk get action.
+ */
+ozpIwc.CommonApiBase.prototype.handleBulkget=function(node,packetContext) {
+	// scan local data set for resource link(?) contains prefix
+	// return list of nodes of matches
+	var matchingNodes = [];
+	
+	if (this.data !== {}) {
+		for (var i in this.data) {
+			if (this.data[i].resource.indexOf(packetContext.packet.resource) === 0) {
+				matchingNodes.push(this.data[i].toPacket());
+			}
+		}
+	}
+	
+	packetContext.replyTo({
+		'response': 'ok',
+		'entity': matchingNodes
+	});
+};
+
+/**
  * Common handler for packet contexts with `set` actions.
  *
  * @method handleSet

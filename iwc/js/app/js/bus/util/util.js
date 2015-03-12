@@ -94,12 +94,16 @@ ozpIwc.util.openWindow=function(url,windowName,features) {
     if(typeof windowName === "object") {
         var str="";
         for(var k in windowName) {
-            str+=k+"="+encodeURIComponent(windowName[k])+"&";
+            str+=k+"="+encodeURIComponent(windowName[k]) +"&";
         }
         windowName=str;
     }
-    
-    window.open(url,windowName,features);
+    try {
+        window.open(url, windowName, features);
+    } catch (e){
+        //fallback for IE
+        window.open(url + "?" + windowName,null,features);
+    }
 };
 
 

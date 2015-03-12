@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>app/js/bus/transport/router.js - ozpIwc</title>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
+    <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
+    <link rel="shortcut icon" type="image/png" href="../assets/favicon.png">
+    <script src="http://yui.yahooapis.com/combo?3.9.1/build/yui/yui-min.js"></script>
+</head>
+<body class="yui3-skin-sam">
+
+<div id="doc">
+    <div id="hd" class="yui3-g header">
+        <div class="yui3-u-3-4">
+            
+                <h1><img src="../assets/css/logo.png" title="ozpIwc"></h1>
+            
+        </div>
+        <div class="yui3-u-1-4 version">
+            <em>API Docs for: 0.2.2</em>
+        </div>
+    </div>
+    <div id="bd" class="yui3-g">
+
+        <div class="yui3-u-1-4">
+            <div id="docs-sidebar" class="sidebar apidocs">
+                <div id="api-list">
+    <h2 class="off-left">APIs</h2>
+    <div id="api-tabview" class="tabview">
+        <ul class="tabs">
+            <li><a href="#api-classes">Classes</a></li>
+            <li><a href="#api-modules">Modules</a></li>
+        </ul>
+
+        <div id="api-tabview-filter">
+            <input type="search" id="api-filter" placeholder="Type to filter APIs">
+        </div>
+
+        <div id="api-tabview-panel">
+            <ul id="api-classes" class="apis classes">
+            
+                <li><a href="../classes/ozpIwc.ApiError.html">ozpIwc.ApiError</a></li>
+            
+                <li><a href="../classes/ozpIwc.AsyncAction.html">ozpIwc.AsyncAction</a></li>
+            
+                <li><a href="../classes/ozpIwc.CancelableEvent.html">ozpIwc.CancelableEvent</a></li>
+            
+                <li><a href="../classes/ozpIwc.Client.html">ozpIwc.Client</a></li>
+            
+                <li><a href="../classes/ozpIwc.CommonApiBase.html">ozpIwc.CommonApiBase</a></li>
+            
+                <li><a href="../classes/ozpIwc.CommonApiCollectionValue.html">ozpIwc.CommonApiCollectionValue</a></li>
+            
+                <li><a href="../classes/ozpIwc.CommonApiValue.html">ozpIwc.CommonApiValue</a></li>
+            
+                <li><a href="../classes/ozpIwc.DataApi.html">ozpIwc.DataApi</a></li>
+            
+                <li><a href="../classes/ozpIwc.DataApiValue.html">ozpIwc.DataApiValue</a></li>
+            
+                <li><a href="../classes/ozpIwc.Endpoint.html">ozpIwc.Endpoint</a></li>
+            
+                <li><a href="../classes/ozpIwc.EndpointRegistry.html">ozpIwc.EndpointRegistry</a></li>
+            
+                <li><a href="../classes/ozpIwc.Event.html">ozpIwc.Event</a></li>
+            
+                <li><a href="../classes/ozpIwc.FragmentPacket.html">ozpIwc.FragmentPacket</a></li>
+            
+                <li><a href="../classes/ozpIwc.FragmentStore.html">ozpIwc.FragmentStore</a></li>
+            
+                <li><a href="../classes/ozpIwc.IntentsApi.html">ozpIwc.IntentsApi</a></li>
+            
+                <li><a href="../classes/ozpIwc.IntentsApiDefinitionValue.html">ozpIwc.IntentsApiDefinitionValue</a></li>
+            
+                <li><a href="../classes/ozpIwc.IntentsApiHandlerValue.html">ozpIwc.IntentsApiHandlerValue</a></li>
+            
+                <li><a href="../classes/ozpIwc.IntentsApiTypeValue.html">ozpIwc.IntentsApiTypeValue</a></li>
+            
+                <li><a href="../classes/ozpIwc.InternalParticipant.html">ozpIwc.InternalParticipant</a></li>
+            
+                <li><a href="../classes/ozpIwc.KeyBroadcastLocalStorageLink.html">ozpIwc.KeyBroadcastLocalStorageLink</a></li>
+            
+                <li><a href="../classes/ozpIwc.LeaderGroupParticipant.html">ozpIwc.LeaderGroupParticipant</a></li>
+            
+                <li><a href="../classes/ozpIwc.LocalStorageLink.html">ozpIwc.LocalStorageLink</a></li>
+            
+                <li><a href="../classes/ozpIwc.log.html">ozpIwc.log</a></li>
+            
+                <li><a href="../classes/ozpIwc.MetricsRegistry.html">ozpIwc.MetricsRegistry</a></li>
+            
+                <li><a href="../classes/ozpIwc.metricsStats.Sample.html">ozpIwc.metricsStats.Sample</a></li>
+            
+                <li><a href="../classes/ozpIwc.metricsStats.UniformSample.html">ozpIwc.metricsStats.UniformSample</a></li>
+            
+                <li><a href="../classes/ozpIwc.metricStats.html">ozpIwc.metricStats</a></li>
+            
+                <li><a href="../classes/ozpIwc.metricStats.BinaryHeap.html">ozpIwc.metricStats.BinaryHeap</a></li>
+            
+                <li><a href="../classes/ozpIwc.metricStats.ExponentiallyDecayingSample.html">ozpIwc.metricStats.ExponentiallyDecayingSample</a></li>
+            
+                <li><a href="../classes/ozpIwc.metricTypes.BaseMetric.html">ozpIwc.metricTypes.BaseMetric</a></li>
+            
+                <li><a href="../classes/ozpIwc.metricTypes.Counter.html">ozpIwc.metricTypes.Counter</a></li>
+            
+                <li><a href="../classes/ozpIwc.metricTypes.Gauge.html">ozpIwc.metricTypes.Gauge</a></li>
+            
+                <li><a href="../classes/ozpIwc.metricTypes.Histogram.html">ozpIwc.metricTypes.Histogram</a></li>
+            
+                <li><a href="../classes/ozpIwc.metricTypes.Meter.html">ozpIwc.metricTypes.Meter</a></li>
+            
+                <li><a href="../classes/ozpIwc.MulticastParticipant.html">ozpIwc.MulticastParticipant</a></li>
+            
+                <li><a href="../classes/ozpIwc.NamesApi.html">ozpIwc.NamesApi</a></li>
+            
+                <li><a href="../classes/ozpIwc.NamesApiValue.html">ozpIwc.NamesApiValue</a></li>
+            
+                <li><a href="../classes/ozpIwc.NetworkPacket.html">ozpIwc.NetworkPacket</a></li>
+            
+                <li><a href="../classes/ozpIwc.Participant.html">ozpIwc.Participant</a></li>
+            
+                <li><a href="../classes/ozpIwc.Peer.html">ozpIwc.Peer</a></li>
+            
+                <li><a href="../classes/ozpIwc.policyAuth.PDP.html">ozpIwc.policyAuth.PDP</a></li>
+            
+                <li><a href="../classes/ozpIwc.policyAuth.SecurityAttribute.html">ozpIwc.policyAuth.SecurityAttribute</a></li>
+            
+                <li><a href="../classes/ozpIwc.PostMessageParticipant.html">ozpIwc.PostMessageParticipant</a></li>
+            
+                <li><a href="../classes/ozpIwc.PostMessageParticipantListener.html">ozpIwc.PostMessageParticipantListener</a></li>
+            
+                <li><a href="../classes/ozpIwc.Router.html">ozpIwc.Router</a></li>
+            
+                <li><a href="../classes/ozpIwc.RouterWatchdog.html">ozpIwc.RouterWatchdog</a></li>
+            
+                <li><a href="../classes/ozpIwc.SystemApi.html">ozpIwc.SystemApi</a></li>
+            
+                <li><a href="../classes/ozpIwc.SystemApiApplicationValue.html">ozpIwc.SystemApiApplicationValue</a></li>
+            
+                <li><a href="../classes/ozpIwc.Timer.html">ozpIwc.Timer</a></li>
+            
+                <li><a href="../classes/ozpIwc.TransportPacket.html">ozpIwc.TransportPacket</a></li>
+            
+                <li><a href="../classes/ozpIwc.TransportPacketContext.html">ozpIwc.TransportPacketContext</a></li>
+            
+                <li><a href="../classes/ozpIwc.util.html">ozpIwc.util</a></li>
+            
+                <li><a href="../classes/ozpIwcPolicies.html">ozpIwcPolicies</a></li>
+            
+            </ul>
+
+            <ul id="api-modules" class="apis modules">
+            
+                <li><a href="../modules/bus.html">bus</a></li>
+            
+                <li><a href="../modules/bus.api.html">bus.api</a></li>
+            
+                <li><a href="../modules/bus.api.Type.html">bus.api.Type</a></li>
+            
+                <li><a href="../modules/bus.api.Value.html">bus.api.Value</a></li>
+            
+                <li><a href="../modules/bus.network.html">bus.network</a></li>
+            
+                <li><a href="../modules/bus.network.packets.html">bus.network.packets</a></li>
+            
+                <li><a href="../modules/bus.security.html">bus.security</a></li>
+            
+                <li><a href="../modules/bus.transport.html">bus.transport</a></li>
+            
+                <li><a href="../modules/bus.util.html">bus.util</a></li>
+            
+                <li><a href="../modules/client.html">client</a></li>
+            
+                <li><a href="../modules/common.html">common</a></li>
+            
+                <li><a href="../modules/metrics.html">metrics</a></li>
+            
+                <li><a href="../modules/metrics.statistics.html">metrics.statistics</a></li>
+            
+                <li><a href="../modules/metrics.types.html">metrics.types</a></li>
+            
+            </ul>
+        </div>
+    </div>
+</div>
+
+            </div>
+        </div>
+        <div class="yui3-u-3-4">
+                <div id="api-options">
+        Show:
+        <label for="api-show-inherited">
+            <input type="checkbox" id="api-show-inherited" checked>
+            Inherited
+        </label>
+
+        <label for="api-show-protected">
+            <input type="checkbox" id="api-show-protected">
+            Protected
+        </label>
+
+        <label for="api-show-private">
+            <input type="checkbox" id="api-show-private">
+            Private
+        </label>
+        <label for="api-show-deprecated">
+            <input type="checkbox" id="api-show-deprecated">
+            Deprecated
+        </label>
+
+    </div>
+
+
+            <div class="apidocs">
+                <div id="docs-main">
+                    <div class="content">
+                        <h1 class="file-heading">File: app/js/bus/transport/router.js</h1>
+
+<div class="file">
+    <pre class="code prettyprint linenums">
+/**
+ * @submodule bus.transport
+ */
+
+/**
+ * @class ozpIwc.TransportPacket
+ */
+
+/**
+ * The participant address that sent this packet.
+ * @property src
+ * @type String
+ */
+
+/**
+ * The intended recipient of this packet.
+ * @property dst
+ * @type String
+ */
+
+/**
+ * Protocol Version.  Should be 1.
+ * @property ver
+ * @type Number
+ */
+
+/**
+ * A unique id for this packet.
+ * @property msgId
+ * @type Number
+ */
+
+/**
+ * The payload of this packet.
+ * @property entity
+ * @type Object
+ */
+
+/**
+ * Permissions required to see the payload of this packet.
+ * @property [permissions]
+ * @type Object
+ */
+
+/**
+ * The time in milliseconds since epoch that this packet was created.
+ * @property [time]
+ * @type Number
+ */
+
+/**
+ * Reference to the msgId that this is in reply to.
+ * @property [replyTo]
+ * @type Number
+ */
+
+/**
+ * Action to be performed.
+ * @property [action]
+ * @type String
+ */
+
+/**
+ * Resource to perform the action upon.
+ * @property [resource]
+ * @type String
+ */
+
+/**
+ * Marker for test packets.
+ * @property [test]
+ * @type Boolean
+*/
+
+/**
+ * @class TransportPacketContext
+ * @namespace ozpIwc
+ * @param {Object} config
+ * @param {ozpIwc.TransportPacket} config.packet
+ * @param {ozpIwc.Router} config.router
+ * @param {ozpIwc.Participant} [config.srcParticpant]
+ * @param {ozpIwc.Participant} [config.dstParticpant]
+ */
+ozpIwc.TransportPacketContext=function(config) {
+    /**
+     * @property packet
+     * @type ozpIwc.TransportPacket
+     */
+
+    /**
+     * @property router
+     * @type ozpIwc.Router
+     */
+
+    /**
+     * @property [srcParticipant]
+     * @type ozpIwc.Participant
+     */
+
+    /**
+     * @property [dstParticipant]
+     * @type ozpIwc.Participant
+     */
+    for(var i in config) {
+        this[i]=config[i];
+    }
+};
+
+/**
+ * @method replyTo
+ * @param {ozpIwc.TransportPacket} response
+ *
+ * @returns {ozpIwc.TransportPacket} the packet that was sent
+ */
+ozpIwc.TransportPacketContext.prototype.replyTo=function(response) {
+    var now=new Date().getTime();
+    response.ver = response.ver || 1;
+    response.time = response.time || now;
+    response.replyTo=response.replyTo || this.packet.msgId;
+    response.src=response.src || this.packet.dst;
+    response.dst=response.dst || this.packet.src;
+    if(this.dstParticipant) {
+        this.dstParticipant.send(response);
+    } else{
+        response.msgId = response.msgId || now;
+        this.router.send(response);
+    }
+    return response;
+};
+
+
+/**
+ * @class Router
+ * @namespace ozpIwc
+ * @constructor
+ * @param {Object} [config]
+ * @param {ozpIwc.Peer} [config.peer=ozpIwc.defaultPeer]
+ */
+/**
+ * @event ozpIwc.Router#preRegisterParticipant
+ * @mixes ozpIwc.CancelableEvent
+ * @param {ozpIwc.TransportPacket} [packet] - The packet to be delivered
+ * @param {object} registration - Information provided by the participant about it&#x27;s registration
+ * @param {ozpIwc.Participant} participant - The participant that will receive the packet
+ */
+
+/**
+ * @event ozpIwc.Router#preSend
+ * @mixes ozpIwc.CancelableEvent
+ * @param {ozpIwc.TransportPacket} packet - The packet to be sent
+ * @param {ozpIwc.Participant} participant - The participant that sent the packet
+ */
+
+/**
+ * @event ozpIwc.Router#preDeliver
+ * @mixes ozpIwc.CancelableEvent
+ * @param {ozpIwc.TransportPacket} packet - The packet to be delivered
+ * @param {ozpIwc.Participant} participant - The participant that will receive the packet
+ */
+
+/**
+ * @event ozpIwc.Router#send
+ * @param {ozpIwc.TransportPacket} packet - The packet to be delivered
+ */
+
+/**
+ * @event ozpIwc.Router#prePeerReceive
+ * @mixes ozpIwc.CancelableEvent
+ * @param {ozpIwc.TransportPacket} packet
+ * @param {ozpIwc.NetworkPacket} rawPacket
+ */
+
+ozpIwc.Router=function(config) {
+    config=config || {};
+
+    /**
+     * @property peer
+     * @type ozpIwc.Peer
+     */
+    this.peer=config.peer || ozpIwc.defaultPeer;
+
+//	this.nobodyAddress=&quot;$nobody&quot;;
+//	this.routerControlAddress=&#x27;$transport&#x27;;
+	var self=this;
+
+    /**
+     * @property selfId
+     * @type String
+     */
+	this.selfId=ozpIwc.util.generateId();
+	
+    /**
+     * A key value store of all participants local to the router.
+     * @property participants
+     * @type Object
+     * @default {}
+     */
+	this.participants={};
+	
+	ozpIwc.metrics.gauge(&quot;transport.participants&quot;).set(function() {
+		return Object.keys(self.participants).length;
+	});
+
+
+    /**
+     * Eventing module for the router.
+     * @property events
+     * @type ozpIwc.Event
+     * @default ozpIwc.Event
+     */
+	this.events=new ozpIwc.Event();
+	this.events.mixinOnOff(this);
+	
+	// Wire up to the peer
+	this.peer.on(&quot;receive&quot;,function(event) {
+		self.receiveFromPeer(event.packet);
+	});
+	
+	var checkFormat=function(event) {
+		var message=event.packet;
+		if(message.ver !== 1) {
+			event.cancel(&quot;badVersion&quot;);
+		}
+		if(!message.src) {
+			event.cancel(&quot;nullSource&quot;);
+		}
+		if(!message.dst) {
+			event.cancel(&quot;nullDestination&quot;);
+		}
+		if(event.canceled) {
+			ozpIwc.metrics.counter(&quot;transport.packets.invalidFormat&quot;).inc();
+		}
+	};
+	this.events.on(&quot;preSend&quot;,checkFormat);
+
+    if(!config.disableBus){
+        this.participants[&quot;$bus.multicast&quot;]=new ozpIwc.MulticastParticipant(&quot;$bus.multicast&quot;);
+    }
+    /**
+     * @property watchdog
+     * @type ozpIwc.RouterWatchdog
+     */
+	this.watchdog=new ozpIwc.RouterWatchdog({
+        router: this,
+        heartbeatFrequency: config.heartbeatFrequency
+    });
+	this.registerParticipant(this.watchdog);
+
+    ozpIwc.metrics.gauge(&#x27;transport.router.participants&#x27;).set(function() {
+        return self.getParticipantCount();
+    });
+};
+
+/**
+ * Gets the count of participants who have registered with the router.
+ * @method getParticipantCount
+ *
+ * @returns {Number} the number of registered participants
+ */
+ozpIwc.Router.prototype.getParticipantCount=function() {
+    if (!this.participants || !Object.keys(this.participants)) {
+        return 0;
+    }
+    return Object.keys(this.participants).length;
+
+};
+
+/**
+ * @method shutdown
+ */
+ozpIwc.Router.prototype.shutdown=function() {
+    this.watchdog.shutdown();
+};
+
+/**
+ * Allows a listener to add a new participant.
+ *
+ * Fires:
+ *     - {{#crossLink &quot;ozpIwc.Router/#registerParticipant:event&quot;}}{{/crossLink}}
+ *
+ * @method registerParticipant
+ * @param {Object} participant the participant object that contains a send() function.
+ * @param {Object} packet The handshake requesting registration.
+ *
+ * @returns {String} returns participant id
+ */
+ozpIwc.Router.prototype.registerParticipant=function(participant,packet) {
+    packet = packet || {};
+    var address;
+    do {
+        address=ozpIwc.util.generateId()+&quot;.&quot;+this.selfId;
+    } while(this.participants.hasOwnProperty(address));
+
+    var registerEvent=new ozpIwc.CancelableEvent({
+        &#x27;packet&#x27;: packet,
+        &#x27;registration&#x27;: packet.entity,
+        &#x27;participant&#x27;: participant
+    });
+    this.events.trigger(&quot;preRegisterParticipant&quot;,registerEvent);
+
+    if(registerEvent.canceled){
+        // someone vetoed this participant
+        ozpIwc.log.log(&quot;registeredParticipant[DENIED] origin:&quot;+participant.origin+
+            &quot; because &quot; + registerEvent.cancelReason);
+        return null;
+    }
+
+    this.participants[address] = participant;
+     participant.connectToRouter(this,address);
+    var registeredEvent=new ozpIwc.CancelableEvent({
+        &#x27;packet&#x27;: packet,
+        &#x27;participant&#x27;: participant
+    });
+    this.events.trigger(&quot;registeredParticipant&quot;,registeredEvent);
+
+//	ozpIwc.log.log(&quot;registeredParticipant[&quot;+participant_id+&quot;] origin:&quot;+participant.origin);
+    return address;
+};
+
+/**
+ * Fires:
+ *     - {{#crossLink &quot;ozpIwc.Router/#preDeliver:event&quot;}}{{/crossLink}}
+ *
+ * @method deliverLocal
+ * @param {ozpIwc.TransportPacket} packet
+ * @param {ozpIwc.Participant} sendingParticipant
+ */
+ozpIwc.Router.prototype.deliverLocal=function(packet,sendingParticipant) {
+    if(!packet) {
+        throw &quot;Cannot deliver a null packet!&quot;;
+    }
+    var localParticipant=this.participants[packet.dst];
+    if(!localParticipant) {
+        return;
+    }
+    var packetContext=new ozpIwc.TransportPacketContext({
+        &#x27;packet&#x27;:packet,
+        &#x27;router&#x27;: this,
+        &#x27;srcParticipant&#x27;: sendingParticipant,
+        &#x27;dstParticipant&#x27;: localParticipant
+    });
+
+    var preDeliverEvent=new ozpIwc.CancelableEvent({
+        &#x27;packet&#x27;: packet,
+        &#x27;dstParticipant&#x27;: localParticipant,
+        &#x27;srcParticipant&#x27;: sendingParticipant
+    });
+
+    if(this.events.trigger(&quot;preDeliver&quot;,preDeliverEvent).canceled) {
+        ozpIwc.metrics.counter(&quot;transport.packets.rejected&quot;).inc();
+        return;
+    }
+    ozpIwc.metrics.counter(&quot;transport.packets.delivered&quot;).inc();
+    localParticipant.receiveFromRouter(packetContext);
+};
+
+
+/**
+ * Registers a participant for a multicast group
+ *
+ * Fires:
+ *     - {{#crossLink &quot;ozpIwc.Router/#registerMulticast:event&quot;}}{{/crossLink}}
+ *
+ * @method registerMulticast
+ * @param {ozpIwc.Participant} participant
+ * @param {String[]} multicastGroups
+ */
+ozpIwc.Router.prototype.registerMulticast=function(participant,multicastGroups) {
+    var self=this;
+    multicastGroups.forEach(function(groupName) {
+        var g=self.participants[groupName];
+        if(!g) {
+            g=self.participants[groupName]=new ozpIwc.MulticastParticipant(groupName);
+        }
+        g.addMember(participant);
+        if (participant.address) {
+            var registeredEvent = new ozpIwc.CancelableEvent({
+                &#x27;entity&#x27;: {&#x27;group&#x27;: groupName, &#x27;address&#x27;: participant.address}
+            });
+            participant.permissions.pushIfNotExist(&#x27;ozp:iwc:sendAs&#x27;, groupName);
+            participant.permissions.pushIfNotExist(&#x27;ozp:iwc:receiveAs&#x27;, groupName);
+
+            self.events.trigger(&quot;registeredMulticast&quot;, registeredEvent);
+        } else {
+            ozpIwc.log.log(&quot;no address for &quot; +  participant.participantType + &quot; &quot; + participant.name + &quot;with address &quot; + participant.address + &quot; for group &quot; + groupName);
+        }
+        //ozpIwc.log.log(&quot;registered &quot; + participant.participantType + &quot; &quot; + participant.name + &quot;with address &quot; + participant.address + &quot; for group &quot; + groupName);
+    });
+    return multicastGroups;
+};
+
+/**
+ * Used by participant listeners to route a message to other participants.
+ *
+ * Fires:
+ *     -{{#crossLink &quot;ozpIwc.Router/#preSend:event&quot;}}{{/crossLink}}
+ *     -{{#crossLink &quot;ozpIwc.Router/#send:event&quot;}}{{/crossLink}}
+ *
+ * @method send
+ * @param {ozpIwc.TransportPacket} packet The packet to route.
+ * @param {ozpIwc.Participant} sendingParticipant Information about the participant that is attempting to send
+ * the packet.
+ */
+ozpIwc.Router.prototype.send=function(packet,sendingParticipant) {
+
+    var preSendEvent=new ozpIwc.CancelableEvent({
+        &#x27;packet&#x27;: packet,
+        &#x27;participant&#x27;: sendingParticipant
+    });
+    this.events.trigger(&quot;preSend&quot;,preSendEvent);
+
+    if(preSendEvent.canceled) {
+        ozpIwc.metrics.counter(&quot;transport.packets.sendCanceled&quot;);
+        return;
+    }
+    ozpIwc.metrics.counter(&quot;transport.packets.sent&quot;).inc();
+    this.deliverLocal(packet,sendingParticipant);
+    this.events.trigger(&quot;send&quot;,{&#x27;packet&#x27;: packet});
+    this.peer.send(packet);
+};
+
+/**
+ * Receive a packet from the peer.
+ *
+ * Fires:
+ *     -{{#crossLink &quot;ozpIwc.Router/#prePeerReceive:event&quot;}}{{/crossLink}}
+ *
+ * @param packet {ozpIwc.TransportPacket} the packet to receive
+ */
+ozpIwc.Router.prototype.receiveFromPeer=function(packet) {
+    ozpIwc.metrics.counter(&quot;transport.packets.receivedFromPeer&quot;).inc();
+    var now = Date.now();
+    ozpIwc.metrics.histogram(&quot;transport.packets.latency&quot;).mark(now-packet.data.time,now);
+    var peerReceiveEvent=new ozpIwc.CancelableEvent({
+        &#x27;packet&#x27; : packet.data,
+        &#x27;rawPacket&#x27; : packet
+    });
+    this.events.trigger(&quot;prePeerReceive&quot;,peerReceiveEvent);
+
+    if(!peerReceiveEvent.canceled){
+        this.deliverLocal(packet.data);
+    }
+};
+
+
+    </pre>
+</div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../assets/vendor/prettify/prettify-min.js"></script>
+<script>prettyPrint();</script>
+<script src="../assets/js/yui-prettify.js"></script>
+<script src="../assets/../api.js"></script>
+<script src="../assets/js/api-filter.js"></script>
+<script src="../assets/js/api-list.js"></script>
+<script src="../assets/js/api-search.js"></script>
+<script src="../assets/js/apidocs.js"></script>
+</body>
+</html>

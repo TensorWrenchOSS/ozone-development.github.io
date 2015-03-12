@@ -125,7 +125,7 @@ ozpIwc.Participant.prototype.receiveFromRouter=function(packetContext) {
         self.forbiddenPacketsMeter.mark();
         /** @todo do we send a "denied" message to the destination?  drop?  who knows? */
         ozpIwc.metrics.counter("transport.packets.forbidden").inc();
-        console.error("failure");
+        console.error("failure",err);
     };
 
     ozpIwc.authorization.isPermitted(request,this)

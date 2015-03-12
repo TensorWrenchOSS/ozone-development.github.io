@@ -95,6 +95,11 @@
         var m=/ozpIwc.intentSelection=([^&#]+)/.exec(window.name);
 
         if(!m) {
+            //Fallback for IE
+            m=/ozpIwc.intentSelection=([^&#]+)/.exec(window.location.search);
+        }
+
+        if(!m){
             failure("This page is intended to be launch only by the Ozone Platform intents API.");
         }
         var loc=ozpIwc.util.parseOzpUrl(m[1]);
