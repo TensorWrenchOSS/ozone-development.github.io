@@ -19,7 +19,7 @@
             
         </div>
         <div class="yui3-u-1-4 version">
-            <em>API Docs for: 0.2.2</em>
+            <em>API Docs for: 0.2.3</em>
         </div>
     </div>
     <div id="bd" class="yui3-g">
@@ -268,11 +268,11 @@ var debuggerModule=angular.module(&quot;ozpIwc.debugger&quot;,[
 debuggerModule.factory(&quot;iwcClient&quot;,function() {
     var client=new ozpIwc.InternalParticipant({name: &quot;debuggerClient&quot;});
     ozpIwc.defaultRouter.registerParticipant(client);
-
+    client.apiMap = ozpIwc.apiMap;
+    client.wrapperMap = {};
     client.connect=function() {
         if(!this.connectPromise) {
             var self=this;
-            this.apiMap = {};
 
             /**
              * Promise to chain off of for client connection asynchronous actions.
@@ -280,46 +280,6 @@ debuggerModule.factory(&quot;iwcClient&quot;,function() {
              * @type Promise
              */
             this.connectPromise=new Promise(function(resolve, reject) {
-
-                    self.send({
-                        dst: &quot;names.api&quot;,
-                        action: &quot;get&quot;,
-                        resource: &quot;/api&quot;
-                    },function(reply,done){
-                        if(reply.response === &#x27;ok&#x27;){
-                            resolve(reply.entity);
-                        } else{
-                            reject(reply.response);
-                        }
-                        done();
-                    });
-
-                }).then(function(apis) {
-                    var promiseArray = [];
-                    apis.forEach(function (api) {
-                        promiseArray.push(new Promise(function (resolve, reject) {
-                            self.send({
-                                dst: &quot;names.api&quot;,
-                                action: &quot;get&quot;,
-                                resource: api
-                            }, function (res,done) {
-                                if (res.response === &#x27;ok&#x27;) {
-                                    var name = api.replace(&#x27;/api/&#x27;, &#x27;&#x27;);
-                                    self.apiMap[name] = {
-                                        &#x27;address&#x27;: name,
-                                        &#x27;actions&#x27;: res.entity.actions
-                                    };
-
-                                    resolve();
-                                } else {
-                                    reject(res.response);
-                                }
-                                done();
-                            });
-                        }));
-                    });
-                    return Promise.all(promiseArray);
-                }).then(function(){
                     for(var api in self.apiMap){
                         var apiObj = self.apiMap[api];
                         var apiFuncName = apiObj.address.replace(&#x27;.api&#x27;,&#x27;&#x27;);
@@ -339,13 +299,13 @@ debuggerModule.factory(&quot;iwcClient&quot;,function() {
                             })(apiObj.address);
                         }
                     }
-                }).then(function() {
                     /**
                      * Fired when the client is connected to the IWC bus.
                      * @event #connected
                      */
                     self.events.trigger(&quot;connected&quot;);
-                })[&#x27;catch&#x27;](function(error) {
+                    resolve();
+            })[&#x27;catch&#x27;](function(error) {
                 ozpIwc.log.log(&quot;Failed to connect to bus &quot;,error);
             });
         }

@@ -165,7 +165,13 @@ ozpIwc.KeyBroadcastLocalStorageLink = function (config) {
             }
         }
     };
-    window.addEventListener('storage', receiveStorageEvent, false);
+    if(ozpIwc.util.getInternetExplorerVersion() >= 0) {
+        window.setTimeout(function () {
+            window.addEventListener('storage', receiveStorageEvent, false);
+        }, 500);
+    } else {
+        window.addEventListener('storage', receiveStorageEvent, false);
+    }
 
     this.peer.on("send", function (event) {
         self.send(event.packet);

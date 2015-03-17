@@ -19,7 +19,7 @@
             
         </div>
         <div class="yui3-u-1-4 version">
-            <em>API Docs for: 0.2.2</em>
+            <em>API Docs for: 0.2.3</em>
         </div>
     </div>
     <div id="bd" class="yui3-g">
@@ -385,7 +385,13 @@ ozpIwc.KeyBroadcastLocalStorageLink = function (config) {
             }
         }
     };
-    window.addEventListener(&#x27;storage&#x27;, receiveStorageEvent, false);
+    if(ozpIwc.util.getInternetExplorerVersion() &gt;= 0) {
+        window.setTimeout(function () {
+            window.addEventListener(&#x27;storage&#x27;, receiveStorageEvent, false);
+        }, 500);
+    } else {
+        window.addEventListener(&#x27;storage&#x27;, receiveStorageEvent, false);
+    }
 
     this.peer.on(&quot;send&quot;, function (event) {
         self.send(event.packet);

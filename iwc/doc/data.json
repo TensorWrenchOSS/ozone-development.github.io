@@ -2,7 +2,7 @@
     "project": {
         "name": "ozpIwc",
         "description": "",
-        "version": "0.2.2",
+        "version": "0.2.3",
         "url": ""
     },
     "files": {
@@ -5247,7 +5247,7 @@
         },
         {
             "file": "app/js/bus/network/keyBroadcastLocalStorageLink.js",
-            "line": 188,
+            "line": 194,
             "description": "Handles fragmented packets received from the router. When all fragments of a message have been received,\nthe resulting packet will be passed on to the\n{{#crossLink \"ozpIwc.KeyBroadcastLocalStorageLink/peer:property\"}}registered peer{{/crossLink}}.",
             "itemtype": "method",
             "name": "handleFragment",
@@ -5265,7 +5265,7 @@
         },
         {
             "file": "app/js/bus/network/keyBroadcastLocalStorageLink.js",
-            "line": 223,
+            "line": 229,
             "description": "Stores a received fragment. When the first fragment of a message is received, a timer is set to destroy the storage\nof the message fragments should not all messages be received.",
             "itemtype": "method",
             "name": "storeFragment",
@@ -5287,7 +5287,7 @@
         },
         {
             "file": "app/js/bus/network/keyBroadcastLocalStorageLink.js",
-            "line": 287,
+            "line": 293,
             "description": "Rebuilds the original packet sent across the keyBroadcastLocalStorageLink from the fragments it was broken up into.",
             "itemtype": "method",
             "name": "defragmentPacket",
@@ -5309,7 +5309,7 @@
         },
         {
             "file": "app/js/bus/network/keyBroadcastLocalStorageLink.js",
-            "line": 312,
+            "line": 318,
             "description": "Publishes a packet to other peers. If the sendQueue is full the send will not occur. If the TransportPacket is larger\nthan the {{#crossLink \"ozpIwc.KeyBroadcastLocalStorageLink/fragmentSize:property\"}}{{/crossLink}}, an\n{{#crossLink \"ozpIwc.FragmentPacket\"}}{{/crossLink}} will be sent instead.",
             "itemtype": "method",
             "name": "send",
@@ -5327,7 +5327,7 @@
         },
         {
             "file": "app/js/bus/network/keyBroadcastLocalStorageLink.js",
-            "line": 362,
+            "line": 368,
             "description": "Places a packet in the {{#crossLink \"ozpIwc.KeyBroadcastLocalStorageLink/sendQueue:property\"}}{{/crossLink}}\nif it does not already hold {{#crossLink \"ozpIwc.KeyBroadcastLocalStorageLink/queueSize:property\"}}{{/crossLink}}\namount of packets.",
             "itemtype": "method",
             "name": "queueSend",
@@ -5344,7 +5344,7 @@
         },
         {
             "file": "app/js/bus/network/keyBroadcastLocalStorageLink.js",
-            "line": 382,
+            "line": 388,
             "description": "Recursively tries sending the packet\n{{#crossLink \"ozpIwc.KeyBroadcastLocalStorageLink/maxRetries:property\"}}{{/crossLink}} times.\nThe packet is dropped and the send fails after reaching max attempts.",
             "itemtype": "method",
             "name": "attemptSend",
@@ -5368,7 +5368,7 @@
         },
         {
             "file": "app/js/bus/network/keyBroadcastLocalStorageLink.js",
-            "line": 413,
+            "line": 419,
             "description": "Implementation of publishing packets to peers through localStorage. If the localStorage is full or a write collision\noccurs, the send will not occur. Returns status of localStorage write, null if success.",
             "todo": [
                 "move counter.inc() out of the impl and handle in attemptSend?"
@@ -10159,6 +10159,19 @@
             "namespace": "ozpIwc"
         },
         {
+            "file": "app/js/common/util.js",
+            "line": 362,
+            "description": "Returns the version of Internet Explorer or a -1\n(indicating the use of another browser).",
+            "return": {
+                "description": "",
+                "type": "Number"
+            },
+            "class": "ozpIwc.util",
+            "module": "common",
+            "submodule": "common",
+            "namespace": "ozpIwc"
+        },
+        {
             "file": "app/js/debugger/debugger.js",
             "line": 57,
             "description": "Promise to chain off of for client connection asynchronous actions.",
@@ -10171,7 +10184,7 @@
         },
         {
             "file": "app/js/debugger/debugger.js",
-            "line": 123,
+            "line": 82,
             "description": "Fired when the client is connected to the IWC bus.",
             "itemtype": "event",
             "name": "#connected",
@@ -11374,11 +11387,11 @@
         },
         {
             "message": "replacing incorrect tag: returns with return",
-            "line": " app/js/bus/network/keyBroadcastLocalStorageLink.js:223"
+            "line": " app/js/bus/network/keyBroadcastLocalStorageLink.js:229"
         },
         {
             "message": "replacing incorrect tag: returns with return",
-            "line": " app/js/bus/network/keyBroadcastLocalStorageLink.js:287"
+            "line": " app/js/bus/network/keyBroadcastLocalStorageLink.js:293"
         },
         {
             "message": "replacing incorrect tag: returns with return",
@@ -11738,6 +11751,10 @@
         },
         {
             "message": "replacing incorrect tag: returns with return",
+            "line": " app/js/common/util.js:362"
+        },
+        {
+            "message": "replacing incorrect tag: returns with return",
             "line": " app/js/metrics/statistics/binary_heap.js:18"
         },
         {
@@ -11959,6 +11976,10 @@
         {
             "message": "Missing item type\nShortened call for returning a rejecting promise (cleans up promise chaining)",
             "line": " app/js/common/util.js:351"
+        },
+        {
+            "message": "Missing item type\nReturns the version of Internet Explorer or a -1\n(indicating the use of another browser).",
+            "line": " app/js/common/util.js:362"
         },
         {
             "message": "Missing item type\nReturn the rate per second",

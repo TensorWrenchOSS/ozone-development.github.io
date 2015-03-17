@@ -19,7 +19,7 @@
             
         </div>
         <div class="yui3-u-1-4 version">
-            <em>API Docs for: 0.2.2</em>
+            <em>API Docs for: 0.2.3</em>
         </div>
     </div>
     <div id="bd" class="yui3-g">
@@ -577,6 +577,24 @@ ozpIwc.util.rejectWith = function(obj){
     return new Promise(function(resolve,reject){
         reject(obj);
     });
+};
+
+/**
+ * Returns the version of Internet Explorer or a -1
+ * (indicating the use of another browser).
+ * @returns {number}
+ */
+ozpIwc.util.getInternetExplorerVersion= function() {
+    var rv = -1; // Return value assumes failure.
+    if (navigator.appName === &#x27;Microsoft Internet Explorer&#x27;)
+    {
+        var ua = navigator.userAgent;
+        var re  = new RegExp(&quot;MSIE ([0-9]{1,}[\.0-9]{0,})&quot;);
+        if (re.exec(ua) !== null) {
+            rv = parseFloat(RegExp.$1);
+        }
+    }
+    return rv;
 };
     </pre>
 </div>

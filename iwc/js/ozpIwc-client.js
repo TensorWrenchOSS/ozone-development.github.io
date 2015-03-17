@@ -2617,6 +2617,22 @@ define("promise/utils",
   });
 requireModule('promise/polyfill').polyfill();
 }());
+ozpIwc = ozpIwc || {};
+
+ozpIwc.apiMap = {
+    "data.api" : { 'address': 'data.api',
+        'actions': ["get","set","delete","watch","unwatch","list","bulkGet","addChild","removeChild"]
+    },
+    "intents.api" : { 'address': 'intents.api',
+        'actions': ["get","set","delete","watch","unwatch","list","bulkGet","register","invoke","broadcast"]
+    },
+    "names.api" : { 'address': 'names.api',
+        'actions': ["get","set","delete","watch","unwatch","list","bulkGet"]
+    },
+    "system.api" : { 'address': 'system.api',
+        'actions': ["get","set","delete","watch","unwatch","list","bulkGet","launch"]
+    }
+};
 var ozpIwc=ozpIwc || {};
 /**
  * Common classes used between both the Client and the Bus.
@@ -3109,21 +3125,23 @@ ozpIwc.util.rejectWith = function(obj){
         reject(obj);
     });
 };
-ozpIwc = ozpIwc || {};
 
-ozpIwc.apiMap = {
-    "data.api" : { 'address': 'data.api',
-        'actions': ["get","set","delete","watch","unwatch","list","bulkGet","addChild","removeChild"]
-    },
-    "intents.api" : { 'address': 'intents.api',
-        'actions': ["get","set","delete","watch","unwatch","list","bulkGet","register","invoke","broadcast"]
-    },
-    "names.api" : { 'address': 'names.api',
-        'actions': ["get","set","delete","watch","unwatch","list","bulkGet"]
-    },
-    "system.api" : { 'address': 'system.api',
-        'actions': ["get","set","delete","watch","unwatch","list","bulkGet","launch"]
+/**
+ * Returns the version of Internet Explorer or a -1
+ * (indicating the use of another browser).
+ * @returns {number}
+ */
+ozpIwc.util.getInternetExplorerVersion= function() {
+    var rv = -1; // Return value assumes failure.
+    if (navigator.appName === 'Microsoft Internet Explorer')
+    {
+        var ua = navigator.userAgent;
+        var re  = new RegExp("MSIE ([0-9]{1,}[\.0-9]{0,})");
+        if (re.exec(ua) !== null) {
+            rv = parseFloat(RegExp.$1);
+        }
     }
+    return rv;
 };
 var ozpIwc=ozpIwc || {};
 

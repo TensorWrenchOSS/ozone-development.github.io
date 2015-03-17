@@ -2617,6 +2617,22 @@ define("promise/utils",
   });
 requireModule('promise/polyfill').polyfill();
 }());
+ozpIwc = ozpIwc || {};
+
+ozpIwc.apiMap = {
+    "data.api" : { 'address': 'data.api',
+        'actions': ["get","set","delete","watch","unwatch","list","bulkGet","addChild","removeChild"]
+    },
+    "intents.api" : { 'address': 'intents.api',
+        'actions': ["get","set","delete","watch","unwatch","list","bulkGet","register","invoke","broadcast"]
+    },
+    "names.api" : { 'address': 'names.api',
+        'actions': ["get","set","delete","watch","unwatch","list","bulkGet"]
+    },
+    "system.api" : { 'address': 'system.api',
+        'actions': ["get","set","delete","watch","unwatch","list","bulkGet","launch"]
+    }
+};
 var ozpIwc=ozpIwc || {};
 /**
  * Common classes used between both the Client and the Bus.
@@ -3108,6 +3124,24 @@ ozpIwc.util.rejectWith = function(obj){
     return new Promise(function(resolve,reject){
         reject(obj);
     });
+};
+
+/**
+ * Returns the version of Internet Explorer or a -1
+ * (indicating the use of another browser).
+ * @returns {number}
+ */
+ozpIwc.util.getInternetExplorerVersion= function() {
+    var rv = -1; // Return value assumes failure.
+    if (navigator.appName === 'Microsoft Internet Explorer')
+    {
+        var ua = navigator.userAgent;
+        var re  = new RegExp("MSIE ([0-9]{1,}[\.0-9]{0,})");
+        if (re.exec(ua) !== null) {
+            rv = parseFloat(RegExp.$1);
+        }
+    }
+    return rv;
 };
 /*
  * The MIT License (MIT) Copyright (c) 2012 Mike Ihbe
@@ -6101,7 +6135,13 @@ ozpIwc.KeyBroadcastLocalStorageLink = function (config) {
             }
         }
     };
-    window.addEventListener('storage', receiveStorageEvent, false);
+    if(ozpIwc.util.getInternetExplorerVersion() >= 0) {
+        window.setTimeout(function () {
+            window.addEventListener('storage', receiveStorageEvent, false);
+        }, 500);
+    } else {
+        window.addEventListener('storage', receiveStorageEvent, false);
+    }
 
     this.peer.on("send", function (event) {
         self.send(event.packet);
@@ -91063,11 +91103,11 @@ var debuggerModule=angular.module("ozpIwc.debugger",[
 debuggerModule.factory("iwcClient",function() {
     var client=new ozpIwc.InternalParticipant({name: "debuggerClient"});
     ozpIwc.defaultRouter.registerParticipant(client);
-
+    client.apiMap = ozpIwc.apiMap;
+    client.wrapperMap = {};
     client.connect=function() {
         if(!this.connectPromise) {
             var self=this;
-            this.apiMap = {};
 
             /**
              * Promise to chain off of for client connection asynchronous actions.
@@ -91075,46 +91115,6 @@ debuggerModule.factory("iwcClient",function() {
              * @type Promise
              */
             this.connectPromise=new Promise(function(resolve, reject) {
-
-                    self.send({
-                        dst: "names.api",
-                        action: "get",
-                        resource: "/api"
-                    },function(reply,done){
-                        if(reply.response === 'ok'){
-                            resolve(reply.entity);
-                        } else{
-                            reject(reply.response);
-                        }
-                        done();
-                    });
-
-                }).then(function(apis) {
-                    var promiseArray = [];
-                    apis.forEach(function (api) {
-                        promiseArray.push(new Promise(function (resolve, reject) {
-                            self.send({
-                                dst: "names.api",
-                                action: "get",
-                                resource: api
-                            }, function (res,done) {
-                                if (res.response === 'ok') {
-                                    var name = api.replace('/api/', '');
-                                    self.apiMap[name] = {
-                                        'address': name,
-                                        'actions': res.entity.actions
-                                    };
-
-                                    resolve();
-                                } else {
-                                    reject(res.response);
-                                }
-                                done();
-                            });
-                        }));
-                    });
-                    return Promise.all(promiseArray);
-                }).then(function(){
                     for(var api in self.apiMap){
                         var apiObj = self.apiMap[api];
                         var apiFuncName = apiObj.address.replace('.api','');
@@ -91134,13 +91134,13 @@ debuggerModule.factory("iwcClient",function() {
                             })(apiObj.address);
                         }
                     }
-                }).then(function() {
                     /**
                      * Fired when the client is connected to the IWC bus.
                      * @event #connected
                      */
                     self.events.trigger("connected");
-                })['catch'](function(error) {
+                    resolve();
+            })['catch'](function(error) {
                 ozpIwc.log.log("Failed to connect to bus ",error);
             });
         }
