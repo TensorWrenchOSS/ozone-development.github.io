@@ -123,7 +123,7 @@ ul, li {
 }
 
 a, a:visited {
-    color: #32838c;
+    color: #009dd3;
     text-decoration: none;
     outline: none;
 }
@@ -134,7 +134,7 @@ a, a:visited {
     }
 
 a.button {
-    background: #3b4246;
+    background: #009dd3;
     color: #fff;
     display: block;
     width: 200px;
@@ -157,8 +157,16 @@ a.button {
 }
 
     a.button:hover, a.button:active {
-        background: #4c5457;
+        background: #d45a28;
     }
+
+    .one a.button {
+        background: #d45a28;
+    }
+
+        .one a.button:hover, .one a.button:active {
+            background: #009dd3;
+        }
 
     a.button [class^="icon-"], a.button [class*=" icon-"] {
         font-size: 25px;
@@ -187,28 +195,18 @@ h1[class^="icon-"], h1[class*=" icon-"] {
     ALL: 
    =================== */
 
-.header-container {
-    background: #293035;
-    background-image:
-    linear-gradient(
-        to top right, 
-        #4c5457, #293035
-    );
+.header-container,
+.section-container.bg {
+    background: url('../img/bg_clouds3.jpg');
+    background: url('../img/bg_fractal.png');
+    background-size: cover;
 }
 
-    .header-container.bg {
-        background: #009dd3;
-        background-image:
-        linear-gradient(
-            to top right, 
-            #0e5772, #009dd3
-        );
-        background: url('../img/bg_fractal.png');
-        background-size: cover;
-        padding-top: 30px;
-    }
+.header-container {
+    padding-top: 30px;
+}
 
-    .header-container h2 {
+    .header-container header h2 {
         display: block;
         clear: both;
         color: #fff;
@@ -218,7 +216,7 @@ h1[class^="icon-"], h1[class*=" icon-"] {
         text-align: center;
     }
 
-        .header-container h2 b {
+        .header-container header h2 b {
             font-size: 20pt;
             color: #eeeeef;
         }
@@ -240,21 +238,23 @@ h1[class^="icon-"], h1[class*=" icon-"] {
 }
 
     .section-container.one {
-        background: #814481;
+        background: #009dd3;
         background-image:
         linear-gradient(
             to top right, 
-            #814481, #d45a28
+            #0e5772, #71c9e7
         );
+        background: rgba(0, 157, 211, .2);
     }
 
     .section-container.two {
-        background: #32838c;
+        background: #0e5772;
         background-image:
         linear-gradient(
             to top right, 
-            #b32a5f, #32838c
+            #009dd3, #0e5772
         );
+        background: rgba(0, 0, 0, .2);
     }
 
     .section-container h1 {
@@ -311,7 +311,7 @@ nav ul {
         text-align: center;
         text-decoration: none;
         color: white;
-        background: #3b4246;
+        background: rgba(0, 0, 0, .1);
     }
 
         nav a:hover,
@@ -321,13 +321,15 @@ nav ul {
 
         nav a:hover,
         nav a:active {
-            -ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=80)"; 
-            filter: alpha(opacity=80);
-            opacity: 0.8;
+            background: rgba(0, 0, 0, .1);
         }
 
         nav a.live {
-            background: #4c5457;
+            background: rgba(0, 0, 0, .2);
+        }
+
+        nav a.live.one {
+            background: rgba(0, 157, 211, .2);
         }
 
         nav a span {
@@ -336,20 +338,24 @@ nav ul {
             padding-bottom: 5px;
         }
 
-    nav.one a {
-        background: #814481;
+    nav.one a,
+    nav.two a {
+        background: rgba(0, 0, 0, .3);
     }
+    
+        nav.one a:hover,
+        nav.one a:active,
+        nav.two a:hover,
+        nav.two a:active {
+            background: rgba(0, 0, 0, .5);
+        }
 
         nav.one a.live {
             background: #d45a28;
         }
 
-    nav.two a {
-        background: #32838c;
-    }
-        
         nav.two a.live {
-            background: #b32a5f;
+            background: #009dd3;
         }
 
 /* ==============
@@ -422,15 +428,15 @@ nav ul {
             margin-right: 0;
         }
 
-    .header-container nav a {
+    header nav a {
         float: right;
     }
 
-        .header-container nav li:first-child a {
+        header nav li:first-child a {
             margin: 0 0 0 1.7%;
         }
 
-        .header-container nav li:last-child a {
+        header nav li:last-child a {
             margin: 0 1.7% 0 0;
         }
 
@@ -481,7 +487,7 @@ nav ul {
         width: 28%;
     }
 
-    .header-container h2 {
+    .header-container header h2 {
         max-width: 60%;
     }
 
@@ -534,7 +540,7 @@ nav ul {
                 float: left;
                 font-size: 40px;
                 padding: 20px 20px 20px 0;
-                color: #32838c;
+                color: #009dd3;
             }
 
             .col2 h2, .col2 p {
