@@ -167,6 +167,9 @@ ozpIwc.Client=function(config) {
     this.launchedIntents = [];
 
     this.constructApiFunctions();
+
+    window.addEventListener('beforeunload',this.disconnect);
+
     if(this.autoConnect) {
         this.connect();
     }
@@ -484,6 +487,7 @@ ozpIwc.Client.prototype.disconnect=function() {
     this.promiseCallbacks={};
     this.registeredCallbacks={};
     window.removeEventListener("message",this.postMessageHandler,false);
+    this.connectPromise = null;
     if(this.iframe) {
         this.iframe.src = "about:blank";
         var self = this;
@@ -553,7 +557,7 @@ ozpIwc.Client.prototype.connect=function() {
             self.preconnectionQueue.forEach(function (p) {
                 self.send(p.fields, p.callback, p.promiseRes, p.promiseRej);
             });
-            self.preconnectionQueue = null;
+            self.preconnectionQueue = [];
 
             if (!self.launchParams.inFlightIntent) {
                 return;
@@ -580,8 +584,6 @@ ozpIwc.Client.prototype.connect=function() {
              * @event #connected
              */
             self.events.trigger("connected");
-        })['catch'](function(error) {
-            ozpIwc.log.log("Failed to connect to bus ",error);
         });
     }
     return this.connectPromise; 
@@ -596,7 +598,7 @@ ozpIwc.Client.prototype.createIframePeer=function() {
     var self=this;
     return new Promise(function(resolve,reject) {
         var createIframeShim=function() {
-            self.iframe=document.createElement("iframe");
+            self.iframe = document.createElement("iframe");
             self.iframe.addEventListener("load",function() {
                 resolve();
             });

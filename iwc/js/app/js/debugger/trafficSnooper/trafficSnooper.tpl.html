@@ -24,9 +24,11 @@
         <label for="packetFilter" style="margin-left: 10px;" class="control-label">Filter:</label>
         <input id="packetFilter" ng-model="viewFilter" type="text" size="40" 
            class="form-control" 
-           placeholder="filter packets..."
-           tooltip-placement="bottom" tooltip="Search packets for text.">
-        <button class="btn btn-primary" ng-click="updateFilter(viewFilter)">Apply
+           placeholder="data.action === 'get'"
+           tooltip-placement="bottom" tooltip="A boolean expression evaluator to filter packets by.
+               The filter's scope is the packet object.
+               Example: data.action === 'get' will show only packets with a 'get' action">
+        <button class="btn btn-primary" ng-disabled="filterError" ng-click="updateFilter(viewFilter)">Apply
         </button>
         <span>{{filterError}}</span>
       </div>

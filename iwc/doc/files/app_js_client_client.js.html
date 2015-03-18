@@ -19,7 +19,7 @@
             
         </div>
         <div class="yui3-u-1-4 version">
-            <em>API Docs for: 0.2.3</em>
+            <em>API Docs for: 0.2.4</em>
         </div>
     </div>
     <div id="bd" class="yui3-g">
@@ -116,6 +116,10 @@
                 <li><a href="../classes/ozpIwc.NamesApiValue.html">ozpIwc.NamesApiValue</a></li>
             
                 <li><a href="../classes/ozpIwc.NetworkPacket.html">ozpIwc.NetworkPacket</a></li>
+            
+                <li><a href="../classes/ozpIwc.packetRouter.html">ozpIwc.packetRouter</a></li>
+            
+                <li><a href="../classes/ozpIwc.PacketRouter.html">ozpIwc.PacketRouter</a></li>
             
                 <li><a href="../classes/ozpIwc.Participant.html">ozpIwc.Participant</a></li>
             
@@ -387,6 +391,9 @@ ozpIwc.Client=function(config) {
     this.launchedIntents = [];
 
     this.constructApiFunctions();
+
+    window.addEventListener(&#x27;beforeunload&#x27;,this.disconnect);
+
     if(this.autoConnect) {
         this.connect();
     }
@@ -704,6 +711,7 @@ ozpIwc.Client.prototype.disconnect=function() {
     this.promiseCallbacks={};
     this.registeredCallbacks={};
     window.removeEventListener(&quot;message&quot;,this.postMessageHandler,false);
+    this.connectPromise = null;
     if(this.iframe) {
         this.iframe.src = &quot;about:blank&quot;;
         var self = this;
@@ -773,7 +781,7 @@ ozpIwc.Client.prototype.connect=function() {
             self.preconnectionQueue.forEach(function (p) {
                 self.send(p.fields, p.callback, p.promiseRes, p.promiseRej);
             });
-            self.preconnectionQueue = null;
+            self.preconnectionQueue = [];
 
             if (!self.launchParams.inFlightIntent) {
                 return;
@@ -800,8 +808,6 @@ ozpIwc.Client.prototype.connect=function() {
              * @event #connected
              */
             self.events.trigger(&quot;connected&quot;);
-        })[&#x27;catch&#x27;](function(error) {
-            ozpIwc.log.log(&quot;Failed to connect to bus &quot;,error);
         });
     }
     return this.connectPromise; 
@@ -816,7 +822,7 @@ ozpIwc.Client.prototype.createIframePeer=function() {
     var self=this;
     return new Promise(function(resolve,reject) {
         var createIframeShim=function() {
-            self.iframe=document.createElement(&quot;iframe&quot;);
+            self.iframe = document.createElement(&quot;iframe&quot;);
             self.iframe.addEventListener(&quot;load&quot;,function() {
                 resolve();
             });

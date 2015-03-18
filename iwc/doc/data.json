@@ -2,7 +2,7 @@
     "project": {
         "name": "ozpIwc",
         "description": "",
-        "version": "0.2.3",
+        "version": "0.2.4",
         "url": ""
     },
     "files": {
@@ -433,6 +433,18 @@
                 "ozpIwc": 1
             }
         },
+        "app/js/common/packetRouter.js": {
+            "name": "app/js/common/packetRouter.js",
+            "modules": {},
+            "classes": {
+                "ozpIwc.packetRouter": 1,
+                "ozpIwc.PacketRouter": 1
+            },
+            "fors": {},
+            "namespaces": {
+                "ozpIwc": 1
+            }
+        },
         "app/js/common/util.js": {
             "name": "app/js/common/util.js",
             "modules": {},
@@ -827,15 +839,17 @@
             "classes": {
                 "ozpIwc.util": 1,
                 "ozpIwc.Event": 1,
-                "ozpIwc.CancelableEvent": 1
+                "ozpIwc.CancelableEvent": 1,
+                "ozpIwc.packetRouter": 1,
+                "ozpIwc.PacketRouter": 1
             },
             "fors": {},
             "namespaces": {
                 "ozpIwc": 1
             },
             "tag": "module",
-            "file": "app/js/common/event.js",
-            "line": 92,
+            "file": "app/js/common/packetRouter.js",
+            "line": 47,
             "description": "Common classes used between both the Client and the Bus.",
             "module": "common"
         },
@@ -2118,6 +2132,34 @@
                     "type": "Object"
                 }
             ]
+        },
+        "ozpIwc.packetRouter": {
+            "name": "ozpIwc.packetRouter",
+            "shortname": "ozpIwc.packetRouter",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "common",
+            "namespace": "ozpIwc",
+            "file": "app/js/common/packetRouter.js",
+            "line": 1,
+            "static": 1
+        },
+        "ozpIwc.PacketRouter": {
+            "name": "ozpIwc.PacketRouter",
+            "shortname": "ozpIwc.PacketRouter",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "common",
+            "namespace": "ozpIwc",
+            "file": "app/js/common/packetRouter.js",
+            "line": 47,
+            "description": "A routing module for packet controlling via template matching and filtering."
         },
         "ozpIwc.metricStats": {
             "name": "ozpIwc.metricStats",
@@ -3460,18 +3502,7 @@
         },
         {
             "file": "app/js/bus/api/system/systemApiApplicationValue.js",
-            "line": 17,
-            "description": "A reference to the instantiated system Api",
-            "itemtype": "property",
-            "name": "systemApi",
-            "type": "{ozpIwc.SystemApi}",
-            "class": "ozpIwc.SystemApiApplicationValue",
-            "submodule": "bus.api.Value",
-            "namespace": "ozpIwc"
-        },
-        {
-            "file": "app/js/bus/api/system/systemApiApplicationValue.js",
-            "line": 25,
+            "line": 18,
             "description": "Returns the intents registered to this value.",
             "itemtype": "method",
             "name": "getIntentsRegistrations",
@@ -9368,7 +9399,7 @@
         },
         {
             "file": "app/js/client/client.js",
-            "line": 177,
+            "line": 180,
             "description": "Parses launch parameters based on the raw string input it receives.",
             "itemtype": "method",
             "name": "readLaunchParams",
@@ -9385,7 +9416,7 @@
         },
         {
             "file": "app/js/client/client.js",
-            "line": 199,
+            "line": 202,
             "description": "Receive a packet from the connected peer.  If the packet is a reply, then\nthe callback for that reply is invoked.  Otherwise, it fires a receive event\n\nFires:\n    - {{#crossLink \"ozpIwc.Client/receive:event}}{{/crossLink}}",
             "itemtype": "method",
             "name": "receive",
@@ -9404,7 +9435,7 @@
         },
         {
             "file": "app/js/client/client.js",
-            "line": 249,
+            "line": 252,
             "description": "Fired when the client receives a packet.",
             "itemtype": "event",
             "name": "#receive",
@@ -9414,7 +9445,7 @@
         },
         {
             "file": "app/js/client/client.js",
-            "line": 256,
+            "line": 259,
             "description": "Sends a packet through the IWC.",
             "itemtype": "method",
             "name": "send",
@@ -9441,7 +9472,7 @@
         },
         {
             "file": "app/js/client/client.js",
-            "line": 336,
+            "line": 339,
             "description": "Builds the client api calls from the values in client.apiMap",
             "itemtype": "method",
             "name": "constructApiFunctions",
@@ -9451,7 +9482,7 @@
         },
         {
             "file": "app/js/client/client.js",
-            "line": 364,
+            "line": 367,
             "description": "Calls the names.api to gather the /api/* resources to gain knowledge of available api actions of the current bus.",
             "itemtype": "method",
             "name": "gatherApiInformation",
@@ -9465,7 +9496,7 @@
         },
         {
             "file": "app/js/client/client.js",
-            "line": 406,
+            "line": 409,
             "description": "Returns whether or not the Client is connected to the IWC bus.",
             "itemtype": "method",
             "name": "isConnected",
@@ -9479,7 +9510,7 @@
         },
         {
             "file": "app/js/client/client.js",
-            "line": 416,
+            "line": 419,
             "description": "Cancel a reply callback registration.",
             "itemtype": "method",
             "name": "cancelPromiseCallback",
@@ -9499,7 +9530,7 @@
         },
         {
             "file": "app/js/client/client.js",
-            "line": 432,
+            "line": 435,
             "description": "Cancel a watch callback registration.",
             "itemtype": "method",
             "name": "cancelRegisteredCallback",
@@ -9519,7 +9550,7 @@
         },
         {
             "file": "app/js/client/client.js",
-            "line": 450,
+            "line": 453,
             "description": "Registers callbacks",
             "itemtype": "method",
             "name": "on",
@@ -9541,7 +9572,7 @@
         },
         {
             "file": "app/js/client/client.js",
-            "line": 466,
+            "line": 469,
             "description": "De-registers callbacks",
             "itemtype": "method",
             "name": "off",
@@ -9563,7 +9594,7 @@
         },
         {
             "file": "app/js/client/client.js",
-            "line": 478,
+            "line": 481,
             "description": "Disconnects the client from the IWC bus.",
             "itemtype": "method",
             "name": "disconnect",
@@ -9573,7 +9604,7 @@
         },
         {
             "file": "app/js/client/client.js",
-            "line": 498,
+            "line": 502,
             "description": "Connects the client from the IWC bus.\nFires:\n    - {{#crossLink \"ozpIwc.Client/#connected\"}}{{/crossLink}}",
             "itemtype": "method",
             "name": "connect",
@@ -9583,7 +9614,7 @@
         },
         {
             "file": "app/js/client/client.js",
-            "line": 509,
+            "line": 513,
             "description": "Promise to chain off of for client connection asynchronous actions.",
             "itemtype": "property",
             "name": "connectPromise",
@@ -9594,7 +9625,7 @@
         },
         {
             "file": "app/js/client/client.js",
-            "line": 546,
+            "line": 550,
             "description": "Fired when the client receives its address.",
             "itemtype": "event",
             "name": "#gotAddress",
@@ -9604,7 +9635,7 @@
         },
         {
             "file": "app/js/client/client.js",
-            "line": 578,
+            "line": 582,
             "description": "Fired when the client is connected to the IWC bus.",
             "itemtype": "event",
             "name": "#connected",
@@ -9614,7 +9645,7 @@
         },
         {
             "file": "app/js/client/client.js",
-            "line": 590,
+            "line": 592,
             "description": "Creates an invisible iFrame Peer for IWC bus communication.",
             "itemtype": "method",
             "name": "createIframePeer",
@@ -9624,7 +9655,7 @@
         },
         {
             "file": "app/js/client/client.js",
-            "line": 623,
+            "line": 625,
             "description": "Handles intent invocation packets. Communicates back with the intents.api to operate the in flight intent state\nmachine.",
             "itemtype": "method",
             "name": "intentInvocationHandling",
@@ -9655,7 +9686,7 @@
         },
         {
             "file": "app/js/client/client.js",
-            "line": 671,
+            "line": 673,
             "description": "Calls the specific api wrapper given an api name specified.\nIf the wrapper does not exist it is created.",
             "itemtype": "method",
             "name": "api",
@@ -9676,7 +9707,7 @@
         },
         {
             "file": "app/js/client/client.js",
-            "line": 684,
+            "line": 686,
             "description": "Updates the wrapper map for api use. Whenever functionality is added or removed from the apiMap the\nupdateApi must be called to reflect said changes on the wrapper map.",
             "itemtype": "method",
             "name": "updateApi",
@@ -9822,6 +9853,192 @@
                 "type": "ozpIwc.CancelableEvent"
             },
             "class": "ozpIwc.CancelableEvent",
+            "module": "common",
+            "namespace": "ozpIwc"
+        },
+        {
+            "file": "app/js/common/packetRouter.js",
+            "line": 9,
+            "description": "Generates a template function to deserialize a uri string based on the RegExp pattern provided.",
+            "itemtype": "method",
+            "name": "uriTemplate",
+            "static": 1,
+            "params": [
+                {
+                    "name": "pattern",
+                    "description": "",
+                    "type": "String"
+                }
+            ],
+            "return": {
+                "description": "If the uri does not meet the template criteria, null will be returned when the returned\n                    function is invoked.",
+                "type": "Function"
+            },
+            "class": "ozpIwc.packetRouter",
+            "module": "common",
+            "namespace": "ozpIwc"
+        },
+        {
+            "file": "app/js/common/packetRouter.js",
+            "line": 53,
+            "description": "The key on this table is the route action.\nThe value is an array of config objects of the form:\n   action: from the route declaration\n   resource: from the route declaration\n   handler: the function from the route declaration\n   uriTemplate: uriTemplate function",
+            "itemtype": "property",
+            "name": "routes",
+            "type": "{Object}",
+            "class": "ozpIwc.PacketRouter",
+            "module": "common",
+            "namespace": "ozpIwc"
+        },
+        {
+            "file": "app/js/common/packetRouter.js",
+            "line": 65,
+            "description": "The route that matches all packet handling requests. Should defined route be able to handle a packet, this route\nis called. Can be changed using the declareDefaultRoute method.",
+            "itemtype": "property",
+            "name": "defaultRoute",
+            "return": {
+                "description": "",
+                "type": "*"
+            },
+            "class": "ozpIwc.PacketRouter",
+            "module": "common",
+            "namespace": "ozpIwc"
+        },
+        {
+            "file": "app/js/common/packetRouter.js",
+            "line": 74,
+            "description": "The default scope of the router.",
+            "type": "{PacketRouter}",
+            "class": "ozpIwc.PacketRouter",
+            "module": "common",
+            "namespace": "ozpIwc"
+        },
+        {
+            "file": "app/js/common/packetRouter.js",
+            "line": 82,
+            "description": "Assigns a route to the Packet Router for the specific action. This route is taken by a packet if its resource matches\nthe routes resource template, passes any assigned filters. Additionally, a packet may only take one route, if\nmultiple possible routes are possible, the route which was declared earliest will handle the packet.",
+            "itemtype": "method",
+            "name": "declareRoute",
+            "params": [
+                {
+                    "name": "config",
+                    "description": "",
+                    "type": "Object",
+                    "props": [
+                        {
+                            "name": "action",
+                            "description": "The action this route is defined to (ex. \"get\", \"set\", \"list\", ...)",
+                            "type": "String"
+                        },
+                        {
+                            "name": "resource",
+                            "description": "The serialized uri template definition pertaining to the route (ex. \"/foo\", \"/{id:\\\\d+}\", \"/{param1}/{param2}\")",
+                            "type": "String"
+                        },
+                        {
+                            "name": "filters",
+                            "description": "Any filters that better isolate the packet routing based on the context and packet properties",
+                            "type": "Array"
+                        }
+                    ]
+                },
+                {
+                    "name": "handler",
+                    "description": "The resulting action to be taken should this route handle a packet.",
+                    "type": "Function"
+                },
+                {
+                    "name": "handlerSelf",
+                    "description": "The scope of the handler, the PacketRouter object holds the default scope if none is provided.",
+                    "type": "Object"
+                }
+            ],
+            "return": {
+                "description": "",
+                "type": "ozpIwc.PacketRouter"
+            },
+            "class": "ozpIwc.PacketRouter",
+            "module": "common",
+            "namespace": "ozpIwc"
+        },
+        {
+            "file": "app/js/common/packetRouter.js",
+            "line": 114,
+            "description": "Recursively passes through all filters for the packet, calling the handler only if all filters pass.",
+            "itemtype": "method",
+            "name": "filterChain",
+            "params": [
+                {
+                    "name": "packet",
+                    "description": "",
+                    "type": "Object"
+                },
+                {
+                    "name": "context",
+                    "description": "",
+                    "type": "Object"
+                },
+                {
+                    "name": "pathParams",
+                    "description": "",
+                    "type": "Object"
+                },
+                {
+                    "name": "routeSpec",
+                    "description": "",
+                    "type": "Object"
+                },
+                {
+                    "name": "filters",
+                    "description": "",
+                    "type": "Array"
+                }
+            ],
+            "return": {
+                "description": "The handler function should all filters pass.",
+                "type": "Function|null"
+            },
+            "class": "ozpIwc.PacketRouter",
+            "module": "common",
+            "namespace": "ozpIwc"
+        },
+        {
+            "file": "app/js/common/packetRouter.js",
+            "line": 136,
+            "description": "Routes the given packet based on the context provided.",
+            "itemtype": "method",
+            "name": "routePacket",
+            "params": [
+                {
+                    "name": "packet",
+                    "description": "",
+                    "type": "Object"
+                },
+                {
+                    "name": "context",
+                    "description": "",
+                    "type": "Object"
+                }
+            ],
+            "return": {
+                "description": "The output of the route's handler. If the specified action does not have any routes false is\n                   returned. If the specified action does not have a matching route the default route is applied",
+                "type": "*|false"
+            },
+            "class": "ozpIwc.PacketRouter",
+            "module": "common",
+            "namespace": "ozpIwc"
+        },
+        {
+            "file": "app/js/common/packetRouter.js",
+            "line": 163,
+            "description": "Assigns the default route for the Packet Router",
+            "params": [
+                {
+                    "name": "handler",
+                    "description": "",
+                    "type": "Function"
+                }
+            ],
+            "class": "ozpIwc.PacketRouter",
             "module": "common",
             "namespace": "ozpIwc"
         },
@@ -11259,7 +11476,7 @@
         },
         {
             "message": "replacing incorrect tag: returns with return",
-            "line": " app/js/bus/api/system/systemApiApplicationValue.js:25"
+            "line": " app/js/bus/api/system/systemApiApplicationValue.js:18"
         },
         {
             "message": "replacing incorrect tag: params with param",
@@ -11671,23 +11888,23 @@
         },
         {
             "message": "replacing incorrect tag: returns with return",
-            "line": " app/js/client/client.js:364"
+            "line": " app/js/client/client.js:367"
         },
         {
             "message": "replacing incorrect tag: returns with return",
-            "line": " app/js/client/client.js:406"
+            "line": " app/js/client/client.js:409"
         },
         {
             "message": "replacing incorrect tag: returns with return",
-            "line": " app/js/client/client.js:623"
+            "line": " app/js/client/client.js:625"
         },
         {
             "message": "replacing incorrect tag: returns with return",
-            "line": " app/js/client/client.js:671"
+            "line": " app/js/client/client.js:673"
         },
         {
             "message": "replacing incorrect tag: returns with return",
-            "line": " app/js/client/client.js:684"
+            "line": " app/js/client/client.js:686"
         },
         {
             "message": "replacing incorrect tag: returns with return",
@@ -11700,6 +11917,26 @@
         {
             "message": "replacing incorrect tag: returns with return",
             "line": " app/js/common/event.js:110"
+        },
+        {
+            "message": "replacing incorrect tag: returns with return",
+            "line": " app/js/common/packetRouter.js:9"
+        },
+        {
+            "message": "replacing incorrect tag: returns with return",
+            "line": " app/js/common/packetRouter.js:65"
+        },
+        {
+            "message": "replacing incorrect tag: returns with return",
+            "line": " app/js/common/packetRouter.js:82"
+        },
+        {
+            "message": "replacing incorrect tag: returns with return",
+            "line": " app/js/common/packetRouter.js:114"
+        },
+        {
+            "message": "replacing incorrect tag: returns with return",
+            "line": " app/js/common/packetRouter.js:136"
         },
         {
             "message": "replacing incorrect tag: returns with return",
@@ -11960,6 +12197,14 @@
         {
             "message": "Missing item type\nReceive a packet from the peer.\n\nFires:\n    -{{#crossLink \"ozpIwc.Router/#prePeerReceive:event\"}}{{/crossLink}}",
             "line": " app/js/bus/transport/router.js:422"
+        },
+        {
+            "message": "Missing item type\nThe default scope of the router.",
+            "line": " app/js/common/packetRouter.js:74"
+        },
+        {
+            "message": "Missing item type\nAssigns the default route for the Packet Router",
+            "line": " app/js/common/packetRouter.js:163"
         },
         {
             "message": "Missing item type\nInvoke postMessage on a given window in a safe manner. Test whether the browser\nsupports structured clones, and stringifies the message if not. Catches\nerrors (especially attempts to send non-cloneable objects), and tries to\nsend a stringified copy of the message asa fallback.",

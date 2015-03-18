@@ -6,7 +6,8 @@ debuggerModule.directive('timeSeries', function() {
 //            replace : true,
 //            template: "<div></div>",
         scope: {
-            metrics: '='
+            metrics: '=',
+            timeFrame: '='
         },
         link: function($scope,element){
             $scope.container = element[0];
@@ -34,7 +35,23 @@ debuggerModule.directive('timeSeries', function() {
             $scope.timeline = new vis.Graph2d($scope.container, $scope.data,$scope.groups, $scope.options);
         },
         controller: function($scope){
+
+            $scope.removeOld = function(timeFrame){
+                timeFrame = timeFrame || $scope.timeFrame;
+                var now = Date.now() - timeFrame;
+                var removals = [];
+                $scope.data.get({
+                    filter: function(item) {
+                        if(now > item.x.getTime()){
+                            removals.push(item.id);
+                        }
+                    }
+                });
+                $scope.data.remove(removals);
+            };
+
             $scope.$on("timeSeriesData",function(event,data) {
+                $scope.removeOld();
                 $scope.data.add(data);
                 var now=$scope.timeline.getCurrentTime();
                 var range=$scope.timeline.getWindow();
@@ -43,9 +60,9 @@ debuggerModule.directive('timeSeries', function() {
                 }
             });
 
-                $scope.$on("timeSeriesClear",function(){
-                    $scope.data.clear();
-                });
+            $scope.$on("timeSeriesClear",function(){
+                $scope.data.clear();
+            });
 
             $scope.$watch('metrics',function(newVal){
 //                    $scope.timeline.setGroups(

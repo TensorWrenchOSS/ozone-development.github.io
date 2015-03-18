@@ -13,13 +13,6 @@
  */
 ozpIwc.SystemApiApplicationValue = ozpIwc.util.extend(ozpIwc.CommonApiValue,function(config) {
     ozpIwc.CommonApiValue.apply(this,arguments);
-
-    /**
-     * A reference to the instantiated system Api
-     * @property systemApi
-     * @type {ozpIwc.SystemApi}
-     */
-    this.systemApi=config.systemApi;
 });
 
 /**

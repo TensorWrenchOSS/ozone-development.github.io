@@ -2,6 +2,7 @@
 debuggerModule.controller("metricsController",['$scope','$interval','$filter',function(scope,$interval,$filter) {
     var filter = $filter('filter');
     scope.updateFrequency=1000;
+    scope.metricWindow=60000;
     scope.updateActive=false;
     scope.metrics=[];
     scope.metricsActive = 0;

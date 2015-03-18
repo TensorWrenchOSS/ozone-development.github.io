@@ -1,5 +1,5 @@
-Version: 0.2.3
+Version: 0.2.4
 Git hash: 
-a4f8ce0c5deba8c5b9e6a146dd5cb29d96df7b6a
+fa074dc3f29c3a27c1d08932ddf4a7922b37c76a
 Date:
-2015-03-13 08:49:41 -0400
+2015-03-18 06:12:24 -0400
